@@ -118,7 +118,7 @@ function App() {
         {/* Deep cosmic starfield */}
         <Stars radius={15000} depth={500} count={3000} factor={8} saturation={1} fade speed={0.5} />
         
-        {/* Ultra-Slow, Deep & Gradual Planetarium Camera Controls */}
+        {/* Ultra-Slow, Deep & Gradual Planetarium Camera Controls with Zoom to Mouse Cursor */}
         <CameraControls 
           ref={cameraControlRef} 
           makeDefault 
@@ -127,6 +127,7 @@ function App() {
           smoothTime={0.4}
           dollySpeed={0.035}
           truckSpeed={0.4}
+          dollyToCursor={true}
         />
 
         <EffectComposer disableNormalPass>
@@ -205,7 +206,9 @@ function App() {
         boxShadow: "0 8px 32px rgba(0,0,0,0.6)"
       }}>
         <b style={{ color: "#ffffff" }}>🎮 Cosmic Flight Controls:</b><br />
-        • <b>Scroll Wheel:</b> Slow cinematic zoom<br />
+        • <b>Scroll Wheel:</b> Zoom towards mouse cursor<br />
+        • <b>Left Click + Drag:</b> 360° 3D Orbit<br />
+        • <b>Click any Star:</b> Smooth flight to that system<br />
         <div style={{ marginTop: 10, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
           <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC BLACK HOLES:</b>
           <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 180, overflowY: "auto" }}>
