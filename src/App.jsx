@@ -10,6 +10,7 @@ import CosmicWeb from "./CosmicWeb"
 import CosmicAudio from "./CosmicAudio"
 import TenBlackHoles from "./TenBlackHoles"
 import { BLACK_HOLE_DATA } from "./blackHolesData"
+import InterstellarNavigator from "./InterstellarNavigator"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -118,7 +119,7 @@ function App() {
         {/* Deep cosmic starfield */}
         <Stars radius={15000} depth={500} count={3000} factor={8} saturation={1} fade speed={0.5} />
         
-        {/* Ultra-Slow, Deep & Gradual Planetarium Camera Controls with Zoom to Mouse Cursor */}
+        {/* Ultra-Slow, Deep & Gradual Planetarium Camera Controls with Infinity Dolly */}
         <CameraControls 
           ref={cameraControlRef} 
           makeDefault 
@@ -128,7 +129,11 @@ function App() {
           dollySpeed={0.035}
           truckSpeed={0.4}
           dollyToCursor={true}
+          infinityDolly={true}
         />
+
+        {/* Real-time Interstellar Flight Engine (Traverse gaps between solar systems) */}
+        <InterstellarNavigator cameraControlRef={cameraControlRef} />
 
         <EffectComposer disableNormalPass>
           <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.5} intensity={1.2} mipmapBlur />
@@ -205,10 +210,11 @@ function App() {
         lineHeight: 1.5,
         boxShadow: "0 8px 32px rgba(0,0,0,0.6)"
       }}>
-        <b style={{ color: "#ffffff" }}>🎮 Cosmic Flight Controls:</b><br />
-        • <b>Scroll Wheel:</b> Zoom towards mouse cursor<br />
-        • <b>Left Click + Drag:</b> 360° 3D Orbit<br />
-        • <b>Click any Star:</b> Smooth flight to that system<br />
+        <b style={{ color: "#ffffff" }}>🎮 Interstellar Flight Controls:</b><br />
+        • <b>Scroll Wheel:</b> Continuous zoom & fly past systems<br />
+        • <b>W / S / A / D or Arrows:</b> Cruise through interstellar gaps<br />
+        • <b>Shift + W:</b> Light-speed interstellar warp boost<br />
+        • <b>Left Drag:</b> 360° Look | <b>Click Star:</b> Fly to system<br />
         <div style={{ marginTop: 10, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
           <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC BLACK HOLES:</b>
           <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 180, overflowY: "auto" }}>
