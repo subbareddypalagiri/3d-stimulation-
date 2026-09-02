@@ -1,0 +1,200 @@
+import { Canvas, useFrame } from "@react-three/fiber"
+import { Stars, CameraControls, Environment } from "@react-three/drei"
+import { EffectComposer, Bloom } from "@react-three/postprocessing"
+import { Suspense, useRef, useState } from "react"
+import * as THREE from "three"
+import "./App.css"
+import UniverseManager from "./UniverseManager"
+import MilkyWay from "./MilkyWay"
+import CosmicWeb from "./CosmicWeb"
+import CosmicAudio from "./CosmicAudio"
+
+// Live tracker for the 6 Cosmic Scales
+function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
+  useFrame(({ camera }) => {
+    const center = new THREE.Vector3(...activeCenter)
+    const dist = camera.position.distanceTo(center)
+    let level = "LEVEL 1: STELLAR NEIGHBORHOOD"
+    let desc = "Sol & 24 Neighboring Star Systems"
+    let color = "#ffaa33"
+    let progress = 1
+
+    if (dist > 40000 && dist <= 250000) {
+      level = "LEVEL 2: THE MILKY WAY GALAXY"
+      desc = "Spiral Arms & Galactic Core"
+      color = "#00d8ff"
+      progress = 2
+    } else if (dist > 250000 && dist <= 1800000) {
+      level = "LEVEL 3: VIRGO SUPERCLUSTER"
+      desc = "1,000 Distant Galaxies"
+      color = "#aa66ff"
+      progress = 3
+    } else if (dist > 1800000 && dist <= 8000000) {
+      level = "LEVEL 4: THE GREAT COSMIC WEB"
+      desc = "Dark Matter Filaments & Observable Universe"
+      color = "#33ddaa"
+      progress = 4
+    } else if (dist > 8000000 && dist <= 45000000) {
+      level = "LEVEL 5: THE NASA MULTIVERSE"
+      desc = "100 Eternal Inflation Bubble Universes"
+      color = "#ff44aa"
+      progress = 5
+    } else if (dist > 45000000) {
+      level = "LEVEL 6: THE OMNIVERSE BULK"
+      desc = "20 Bold Inflaton Mega-Domains (Each with Unique Colors)"
+      color = "#ffd700"
+      progress = 6
+    }
+
+    onLevelUpdate({ level, desc, color, progress, dist: Math.round(dist) })
+  })
+
+  return null
+}
+
+function App() {
+  const cameraControlRef = useRef()
+  const [galaxyCenter, setGalaxyCenter] = useState([0, 0, 0])
+  const [telemetry, setTelemetry] = useState({
+    level: "LEVEL 1: STELLAR NEIGHBORHOOD",
+    desc: "Sol & 24 Neighboring Star Systems",
+    color: "#ffaa33",
+    progress: 1,
+    dist: 150
+  })
+
+  const flyTo = (absPosition, radius) => {
+    if (cameraControlRef.current) {
+      const target = new THREE.Vector3(...absPosition)
+      const offset = new THREE.Vector3(radius * 3.5, radius * 2.0, radius * 3.5)
+      const cameraPos = target.clone().add(offset)
+      setGalaxyCenter(absPosition)
+      cameraControlRef.current.setLookAt(
+        cameraPos.x, cameraPos.y, cameraPos.z, 
+        target.x, target.y, target.z, 
+        true
+      )
+    }
+  }
+
+  return (
+    <div style={{ width: "100vw", height: "100vh", background: "#000", overflow: "hidden" }}>
+      <Canvas 
+        camera={{ position: [0, 50, 150], fov: 45, far: 1500000000, near: 1 }} 
+        gl={{ logarithmicDepthBuffer: true, antialias: true }}
+        shadows
+      >
+        <Environment preset="city" />
+        <ambientLight intensity={0.08} />
+
+        {/* Live cosmological telemetry tracker */}
+        <CosmicLevelTracker onLevelUpdate={setTelemetry} activeCenter={galaxyCenter} />
+
+        <Suspense fallback={null}>
+          <UniverseManager 
+            flyTo={flyTo} 
+            onActiveSystemChange={(pos) => setGalaxyCenter(pos)}
+          />
+          <MilkyWay position={galaxyCenter} />
+          <CosmicWeb activeCenter={galaxyCenter} />
+        </Suspense>
+
+        {/* Deep cosmic starfield */}
+        <Stars radius={15000} depth={500} count={3000} factor={8} saturation={1} fade speed={0.5} />
+        
+        {/* Ultra-Slow, Deep & Gradual Planetarium Camera Controls */}
+        <CameraControls 
+          ref={cameraControlRef} 
+          makeDefault 
+          maxDistance={480000000} 
+          minDistance={2}
+          smoothTime={0.4}
+          dollySpeed={0.035}
+          truckSpeed={0.4}
+        />
+
+        <EffectComposer disableNormalPass>
+          <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.5} intensity={1.2} mipmapBlur />
+        </EffectComposer>
+      </Canvas>
+
+      {/* Interactive Ethereal Cosmic Soundscape (Web Audio Synthesizer) */}
+      <CosmicAudio currentDistance={telemetry.dist} />
+      
+      {/* Top Left: Live Cosmic Scale Telemetry HUD */}
+      <div style={{ 
+        position: "absolute", 
+        top: 20, 
+        left: 20, 
+        color: "white", 
+        fontFamily: "system-ui, -apple-system, sans-serif", 
+        background: "rgba(5, 10, 25, 0.8)", 
+        padding: "16px 24px", 
+        borderRadius: 14, 
+        backdropFilter: "blur(20px)",
+        border: `1px solid ${telemetry.color}55`,
+        boxShadow: `0 8px 32px rgba(0,0,0,0.6), 0 0 20px ${telemetry.color}33`,
+        maxWidth: 420,
+        pointerEvents: "none",
+        transition: "all 0.3s ease"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+          <span style={{ 
+            display: "inline-block", 
+            width: 10, 
+            height: 10, 
+            borderRadius: "50%", 
+            background: telemetry.color,
+            boxShadow: `0 0 10px ${telemetry.color}`
+          }} />
+          <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: "1px", color: telemetry.color }}>
+            {telemetry.level}
+          </span>
+        </div>
+        
+        <div style={{ fontSize: 14, color: "#ffffff", fontWeight: 600, marginBottom: 4 }}>
+          {telemetry.desc}
+        </div>
+
+        <div style={{ fontSize: 11, color: "#8899aa", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
+          <span>Scale: Level {telemetry.progress} of 6</span>
+          <span>Distance: {telemetry.dist.toLocaleString()} AU/units</span>
+        </div>
+
+        {/* 6-Level Progress Bar */}
+        <div style={{ width: "100%", height: 3, background: "rgba(255,255,255,0.15)", borderRadius: 2, marginTop: 10, overflow: "hidden" }}>
+          <div style={{ 
+            width: `${(telemetry.progress / 6) * 100}%`, 
+            height: "100%", 
+            background: telemetry.color,
+            transition: "width 0.4s ease, background 0.4s ease"
+          }} />
+        </div>
+      </div>
+
+      {/* Top Right: Free Flight Controls Guide */}
+      <div style={{
+        position: "absolute",
+        top: 20,
+        right: 20,
+        color: "#aabbcc",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        background: "rgba(5, 10, 25, 0.7)",
+        padding: "10px 18px",
+        borderRadius: 10,
+        backdropFilter: "blur(14px)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        fontSize: 11,
+        lineHeight: 1.5,
+        pointerEvents: "none"
+      }}>
+        <b style={{ color: "#ffffff" }}>🎮 Free Cosmic Navigation:</b><br />
+        • <b>Scroll Wheel:</b> Zoom In / Out seamlessly across all 6 levels<br />
+        • <b>Left Click + Drag:</b> Orbit & look in any 3D direction<br />
+        • <b>Right Click + Drag:</b> Pan freely across space
+      </div>
+    </div>
+  )
+}
+
+export default App
