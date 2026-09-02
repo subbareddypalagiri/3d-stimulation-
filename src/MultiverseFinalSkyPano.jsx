@@ -2,19 +2,7 @@ import React, { useRef, useMemo } from "react"
 import { useLoader, useFrame } from "@react-three/fiber"
 import * as THREE from "three"
 
-// 10 Colossal Cosmic Realm Spheres at Level 7 with distinct light-mixing palettes
-export const TEN_COSMIC_SPHERES = [
-  { id: 0, name: "Prime Realm (Home)", pos: [0, 0, 0], scale: 1.0, c1: "#99ccff", c2: "#ffffff" },
-  { id: 1, name: "Aetheria", pos: [3900000000, 500000000, -1400000000], scale: 0.95, c1: "#00f0ff", c2: "#0033cc" },
-  { id: 2, name: "Nyx Domain", pos: [-3800000000, -400000000, 1800000000], scale: 1.05, c1: "#cc00ff", c2: "#330088" },
-  { id: 3, name: "Solaria Prime", pos: [1400000000, 700000000, 4100000000], scale: 1.1, c1: "#ffaa00", c2: "#ff3300" },
-  { id: 4, name: "Elysium Realm", pos: [-1600000000, -600000000, -4000000000], scale: 0.9, c1: "#00ff88", c2: "#005522" },
-  { id: 5, name: "Tartarus Core", pos: [3100000000, -700000000, 2900000000], scale: 1.0, c1: "#ff1144", c2: "#770011" },
-  { id: 6, name: "Chronos Astral", pos: [-3000000000, 800000000, -3100000000], scale: 0.95, c1: "#ff44cc", c2: "#8800ff" },
-  { id: 7, name: "Celestia Crown", pos: [3400000000, -500000000, -3300000000], scale: 1.05, c1: "#00e5ff", c2: "#1de9b6" },
-  { id: 8, name: "Hyperion Zenith", pos: [-3500000000, 600000000, 3000000000], scale: 1.0, c1: "#ffdd00", c2: "#ff0066" },
-  { id: 9, name: "Nexus Omnis", pos: [0, 3800000000, -500000000], scale: 1.15, c1: "#ffffff", c2: "#4fc3f7" }
-]
+import { TEN_COSMIC_SPHERES } from "./cosmicSpheresData"
 
 // Custom GLSL Shader for Dynamic Dual-Color Light Mixing on the Panorama Texture
 const sphereVertexShader = `
@@ -85,8 +73,8 @@ function SingleCosmicSphere({ sphere, texture, onSelect }) {
     }
   })
 
-  // Base radius: 1,200,000,000 AU
-  const radius = 1200000000 * sphere.scale
+  // Base radius: 1,100,000,000 AU (1.1 Billion AU)
+  const radius = 1100000000 * sphere.scale
 
   return (
     <group position={sphere.pos}>
@@ -133,7 +121,7 @@ export default function MultiverseFinalSkyPano({ activeCenter = [0, 0, 0], flyTo
     }
   }, [texture])
 
-  // Visible strictly when entering Level 7 (dist > 150,000,000 AU)
+  // Visible strictly when entering Level 7 (dist > 140,000,000 AU)
   useFrame(({ camera }) => {
     if (!groupRef.current) return
     const dist = camera.position.length()

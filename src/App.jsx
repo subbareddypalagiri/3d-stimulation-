@@ -12,7 +12,8 @@ import TenBlackHoles from "./TenBlackHoles"
 import { BLACK_HOLE_DATA } from "./blackHolesData"
 import InterstellarNavigator from "./InterstellarNavigator"
 import InterstellarDust from "./InterstellarDust"
-import MultiverseFinalSkyPano, { TEN_COSMIC_SPHERES } from "./MultiverseFinalSkyPano"
+import MultiverseFinalSkyPano from "./MultiverseFinalSkyPano"
+import { TEN_COSMIC_SPHERES } from "./cosmicSpheresData"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -101,7 +102,7 @@ function App() {
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#000", overflow: "hidden" }}>
       <Canvas 
-        camera={{ position: [0, 50, 150], fov: 45, far: 35000000000, near: 1 }} 
+        camera={{ position: [0, 50, 150], fov: 45, far: 80000000000, near: 1 }} 
         gl={{ logarithmicDepthBuffer: true, antialias: true }}
         shadows
       >
@@ -136,7 +137,7 @@ function App() {
         <CameraControls 
           ref={cameraControlRef} 
           makeDefault 
-          maxDistance={25000000000} 
+          maxDistance={50000000000} 
           minDistance={2}
           smoothTime={0.4}
           dollySpeed={0.035}
@@ -280,7 +281,7 @@ function App() {
           <button
             onClick={() => {
               if (cameraControlRef.current) {
-                cameraControlRef.current.setLookAt(0, 3800000000, 10500000000, 0, 0, 0, true)
+                cameraControlRef.current.setLookAt(0, 9500000000, 26000000000, 0, 0, 0, true)
               }
             }}
             style={{
@@ -335,9 +336,9 @@ function App() {
                 key={realm.id}
                 onClick={() => {
                   if (cameraControlRef.current) {
-                    const r = 1200000000 * realm.scale
+                    const r = 1100000000 * realm.scale
                     cameraControlRef.current.setLookAt(
-                      realm.pos[0], realm.pos[1] + r * 1.4, realm.pos[2] + r * 2.5,
+                      realm.pos[0], realm.pos[1] + r * 1.5, realm.pos[2] + r * 2.8,
                       realm.pos[0], realm.pos[1], realm.pos[2],
                       true
                     )
