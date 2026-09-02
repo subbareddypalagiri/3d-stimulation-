@@ -12,7 +12,6 @@ import TenBlackHoles from "./TenBlackHoles"
 import { BLACK_HOLE_DATA } from "./blackHolesData"
 import InterstellarNavigator from "./InterstellarNavigator"
 import InterstellarDust from "./InterstellarDust"
-import InterstellarNebulae from "./InterstellarNebulae"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -119,8 +118,6 @@ function App() {
 
           {/* Luminous Interstellar Dust Streaming in the Deep Void Gaps */}
           <InterstellarDust count={2200} />
-          {/* Ethereal Gaseous Nebular Clouds between Stars */}
-          <InterstellarNebulae />
         </Suspense>
 
         {/* Deep cosmic starfield */}
