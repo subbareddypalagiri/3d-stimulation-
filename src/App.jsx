@@ -12,7 +12,7 @@ import TenBlackHoles from "./TenBlackHoles"
 import { BLACK_HOLE_DATA } from "./blackHolesData"
 import InterstellarNavigator from "./InterstellarNavigator"
 import InterstellarDust from "./InterstellarDust"
-import MultiverseFinalSkyPano from "./MultiverseFinalSkyPano"
+import MultiverseFinalSkyPano, { TEN_COSMIC_SPHERES } from "./MultiverseFinalSkyPano"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -101,7 +101,7 @@ function App() {
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#000", overflow: "hidden" }}>
       <Canvas 
-        camera={{ position: [0, 50, 150], fov: 45, far: 10000000000, near: 1 }} 
+        camera={{ position: [0, 50, 150], fov: 45, far: 35000000000, near: 1 }} 
         gl={{ logarithmicDepthBuffer: true, antialias: true }}
         shadows
       >
@@ -125,8 +125,8 @@ function App() {
           {/* Luminous Interstellar Dust Streaming in the Deep Void Gaps */}
           <InterstellarDust count={2200} />
 
-          {/* Ultimate Multiverse Horizon Milky Way Sky Panorama GLB Model */}
-          <MultiverseFinalSkyPano activeCenter={galaxyCenter} />
+          {/* 10 Colossal Cosmic Realm Spheres (GLB Panorama with light-mixing colors) */}
+          <MultiverseFinalSkyPano activeCenter={galaxyCenter} flyTo={flyTo} />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -136,7 +136,7 @@ function App() {
         <CameraControls 
           ref={cameraControlRef} 
           makeDefault 
-          maxDistance={4000000000} 
+          maxDistance={25000000000} 
           minDistance={2}
           smoothTime={0.4}
           dollySpeed={0.035}
@@ -280,7 +280,7 @@ function App() {
           <button
             onClick={() => {
               if (cameraControlRef.current) {
-                cameraControlRef.current.setLookAt(0, 160000000, 480000000, 0, 0, 0, true)
+                cameraControlRef.current.setLookAt(0, 3800000000, 10500000000, 0, 0, 0, true)
               }
             }}
             style={{
@@ -295,12 +295,12 @@ function App() {
               transition: "all 0.2s ease"
             }}
           >
-            🌌 Beyond Omniverse
+            🌌 10 Cosmic Spheres
           </button>
         </div>
         <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
           <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC BLACK HOLES:</b>
-          <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 180, overflowY: "auto" }}>
+          <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
             {BLACK_HOLE_DATA.map((bh) => (
               <button
                 key={bh.id}
@@ -323,6 +323,44 @@ function App() {
                 title={`${bh.name} (${bh.level})`}
               >
                 🕳️ {bh.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+          <b style={{ color: "#ff44cc", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC REALMS (GLB SPHERES):</b>
+          <div style={{ marginTop: 5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
+            {TEN_COSMIC_SPHERES.map((realm) => (
+              <button
+                key={realm.id}
+                onClick={() => {
+                  if (cameraControlRef.current) {
+                    const r = 1200000000 * realm.scale
+                    cameraControlRef.current.setLookAt(
+                      realm.pos[0], realm.pos[1] + r * 1.4, realm.pos[2] + r * 2.5,
+                      realm.pos[0], realm.pos[1], realm.pos[2],
+                      true
+                    )
+                  }
+                }}
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: `1px solid ${realm.c1}77`,
+                  color: realm.c1,
+                  padding: "4px 6px",
+                  borderRadius: 6,
+                  fontSize: 9,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  transition: "all 0.2s ease"
+                }}
+                title={realm.name}
+              >
+                🔮 {realm.name}
               </button>
             ))}
           </div>
