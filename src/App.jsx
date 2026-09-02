@@ -8,7 +8,7 @@ import UniverseManager from "./UniverseManager"
 import MilkyWay from "./MilkyWay"
 import CosmicWeb from "./CosmicWeb"
 import CosmicAudio from "./CosmicAudio"
-import FourSingularities from "./FourSingularities"
+import TenBlackHoles, { BLACK_HOLE_DATA } from "./TenBlackHoles"
 
 // Live tracker for the 6 Cosmic Scales
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -99,8 +99,8 @@ function App() {
           <MilkyWay position={galaxyCenter} />
           <CosmicWeb activeCenter={galaxyCenter} />
           
-          {/* 4 Relativistic 3D Black Hole Singularities with Proximity 3D Portals */}
-          <FourSingularities flyTo={flyTo} />
+          {/* 10 Relativistic 3D Black Holes Distributed Across All 6 Cosmic Scales */}
+          <TenBlackHoles flyTo={flyTo} />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -195,30 +195,30 @@ function App() {
         <b style={{ color: "#ffffff" }}>🎮 Cosmic Flight Controls:</b><br />
         • <b>Scroll Wheel:</b> Slow cinematic zoom<br />
         <div style={{ marginTop: 10, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-          <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO BLACK HOLES:</b>
-          <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {[
-              { name: "Gargantua", pos: [320, 45, 180] },
-              { name: "Cygnus X-1", pos: [920, 110, -520] },
-              { name: "Sagittarius A*", pos: [1950, 260, -1280] },
-              { name: "Quasar M87", pos: [-4200, 380, -3100] }
-            ].map((s, i) => (
+          <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC BLACK HOLES:</b>
+          <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 180, overflowY: "auto" }}>
+            {BLACK_HOLE_DATA.map((bh) => (
               <button
-                key={i}
-                onClick={() => flyTo(s.pos, 40)}
+                key={bh.id}
+                onClick={() => flyTo(bh.pos, 40 * bh.scale)}
                 style={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(0,216,255,0.3)",
-                  color: "#00d8ff",
-                  padding: "4px 8px",
+                  background: "rgba(255,255,255,0.06)",
+                  border: `1px solid ${bh.color}55`,
+                  color: bh.color,
+                  padding: "4px 6px",
                   borderRadius: 6,
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: 700,
                   cursor: "pointer",
+                  textAlign: "left",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                   transition: "all 0.2s ease"
                 }}
+                title={`${bh.name} (${bh.level})`}
               >
-                🕳️ {s.name}
+                🕳️ {bh.name}
               </button>
             ))}
           </div>
