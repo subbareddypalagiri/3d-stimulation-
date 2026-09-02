@@ -101,7 +101,7 @@ function App() {
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#000", overflow: "hidden" }}>
       <Canvas 
-        camera={{ position: [0, 50, 150], fov: 45, far: 1500000000, near: 1 }} 
+        camera={{ position: [0, 50, 150], fov: 45, far: 10000000000, near: 1 }} 
         gl={{ logarithmicDepthBuffer: true, antialias: true }}
         shadows
       >
@@ -136,7 +136,7 @@ function App() {
         <CameraControls 
           ref={cameraControlRef} 
           makeDefault 
-          maxDistance={1200000000} 
+          maxDistance={4000000000} 
           minDistance={2}
           smoothTime={0.4}
           dollySpeed={0.035}
@@ -278,7 +278,11 @@ function App() {
             🫧 Multiverse
           </button>
           <button
-            onClick={() => flyTo([0, 110000000, 290000000], 290000000)}
+            onClick={() => {
+              if (cameraControlRef.current) {
+                cameraControlRef.current.setLookAt(0, 160000000, 480000000, 0, 0, 0, true)
+              }
+            }}
             style={{
               background: "rgba(0, 255, 255, 0.18)",
               border: "1px solid rgba(0, 255, 255, 0.6)",
