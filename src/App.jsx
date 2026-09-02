@@ -11,11 +11,17 @@ import CosmicAudio from "./CosmicAudio"
 import TenBlackHoles from "./TenBlackHoles"
 import { BLACK_HOLE_DATA } from "./blackHolesData"
 
-// Live tracker for the 6 Cosmic Scales
+// Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
-  useFrame(({ camera }) => {
-    const center = new THREE.Vector3(...activeCenter)
-    const dist = camera.position.distanceTo(center)
+  const centerVec = useRef(new THREE.Vector3())
+  const lastUpdate = useRef(0)
+  const lastProgress = useRef(1)
+
+  useFrame(({ camera, clock }) => {
+    const now = clock.elapsedTime
+    centerVec.current.set(...activeCenter)
+    const dist = camera.position.distanceTo(centerVec.current)
+
     let level = "LEVEL 1: STELLAR NEIGHBORHOOD"
     let desc = "Sol & 24 Neighboring Star Systems"
     let color = "#ffaa33"
@@ -48,7 +54,12 @@ function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
       progress = 6
     }
 
-    onLevelUpdate({ level, desc, color, progress, dist: Math.round(dist) })
+    // Only update React state when level changes, or at most 5 times per second (prevents GC frame drops!)
+    if (progress !== lastProgress.current || now - lastUpdate.current > 0.2) {
+      lastUpdate.current = now
+      lastProgress.current = progress
+      onLevelUpdate({ level, desc, color, progress, dist: Math.round(dist) })
+    }
   })
 
   return null

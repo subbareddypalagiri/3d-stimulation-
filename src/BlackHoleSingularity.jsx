@@ -119,6 +119,12 @@ const haloFrag = `
   }
 `
 
+// Shared Geometries across all 10 Black Holes (Zero redundant GPU allocations)
+const sharedHorizonGeo = new THREE.SphereGeometry(16, 32, 32)
+const sharedDiskGeo = new THREE.PlaneGeometry(115, 115)
+const sharedHaloGeo = new THREE.PlaneGeometry(95, 95)
+const sharedBlackMat = new THREE.MeshBasicMaterial({ color: 0x000000 })
+
 export default function BlackHoleSingularity({
   position = [0, 0, 0],
   color = "#ffaa00",
@@ -146,11 +152,11 @@ export default function BlackHoleSingularity({
     const camDist = camera.position.length()
 
     if (camDist < minDist || camDist > maxDist) {
-      if (groupRef.current) groupRef.current.visible = false
+      if (groupRef.current && groupRef.current.visible) groupRef.current.visible = false
       return
     }
 
-    if (groupRef.current) groupRef.current.visible = true
+    if (groupRef.current && !groupRef.current.visible) groupRef.current.visible = true
 
     // Smooth opacity fade at level boundaries
     let op = 1.0
@@ -180,15 +186,11 @@ export default function BlackHoleSingularity({
       }}
       style={{ cursor: "pointer" }}
     >
-      {/* 1. THE EVENT HORIZON: Pure Light-Absorbing Black Sphere */}
-      <mesh>
-        <sphereGeometry args={[16, 48, 48]} />
-        <meshBasicMaterial color="#000000" />
-      </mesh>
+      {/* 1. THE EVENT HORIZON: Pure Light-Absorbing Black Sphere (Shared Geo) */}
+      <mesh geometry={sharedHorizonGeo} material={sharedBlackMat} />
 
-      {/* 2. THE MAIN ACCRETION DISK (Keplerian Relativistic Plasma) */}
-      <mesh ref={diskRef} rotation={[-Math.PI / 2.25, 0, 0]}>
-        <planeGeometry args={[115, 115, 1, 1]} />
+      {/* 2. THE MAIN ACCRETION DISK (Shared Geo & Emissive Additive Shader) */}
+      <mesh ref={diskRef} geometry={sharedDiskGeo} rotation={[-Math.PI / 2.25, 0, 0]}>
         <shaderMaterial
           vertexShader={diskVert}
           fragmentShader={diskFrag}
@@ -200,9 +202,8 @@ export default function BlackHoleSingularity({
         />
       </mesh>
 
-      {/* 3. THE RELATIVISTIC VERTICAL LENSING HALO (Interstellar Bent Arc) */}
-      <mesh ref={verticalHaloRef} rotation={[0, 0, Math.PI / 6]}>
-        <planeGeometry args={[95, 95, 1, 1]} />
+      {/* 3. THE RELATIVISTIC VERTICAL LENSING HALO (Shared Geo) */}
+      <mesh ref={verticalHaloRef} geometry={sharedHaloGeo} rotation={[0, 0, Math.PI / 6]}>
         <shaderMaterial
           vertexShader={haloVert}
           fragmentShader={haloFrag}
@@ -213,9 +214,6 @@ export default function BlackHoleSingularity({
           blending={THREE.AdditiveBlending}
         />
       </mesh>
-
-      {/* 4. GRAVITATIONAL ACCRETION LIGHT */}
-      <pointLight color={color} intensity={2.5} distance={180 * scale} decay={1.8} />
     </group>
   )
 }
