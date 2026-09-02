@@ -12,7 +12,7 @@ const starTypes = [
   { dark: '#222222', red: '#aaaaaa', org: '#dddddd', wht: '#ffffff' }, // 5: Blinding White Dwarf
 ]
 
-// 44 Real Named & Exotic Stellar Systems around Sol (Total 45 Systems!)
+// 24 Real Named Neighboring Star Systems around Sol (Total 25 Systems!)
 // Clean, elegant, proportional scales (0.5 to 1.5) and well-spaced coordinates
 const NEIGHBOR_STAR_SYSTEMS = [
   // 1-24: Original Neighbor Systems (Balanced Scales)
@@ -39,29 +39,7 @@ const NEIGHBOR_STAR_SYSTEMS = [
   { name: 'Pollux', pos: [-5500, -380, -3900], starType: 0, scale: 1.2, planets: 5 },
   { name: 'Arcturus', pos: [5850, 580, 4150], starType: 2, scale: 1.4, planets: 5 },
   { name: 'Aldebaran', pos: [-6200, 430, -4400], starType: 2, scale: 1.35, planets: 4 },
-  { name: 'Betelgeuse', pos: [6600, -650, 4700], starType: 2, scale: 1.5, planets: 6 },
-
-  // 25-44: 20 NEW DIVERSE SOLAR SYSTEMS (Balanced Compact Scales)
-  { name: 'Kepler-452 Prime', pos: [-750, -420, -1450], starType: 0, scale: 0.9, planets: 4 },
-  { name: 'Sirius B Dwarf', pos: [1440, 240, -860], starType: 5, scale: 0.45, planets: 2 },
-  { name: 'Rigel Hypergiant', pos: [-7200, 680, 5200], starType: 1, scale: 1.5, planets: 6 },
-  { name: 'TRAPPIST-2 Sector', pos: [-4350, -320, -3150], starType: 2, scale: 0.55, planets: 5 },
-  { name: 'Antares Supergiant', pos: [7600, -820, -5400], starType: 2, scale: 1.5, planets: 6 },
-  { name: 'Cygnus X-3 Microquasar', pos: [-2650, 480, -1920], starType: 4, scale: 0.7, planets: 3 },
-  { name: 'Gliese 667C Trio', pos: [4680, 540, 2950], starType: 0, scale: 0.85, planets: 4 },
-  { name: 'WASP-12 Hell World', pos: [3350, -680, -2600], starType: 0, scale: 0.95, planets: 3 },
-  { name: 'Fomalhaut Azure', pos: [-3650, -420, 2800], starType: 1, scale: 1.3, planets: 5 },
-  { name: 'HD 189733 Cobalt', pos: [-5100, 390, -3650], starType: 1, scale: 0.95, planets: 4 },
-  { name: '55 Cancri Diamond', pos: [2380, -360, 1680], starType: 0, scale: 0.85, planets: 4 },
-  { name: 'Ross 154 Magnetar', pos: [1920, 310, -1350], starType: 4, scale: 0.55, planets: 2 },
-  { name: 'GJ 1214 Oceanus', pos: [-2150, 450, 1420], starType: 2, scale: 0.65, planets: 3 },
-  { name: 'Upsilon Andromedae', pos: [5400, 420, -4100], starType: 0, scale: 1.05, planets: 5 },
-  { name: 'Tau Boötis Magnet', pos: [-3100, 620, 2350], starType: 0, scale: 0.95, planets: 3 },
-  { name: 'Achernar Oblate', pos: [6100, -540, 4350], starType: 1, scale: 1.3, planets: 5 },
-  { name: 'Vega Minor Proto', pos: [-3700, 290, -2650], starType: 1, scale: 1.0, planets: 4 },
-  { name: 'Groombridge 34 Twin', pos: [-1280, 240, 880], starType: 2, scale: 0.55, planets: 3 },
-  { name: 'Mira Variable', pos: [6850, 720, -4950], starType: 2, scale: 1.4, planets: 5 },
-  { name: 'Spica Prime Binary', pos: [-6450, -510, -4600], starType: 1, scale: 1.35, planets: 5 },
+  { name: 'Betelgeuse', pos: [6600, -650, 4700], starType: 2, scale: 1.5, planets: 6 }
 ]
 
 const generateAllSystems = () => {
