@@ -8,56 +8,64 @@ export default function MultiverseFinalSkyPano({ activeCenter = [0, 0, 0] }) {
   const groupRef = useRef()
   const matRef = useRef()
 
-  // Clone the scene and prepare the panoramic material
+  // Clone and setup MeshBasicMaterial so it is 100% self-luminous and crystal clear
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
     clone.traverse((child) => {
       if (child.isMesh) {
-        // Ensure texture is rendered on the inside of the sphere
-        child.material = child.material.clone()
-        child.material.side = THREE.DoubleSide
-        child.material.transparent = true
-        child.material.opacity = 0
-        child.material.depthWrite = false
-        if (child.material.map) {
-          child.material.map.colorSpace = THREE.SRGBColorSpace
+        const tex = child.material.emissiveMap || child.material.map
+        if (tex) {
+          tex.colorSpace = THREE.SRGBColorSpace
+          tex.wrapS = THREE.RepeatWrapping
+          tex.wrapT = THREE.ClampToEdgeWrapping
         }
-        matRef.current = child.material
+
+        const basicMat = new THREE.MeshBasicMaterial({
+          map: tex,
+          side: THREE.BackSide, // Visible looking outwards from inside the sphere
+          transparent: true,
+          opacity: 0.0,
+          depthWrite: false
+        })
+
+        child.material = basicMat
+        matRef.current = basicMat
       }
     })
     return clone
   }, [scene])
 
   useFrame(({ camera, clock }) => {
-    if (!groupRef.current || !matRef.current) return
+    if (!groupRef.current) return
 
     const dist = camera.position.length()
-    // Visible at the last point of the Multiverse & Omniverse (dist > 15,000,000 AU)
-    const isVisible = dist > 12000000
+
+    // Appears strictly AFTER the Omniverse (Level 6 is 45,000,000 - 180,000,000)
+    // Fades in as camera reaches the outer boundary beyond the Omniverse (dist > 160,000,000 AU)
+    const isVisible = dist > 140000000
     groupRef.current.visible = isVisible
 
-    if (isVisible) {
-      // Smooth fade-in: Fades in from 15,000,000 to 45,000,000 AU
-      let opacity = 0
-      if (dist >= 15000000 && dist <= 45000000) {
-        opacity = (dist - 15000000) / 30000000
-      } else if (dist > 45000000) {
-        opacity = 1.0
+    if (isVisible && matRef.current) {
+      // Smooth fade in from 140,000,000 to 240,000,000 AU
+      let opacity = 1.0
+      if (dist < 240000000) {
+        opacity = (dist - 140000000) / 100000000
       }
-      matRef.current.opacity = Math.min(1.0, opacity * 0.92)
+      matRef.current.opacity = Math.min(1.0, Math.max(0.0, opacity))
 
-      // Slow majestic rotation
+      // Slow majestic cosmic rotation
       const t = clock.elapsedTime
-      groupRef.current.rotation.y = t * 0.003
+      groupRef.current.rotation.y = t * 0.002
     }
   })
 
-  // Radius of PanoSphere mesh is 500. Scale of 280,000 gives diameter of ~280,000,000 AU enclosing the Multiverse!
+  // Radius of PanoSphere is 500. Scale of 800,000 gives radius of 400,000,000 AU!
+  // Colossal sphere that encloses the entire Omniverse and all 20 Inflaton Domains!
   return (
     <group
       ref={groupRef}
       position={activeCenter}
-      scale={[280000, 280000, 280000]}
+      scale={[800000, 800000, 800000]}
       rotation={[0, 0, 0]}
     >
       <primitive object={clonedScene} />

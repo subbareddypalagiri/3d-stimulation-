@@ -50,11 +50,16 @@ function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
       desc = "100 Eternal Inflation Bubble Universes"
       color = "#ff44aa"
       progress = 5
-    } else if (dist > 45000000) {
+    } else if (dist > 45000000 && dist <= 180000000) {
       level = "LEVEL 6: THE OMNIVERSE BULK"
       desc = "20 Bold Inflaton Mega-Domains (Each with Unique Colors)"
       color = "#ffd700"
       progress = 6
+    } else if (dist > 180000000) {
+      level = "LEVEL 7: ULTIMATE CELESTIAL HORIZON"
+      desc = "Milky Way Sky Panorama enclosing the Omniverse"
+      color = "#00ffff"
+      progress = 7
     }
 
     // Only update React state when level changes, or at most 5 times per second (prevents GC frame drops!)
@@ -131,7 +136,7 @@ function App() {
         <CameraControls 
           ref={cameraControlRef} 
           makeDefault 
-          maxDistance={480000000} 
+          maxDistance={1200000000} 
           minDistance={2}
           smoothTime={0.4}
           dollySpeed={0.035}
@@ -270,7 +275,23 @@ function App() {
               transition: "all 0.2s ease"
             }}
           >
-            🫧 Multiverse Horizon
+            🫧 Multiverse
+          </button>
+          <button
+            onClick={() => flyTo([0, 110000000, 290000000], 290000000)}
+            style={{
+              background: "rgba(0, 255, 255, 0.18)",
+              border: "1px solid rgba(0, 255, 255, 0.6)",
+              color: "#00ffff",
+              padding: "4px 8px",
+              borderRadius: 6,
+              fontSize: 10,
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.2s ease"
+            }}
+          >
+            🌌 Beyond Omniverse
           </button>
         </div>
         <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
