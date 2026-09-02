@@ -1,31 +1,31 @@
-import React, { useRef, useMemo, useState } from "react"
+import React, { useRef, useMemo } from "react"
 import { useFrame } from "@react-three/fiber"
-import { Html } from "@react-three/drei"
 import * as THREE from "three"
 
-// Custom Procedural Keplerian Accretion Disk Shader with Relativistic Doppler Beaming
+// High-Definition Relativistic Keplerian Accretion Disk Shader
 const diskVert = `
   varying vec2 vUv;
   varying vec3 vWorldPos;
+  varying vec3 vNormal;
   void main() {
     vUv = uv;
     vec4 wp = modelMatrix * vec4(position, 1.0);
     vWorldPos = wp.xyz;
+    vNormal = normalize(normalMatrix * normal);
     gl_Position = projectionMatrix * viewMatrix * wp;
   }
 `
 
 const diskFrag = `
   uniform float uTime;
-  uniform float uOpacity;
   uniform vec3 uColor;
   varying vec2 vUv;
   varying vec3 vWorldPos;
 
-  // Simplex-like noise helper
+  // High precision pseudo-random noise
   float hash(vec2 p) {
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 45.32);
+    p = fract(p * vec2(234.34, 435.345));
+    p += dot(p, p + 34.23);
     return fract(p.x * p.y);
   }
 
@@ -40,111 +40,142 @@ const diskFrag = `
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
   }
 
+  float fbm(vec2 p) {
+    float v = 0.0;
+    float a = 0.5;
+    mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
+    for (int i = 0; i < 4; i++) {
+      v += a * noise(p);
+      p = rot * p * 2.1;
+      a *= 0.5;
+    }
+    return v;
+  }
+
   void main() {
     vec2 p = (vUv - 0.5) * 2.0;
     float r = length(p);
-    
-    // Event horizon hole cutoff and outer boundary
+
+    // Event Horizon cutoff: Pure black singularity inside
     if (r < 0.28 || r > 0.98) discard;
 
-    // Keplerian rotation: inner edge rotates faster
+    // Keplerian angular velocity (relativistic differential rotation)
     float angle = atan(p.y, p.x);
-    float speed = 1.4 / pow(r, 0.75);
-    float rotAngle = angle + uTime * speed * 0.45;
+    float keplerSpeed = 2.2 / pow(r, 0.85);
+    float rotAngle = angle + uTime * keplerSpeed * 0.35;
 
-    // Swirling turbulent plasma bands
-    float n1 = noise(vec2(rotAngle * 4.0, r * 16.0));
-    float n2 = noise(vec2(rotAngle * 8.0 - uTime * 0.5, r * 32.0));
-    float plasma = pow(n1 * 0.65 + n2 * 0.35, 1.4);
+    // Multi-scale turbulent plasma filaments
+    vec2 polar = vec2(rotAngle * 5.0, r * 22.0);
+    float plasma1 = fbm(polar);
+    float plasma2 = noise(vec2(rotAngle * 10.0 - uTime * 0.8, r * 45.0));
+    float plasma = pow(plasma1 * 0.7 + plasma2 * 0.3, 1.35);
 
-    // Relativistic Doppler Beaming: Approaching side is brighter and hotter
+    // Relativistic Doppler Beaming: Approaching gas is blue-shifted & blindingly bright
     float doppler = 0.5 + 0.5 * sin(angle);
-    float temp = mix(0.7, 1.6, doppler);
+    float dopplerBoost = pow(doppler, 1.8) * 2.2;
 
-    // Intense photon ring spike at event horizon edge
-    float photonRing = exp(-pow((r - 0.30) * 22.0, 2.0)) * 2.4;
+    // Einstein Photon Ring: Razor-sharp blinding light ring at event horizon boundary
+    float photonRing = exp(-pow((r - 0.29) * 28.0, 2.0)) * 3.5;
 
-    // Radial gradient fade
-    float radialFade = smoothstep(0.28, 0.38, r) * (1.0 - smoothstep(0.72, 0.98, r));
+    // Radial attenuation envelope
+    float innerFade = smoothstep(0.28, 0.35, r);
+    float outerFade = 1.0 - smoothstep(0.65, 0.98, r);
+    float envelope = innerFade * outerFade;
 
-    // Blended thermal color: Electric Cyan / Burning Gold / Deep Blue
-    vec3 hotColor = vec3(1.0, 0.9, 0.7);
+    // Thermal color spectrum: Ultra-Hot White Core -> Saturated Mid Plasma -> Deep Reddish-Black Outer Rim
+    vec3 hotColor = vec3(1.0, 1.0, 1.0);
     vec3 midColor = uColor;
-    vec3 coldColor = vec3(0.9, 0.2, 0.05);
+    vec3 coldColor = vec3(uColor.r * 0.4, uColor.g * 0.15, uColor.b * 0.05);
 
-    vec3 finalColor = mix(coldColor, midColor, doppler);
-    finalColor = mix(finalColor, hotColor, photonRing * 0.7 + plasma * 0.4);
+    vec3 col = mix(coldColor, midColor, doppler);
+    col = mix(col, hotColor, photonRing * 0.85 + plasma * 0.5);
 
-    float alpha = (plasma * 1.5 + photonRing * 2.0) * radialFade * temp * uOpacity;
-    alpha = clamp(alpha, 0.0, 1.0);
+    float intensity = (plasma * 1.8 + photonRing * 2.8) * envelope * (0.4 + dopplerBoost);
+    gl_FragColor = vec4(col * intensity * 2.2, clamp(intensity, 0.0, 1.0));
+  }
+`
 
-    gl_FragColor = vec4(finalColor * 2.5 * temp, alpha);
+// Gravitational Lensing Spacetime Distortion Halo Shader (Interstellar Vertical Arc)
+const haloVert = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }
+`
+
+const haloFrag = `
+  uniform float uTime;
+  uniform vec3 uColor;
+  varying vec2 vUv;
+
+  void main() {
+    vec2 p = (vUv - 0.5) * 2.0;
+    float r = length(p);
+
+    if (r < 0.29 || r > 0.95) discard;
+
+    // Concentrated vertical gravitational lens arc
+    float arc = smoothstep(0.95, 0.35, r) * smoothstep(0.29, 0.38, r);
+    float shimmer = 0.85 + 0.15 * sin(uTime * 2.0 + p.x * 6.0);
+
+    // Intense photon curve
+    float ring = exp(-pow((r - 0.32) * 22.0, 2.0)) * 2.8;
+
+    vec3 col = mix(uColor, vec3(1.0, 0.95, 0.9), ring * 0.7);
+    float alpha = clamp((arc * 0.9 + ring * 1.8) * shimmer, 0.0, 1.0);
+
+    gl_FragColor = vec4(col * alpha * 2.4, alpha);
   }
 `
 
 export default function BlackHoleSingularity({
   position = [0, 0, 0],
   color = "#ffaa00",
-  title = "PROJECT",
-  subtitle = "Subsystem",
-  badge = "FLAGSHIP",
-  description = "Description text here.",
-  techStack = ["React", "Node"],
-  links = [],
+  scale = 1.0,
   flyTo
 }) {
   const groupRef = useRef()
   const diskRef = useRef()
   const verticalHaloRef = useRef()
-  const [proximity, setProximity] = useState(0) // 0 (far) to 1 (close)
-  const [isCloseEnough, setIsCloseEnough] = useState(false)
 
   const uniforms = useMemo(() => ({
     uTime: { value: 0 },
-    uOpacity: { value: 1 },
     uColor: { value: new THREE.Color(color) }
   }), [color])
 
-  useFrame(({ clock, camera }) => {
+  useFrame(({ clock }) => {
     const t = clock.elapsedTime
     if (diskRef.current) diskRef.current.material.uniforms.uTime.value = t
     if (verticalHaloRef.current) verticalHaloRef.current.material.uniforms.uTime.value = t
 
-    // Distance to camera
-    const pos = new THREE.Vector3(...position)
-    const dist = camera.position.distanceTo(pos)
-
-    // Calculate proximity: reveals when dist < 650, fully visible when dist < 320
-    let prox = 0
-    if (dist < 650) {
-      prox = Math.min(1.0, (650 - dist) / 330)
-    }
-    setProximity(prox)
-    setIsCloseEnough(dist < 750)
-
-    // Subtle breathing animation
+    // Slow majestic cosmic precession
     if (groupRef.current) {
-      groupRef.current.rotation.y = t * 0.05
+      groupRef.current.rotation.y = t * 0.04
     }
   })
 
   return (
-    <group ref={groupRef} position={position}>
-      {/* 1. THE EVENT HORIZON (Pure Light-Absorbing Black Sphere) */}
-      <mesh
-        onClick={(e) => {
-          e.stopPropagation()
-          if (flyTo) flyTo(position, 35)
-        }}
-        style={{ cursor: "pointer" }}
-      >
-        <sphereGeometry args={[14, 48, 48]} />
+    <group
+      ref={groupRef}
+      position={position}
+      scale={scale}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (flyTo) flyTo(position, 40)
+      }}
+      style={{ cursor: "pointer" }}
+    >
+      {/* 1. THE EVENT HORIZON: Pure Light-Absorbing Black Sphere */}
+      <mesh>
+        <sphereGeometry args={[16, 64, 64]} />
         <meshBasicMaterial color="#000000" />
       </mesh>
 
-      {/* 2. THE HORIZONTAL ACCRETION DISK (Keplerian Plasma) */}
-      <mesh ref={diskRef} rotation={[-Math.PI / 2.3, 0, 0]}>
-        <planeGeometry args={[95, 95]} />
+      {/* 2. THE MAIN HORIZONTAL ACCRETION DISK (Keplerian Relativistic Plasma) */}
+      <mesh ref={diskRef} rotation={[-Math.PI / 2.25, 0, 0]}>
+        <planeGeometry args={[115, 115, 1, 1]} />
         <shaderMaterial
           vertexShader={diskVert}
           fragmentShader={diskFrag}
@@ -156,12 +187,12 @@ export default function BlackHoleSingularity({
         />
       </mesh>
 
-      {/* 3. THE RELATIVISTIC VERTICAL LENSING HALO (Gargantua Arc) */}
-      <mesh ref={verticalHaloRef} rotation={[0, 0, Math.PI / 8]}>
-        <planeGeometry args={[75, 75]} />
+      {/* 3. THE RELATIVISTIC VERTICAL LENSING HALO (Interstellar Gargantua Bent Arc) */}
+      <mesh ref={verticalHaloRef} rotation={[0, 0, Math.PI / 6]}>
+        <planeGeometry args={[95, 95, 1, 1]} />
         <shaderMaterial
-          vertexShader={diskVert}
-          fragmentShader={diskFrag}
+          vertexShader={haloVert}
+          fragmentShader={haloFrag}
           uniforms={uniforms}
           transparent
           side={THREE.DoubleSide}
@@ -170,129 +201,8 @@ export default function BlackHoleSingularity({
         />
       </mesh>
 
-      {/* 4. GRAVITATIONAL ENERGY CORE GLOW */}
-      <pointLight color={color} intensity={2.5} distance={180} />
-
-      {/* 5. 3D SPATIAL HOLOGRAPHIC DATA MANIFESTATION */}
-      {isCloseEnough && (
-        <Html
-          position={[0, 24, 0]}
-          center
-          distanceFactor={180}
-          zIndexRange={[100, 0]}
-          transform
-          sprite
-        >
-          <div
-            onClick={(e) => {
-              e.stopPropagation()
-              if (flyTo) flyTo(position, 35)
-            }}
-            style={{
-              opacity: proximity,
-              transform: `scale(${0.7 + proximity * 0.3})`,
-              transition: "opacity 0.25s ease, transform 0.25s ease",
-              pointerEvents: proximity > 0.3 ? "auto" : "none",
-              userSelect: "none",
-              cursor: "pointer",
-              width: 380,
-              background: "rgba(6, 10, 20, 0.82)",
-              backdropFilter: "blur(24px) saturate(200%)",
-              border: `1px solid ${color}88`,
-              borderRadius: 14,
-              padding: "20px 24px",
-              boxShadow: `0 16px 48px rgba(0, 0, 0, 0.9), 0 0 32px ${color}33, inset 0 1px 0 rgba(255, 255, 255, 0.15)`,
-              color: "#ffffff",
-              fontFamily: "'Inter', -apple-system, sans-serif"
-            }}
-          >
-            {/* Header Badge */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <span style={{
-                fontSize: 9,
-                fontWeight: 900,
-                letterSpacing: "0.14em",
-                color: color,
-                background: `${color}22`,
-                border: `1px solid ${color}55`,
-                padding: "3px 8px",
-                borderRadius: 4,
-                textTransform: "uppercase"
-              }}>
-                ✦ {badge}
-              </span>
-              <span style={{ fontSize: 9, color: "#8899aa", letterSpacing: "0.05em" }}>
-                3D SINGULARITY
-              </span>
-            </div>
-
-            {/* Title & Subtitle */}
-            <h2 style={{ margin: "0 0 4px 0", fontSize: 18, fontWeight: 800, letterSpacing: "-0.01em", color: "#ffffff" }}>
-              {title}
-            </h2>
-            <div style={{ fontSize: 11, color: color, fontWeight: 700, marginBottom: 10, letterSpacing: "0.02em" }}>
-              {subtitle}
-            </div>
-
-            {/* Description */}
-            <p style={{ margin: "0 0 14px 0", fontSize: 11.5, lineHeight: 1.55, color: "#cbd5e1" }}>
-              {description}
-            </p>
-
-            {/* Tech Stack Pills */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-              {techStack.map((tech, idx) => (
-                <span
-                  key={idx}
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 700,
-                    background: "rgba(255, 255, 255, 0.08)",
-                    border: "1px solid rgba(255, 255, 255, 0.12)",
-                    color: "#e2e8f0",
-                    padding: "3px 8px",
-                    borderRadius: 4
-                  }}
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
-
-            {/* Action Links */}
-            {links.length > 0 && (
-              <div style={{ display: "flex", gap: 8, borderTop: "1px solid rgba(255, 255, 255, 0.1)", paddingTop: 10 }}>
-                {links.map((link, idx) => (
-                  <a
-                    key={idx}
-                    href={link.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                      background: link.primary ? color : "rgba(255, 255, 255, 0.1)",
-                      color: link.primary ? "#000000" : "#ffffff",
-                      fontSize: 10,
-                      fontWeight: 800,
-                      padding: "6px 12px",
-                      borderRadius: 6,
-                      textDecoration: "none",
-                      letterSpacing: "0.04em",
-                      border: link.primary ? "none" : "1px solid rgba(255, 255, 255, 0.15)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4
-                    }}
-                  >
-                    <span>{link.icon || "🔗"}</span>
-                    <span>{link.label}</span>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </Html>
-      )}
+      {/* 4. GRAVITATIONAL ILLUMINATION: Intense Accretion Light into Space */}
+      <pointLight color={color} intensity={3.5} distance={320} decay={1.8} />
     </group>
   )
 }

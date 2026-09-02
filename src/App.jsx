@@ -194,20 +194,18 @@ function App() {
       }}>
         <b style={{ color: "#ffffff" }}>🎮 Cosmic Flight Controls:</b><br />
         • <b>Scroll Wheel:</b> Slow cinematic zoom<br />
-        • <b>Left Click + Drag:</b> 360° 3D Orbit<br />
-        
         <div style={{ marginTop: 10, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-          <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 3D SINGULARITIES:</b>
+          <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO BLACK HOLES:</b>
           <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
             {[
-              { name: "Sol", pos: [280, 45, 140] },
-              { name: "Haappy", pos: [820, 95, -460] },
-              { name: "Yama AI", pos: [1750, 220, -1150] },
-              { name: "Syn-Nex", pos: [-3850, 320, -2750] }
+              { name: "Gargantua", pos: [320, 45, 180] },
+              { name: "Cygnus X-1", pos: [920, 110, -520] },
+              { name: "Sagittarius A*", pos: [1950, 260, -1280] },
+              { name: "Quasar M87", pos: [-4200, 380, -3100] }
             ].map((s, i) => (
               <button
                 key={i}
-                onClick={() => flyTo(s.pos, 35)}
+                onClick={() => flyTo(s.pos, 40)}
                 style={{
                   background: "rgba(255,255,255,0.08)",
                   border: "1px solid rgba(0,216,255,0.3)",
