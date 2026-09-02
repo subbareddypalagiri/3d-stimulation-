@@ -14,6 +14,8 @@ import InterstellarNavigator from "./InterstellarNavigator"
 import InterstellarDust from "./InterstellarDust"
 import MultiverseFinalSkyPano from "./MultiverseFinalSkyPano"
 import { TEN_COSMIC_SPHERES } from "./cosmicSpheresData"
+import CosmicSingularityDot from "./CosmicSingularityDot"
+import ScrollVideoPortal from "./ScrollVideoPortal"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -56,11 +58,16 @@ function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
       desc = "20 Bold Inflaton Mega-Domains (Each with Unique Colors)"
       color = "#ffd700"
       progress = 6
-    } else if (dist > 180000000) {
-      level = "LEVEL 7: ULTIMATE CELESTIAL HORIZON"
-      desc = "Milky Way Sky Panorama enclosing the Omniverse"
+    } else if (dist > 180000000 && dist <= 22000000000) {
+      level = "LEVEL 7: 10 COSMIC REALMS"
+      desc = "Pantheon of Celestial Sky Panorama Spheres"
       color = "#00ffff"
       progress = 7
+    } else if (dist > 22000000000) {
+      level = "LEVEL 8: THE PRIMORDIAL SINGULARITY"
+      desc = "Mysterious White Singularity Dot in the Void (Click to Open Video)"
+      color = "#ffffff"
+      progress = 8
     }
 
     // Only update React state when level changes, or at most 5 times per second (prevents GC frame drops!)
@@ -77,6 +84,7 @@ function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
 function App() {
   const cameraControlRef = useRef()
   const [galaxyCenter, setGalaxyCenter] = useState([0, 0, 0])
+  const [isPortalOpen, setIsPortalOpen] = useState(false)
   const [telemetry, setTelemetry] = useState({
     level: "LEVEL 1: STELLAR NEIGHBORHOOD",
     desc: "Sol & 24 Neighboring Star Systems",
@@ -128,6 +136,9 @@ function App() {
 
           {/* 10 Colossal Cosmic Realm Spheres (GLB Panorama with light-mixing colors) */}
           <MultiverseFinalSkyPano activeCenter={galaxyCenter} flyTo={flyTo} />
+
+          {/* Level 8: The Mysterious Pulsating White Singularity Dot */}
+          <CosmicSingularityDot onActivatePortal={() => setIsPortalOpen(true)} flyTo={flyTo} />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -298,6 +309,42 @@ function App() {
           >
             🌌 10 Cosmic Spheres
           </button>
+          <button
+            onClick={() => {
+              if (cameraControlRef.current) {
+                cameraControlRef.current.setLookAt(0, 11000000000, 32000000000, 0, 0, 0, true)
+              }
+            }}
+            style={{
+              background: "rgba(255, 255, 255, 0.2)",
+              border: "1px solid rgba(255, 255, 255, 0.8)",
+              color: "#ffffff",
+              padding: "4px 8px",
+              borderRadius: 6,
+              fontSize: 10,
+              fontWeight: 800,
+              cursor: "pointer",
+              boxShadow: "0 0 10px rgba(255,255,255,0.4)"
+            }}
+          >
+            ⚪ Singularity Dot
+          </button>
+          <button
+            onClick={() => setIsPortalOpen(true)}
+            style={{
+              background: "linear-gradient(90deg, rgba(0, 216, 255, 0.3), rgba(255, 0, 234, 0.3))",
+              border: "1px solid #00d8ff",
+              color: "#00ffff",
+              padding: "4px 8px",
+              borderRadius: 6,
+              fontSize: 10,
+              fontWeight: 800,
+              cursor: "pointer",
+              boxShadow: "0 0 10px rgba(0, 216, 255, 0.4)"
+            }}
+          >
+            🎬 Video Portal
+          </button>
         </div>
         <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
           <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC BLACK HOLES:</b>
@@ -367,6 +414,12 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Interactive Apple-Grade Scroll Video Frame Scrubber Portal */}
+      <ScrollVideoPortal 
+        isOpen={isPortalOpen} 
+        onClose={() => setIsPortalOpen(false)} 
+      />
     </div>
   )
 }
