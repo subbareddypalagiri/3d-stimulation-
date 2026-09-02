@@ -2,15 +2,21 @@ import { useEffect, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
 
-export default function InterstellarNavigator({ cameraControlRef }) {
+export default function InterstellarNavigator({ cameraControlRef, flyTo }) {
   const keysPressed = useRef({})
+  const flyToRef = useRef(flyTo)
+  flyToRef.current = flyTo
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't intercept if user is typing in an input
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return
       keysPressed.current[e.key.toLowerCase()] = true
       keysPressed.current[e.code] = true
+
+      // "R" or "Home" key: Instant smooth return flight to Home Sol System
+      if (e.key.toLowerCase() === "r" || e.key === "Home") {
+        if (flyToRef.current) flyToRef.current([0, 20, 45], 25)
+      }
     }
 
     const handleKeyUp = (e) => {
@@ -18,20 +24,20 @@ export default function InterstellarNavigator({ cameraControlRef }) {
       keysPressed.current[e.code] = false
     }
 
-    // Wheel handler for breaking past the solar system barrier into interstellar space
+    // Two-way Wheel handler for seamless interstellar flight
     const handleWheel = (e) => {
       const controls = cameraControlRef.current
       if (!controls) return
 
-      // When scrolling forward (zooming IN)
-      if (e.deltaY < 0) {
-        const distToTarget = controls.distance
-        // If we are already deep inside a solar system (near sun / planets)
-        // Instead of hitting a brick wall at minDistance, push forward into the interstellar void!
-        if (distToTarget <= 25) {
-          const forwardStep = 18 // units forward into deep space per scroll
-          controls.forward(forwardStep, true)
-        }
+      const distToTarget = controls.distance
+
+      // When scrolling forward (zooming IN) past a solar system
+      if (e.deltaY < 0 && distToTarget <= 28) {
+        controls.forward(22, true)
+      }
+      // When scrolling backward (zooming OUT) to escape back into space
+      else if (e.deltaY > 0 && distToTarget <= 28) {
+        controls.forward(-22, true)
       }
     }
 
@@ -44,7 +50,7 @@ export default function InterstellarNavigator({ cameraControlRef }) {
       window.removeEventListener("keyup", handleKeyUp)
       window.removeEventListener("wheel", handleWheel)
     }
-  }, [cameraControlRef])
+  }, [cameraControlRef, flyTo])
 
   // Continuous keyboard interstellar flight loop
   useFrame(({ camera }, delta) => {
@@ -62,19 +68,19 @@ export default function InterstellarNavigator({ cameraControlRef }) {
 
     // Dynamically scale flight speed according to cosmic scale depth
     const camDist = camera.position.length()
-    let baseSpeed = 80 // Base cruising speed between neighboring stars
+    let baseSpeed = 90 // Cruising speed in stellar neighborhood
     if (camDist > 10000 && camDist <= 60000) {
-      baseSpeed = 600
+      baseSpeed = 750
     } else if (camDist > 60000 && camDist <= 300000) {
-      baseSpeed = 4000
+      baseSpeed = 4500
     } else if (camDist > 300000 && camDist <= 2000000) {
-      baseSpeed = 35000
+      baseSpeed = 40000
     } else if (camDist > 2000000) {
-      baseSpeed = 250000
+      baseSpeed = 300000
     }
 
-    const currentSpeed = shift ? baseSpeed * 3.5 : baseSpeed
-    const dt = Math.min(delta, 0.1) // clamp delta to avoid huge jumps
+    const currentSpeed = shift ? baseSpeed * 3.8 : baseSpeed
+    const dt = Math.min(delta, 0.1)
 
     if (forward) controls.forward(currentSpeed * dt, false)
     if (backward) controls.forward(-currentSpeed * dt, false)

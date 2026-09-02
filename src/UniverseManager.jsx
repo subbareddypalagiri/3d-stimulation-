@@ -4,16 +4,17 @@ import * as THREE from 'three'
 import SolarSystem from './SolarSystem'
 
 const starTypes = [
-  { dark: '#220000', red: '#cc1100', org: '#ff6600', wht: '#ffeeaa' }, // Yellow (Sol / G-type)
-  { dark: '#000022', red: '#0033cc', org: '#0099ff', wht: '#ffffff' }, // Blue (Sirius / A-type)
-  { dark: '#330000', red: '#ff0000', org: '#cc3300', wht: '#ffaaaa' }, // Red (Proxima / M-dwarf)
-  { dark: '#112211', red: '#22aa22', org: '#55ff55', wht: '#eeffee' }, // Green / Exotic
-  { dark: '#220022', red: '#9900cc', org: '#dd33ff', wht: '#ffeeff' }, // Purple (Pulsar)
-  { dark: '#222222', red: '#aaaaaa', org: '#dddddd', wht: '#ffffff' }, // White (Dwarf)
+  { dark: '#220000', red: '#cc1100', org: '#ff6600', wht: '#ffeeaa' }, // 0: Yellow-Gold (Sol / G-type)
+  { dark: '#000022', red: '#0033cc', org: '#0099ff', wht: '#ffffff' }, // 1: Electric Blue (Sirius / A-type)
+  { dark: '#330000', red: '#ff0000', org: '#cc3300', wht: '#ffaaaa' }, // 2: Crimson Red Dwarf (Proxima / M-dwarf)
+  { dark: '#112211', red: '#22aa22', org: '#55ff55', wht: '#eeffee' }, // 3: Emerald Exotic
+  { dark: '#220022', red: '#9900cc', org: '#dd33ff', wht: '#ffeeff' }, // 4: Violet Pulsar
+  { dark: '#222222', red: '#aaaaaa', org: '#dddddd', wht: '#ffffff' }, // 5: Blinding White Dwarf
 ]
 
-// 24 Real Named Neighboring Star Systems around Sol (distances 580 to 6600)
+// 44 Real Named & Exotic Stellar Systems around Sol (Total 45 Systems!)
 const NEIGHBOR_STAR_SYSTEMS = [
+  // 1-24: Original Neighbor Systems
   { name: 'Alpha Centauri A', pos: [580, 80, -320], starType: 0, scale: 1.1, planets: 4 },
   { name: 'Proxima Centauri', pos: [720, -110, -420], starType: 2, scale: 0.6, planets: 2 },
   { name: "Barnard's Star", pos: [-850, 160, 480], starType: 2, scale: 0.7, planets: 3 },
@@ -38,6 +39,28 @@ const NEIGHBOR_STAR_SYSTEMS = [
   { name: 'Arcturus', pos: [5850, 580, 4150], starType: 2, scale: 2.2, planets: 6 },
   { name: 'Aldebaran', pos: [-6200, 430, -4400], starType: 2, scale: 2.1, planets: 5 },
   { name: 'Betelgeuse', pos: [6600, -650, 4700], starType: 2, scale: 3.0, planets: 8 },
+
+  // 25-44: 20 BRAND NEW DIVERSE SOLAR SYSTEMS
+  { name: 'Kepler-452 Prime', pos: [-750, -420, -1450], starType: 0, scale: 1.05, planets: 5 },
+  { name: 'Sirius B Dwarf', pos: [1440, 240, -860], starType: 5, scale: 0.45, planets: 3 },
+  { name: 'Rigel Hypergiant', pos: [-7200, 680, 5200], starType: 1, scale: 3.4, planets: 9 },
+  { name: 'TRAPPIST-2 Sector', pos: [-4350, -320, -3150], starType: 2, scale: 0.65, planets: 7 },
+  { name: 'Antares Supergiant', pos: [7600, -820, -5400], starType: 2, scale: 3.8, planets: 8 },
+  { name: 'Cygnus X-3 Microquasar', pos: [-2650, 480, -1920], starType: 4, scale: 0.85, planets: 4 },
+  { name: 'Gliese 667C Trio', pos: [4680, 540, 2950], starType: 0, scale: 0.95, planets: 6 },
+  { name: 'WASP-12 Hell World', pos: [3350, -680, -2600], starType: 0, scale: 1.25, planets: 3 },
+  { name: 'Fomalhaut Azure', pos: [-3650, -420, 2800], starType: 1, scale: 2.1, planets: 6 },
+  { name: 'HD 189733 Cobalt', pos: [-5100, 390, -3650], starType: 1, scale: 1.15, planets: 5 },
+  { name: '55 Cancri Diamond', pos: [2380, -360, 1680], starType: 0, scale: 1.1, planets: 5 },
+  { name: 'Ross 154 Magnetar', pos: [1920, 310, -1350], starType: 4, scale: 0.55, planets: 3 },
+  { name: 'GJ 1214 Oceanus', pos: [-2150, 450, 1420], starType: 2, scale: 0.75, planets: 4 },
+  { name: 'Upsilon Andromedae', pos: [5400, 420, -4100], starType: 0, scale: 1.35, planets: 6 },
+  { name: 'Tau Boötis Magnet', pos: [-3100, 620, 2350], starType: 0, scale: 1.2, planets: 4 },
+  { name: 'Achernar Oblate', pos: [6100, -540, 4350], starType: 1, scale: 2.4, planets: 7 },
+  { name: 'Vega Minor Proto', pos: [-3700, 290, -2650], starType: 1, scale: 1.4, planets: 5 },
+  { name: 'Groombridge 34 Twin', pos: [-1280, 240, 880], starType: 2, scale: 0.65, planets: 4 },
+  { name: 'Mira Variable', pos: [6850, 720, -4950], starType: 2, scale: 2.8, planets: 6 },
+  { name: 'Spica Prime Binary', pos: [-6450, -510, -4600], starType: 1, scale: 2.5, planets: 7 },
 ]
 
 const generateAllSystems = () => {
@@ -54,14 +77,14 @@ const generateAllSystems = () => {
     }
   ]
 
-  // 2. Add the 24 Neighboring Stellar Systems
+  // 2. Add all 44 Neighboring & Exotic Stellar Systems
   NEIGHBOR_STAR_SYSTEMS.forEach((star, index) => {
     list.push({
       id: index + 1,
       name: star.name,
       position: star.pos,
       scale: star.scale,
-      speedMultiplier: 0.4 + (index % 5) * 0.2,
+      speedMultiplier: 0.3 + (index % 6) * 0.18,
       sunColors: starTypes[star.starType],
       planetCount: star.planets
     })
@@ -77,34 +100,15 @@ export default function UniverseManager({ flyTo, onActiveSystemChange }) {
 
   useEffect(() => {
     if (onActiveSystemChange && systems[activeSystemId]) {
-      onActiveSystemChange(systems[activeSystemId].position, handleGalaxyClick)
+      onActiveSystemChange(systems[activeSystemId].position)
     }
-  }, [activeSystemId, systems])
+  }, [activeSystemId, systems, onActiveSystemChange])
 
-  const handleGalaxyClick = (pointArray) => {
-    const newPos = new THREE.Vector3(pointArray[0], pointArray[1], pointArray[2])
-    const newId = systems.length
-    const newSys = {
-      id: newId,
-      name: `Galaxy Star-${newId}`,
-      position: [newPos.x, newPos.y, newPos.z],
-      scale: 0.8 + Math.random() * 1.5,
-      speedMultiplier: 0.5 + Math.random(),
-      sunColors: starTypes[Math.floor(Math.random() * starTypes.length)],
-      planetCount: Math.floor(Math.random() * 6) + 3
-    }
-    
-    setSystems(prev => [...prev, newSys])
-    setActiveSystemId(newId)
-    flyTo([newPos.x, newPos.y, newPos.z], newSys.scale * 4)
-  }
-
-  // Smoothly manage visibility: All 25 solar systems visible when close/zooming out (dist < 22,000)
+  // Smoothly manage visibility: All 45 solar systems visible throughout Level 1 (dist < 65,000)
   useFrame(({ camera }) => {
     if (groupRef.current) {
       const dist = camera.position.length()
-      // Visible when in solar system / local star cluster region (dist < 55000)
-      groupRef.current.visible = dist < 55000
+      groupRef.current.visible = dist < 65000
     }
   })
 
@@ -123,4 +127,3 @@ export default function UniverseManager({ flyTo, onActiveSystemChange }) {
     </group>
   )
 }
-

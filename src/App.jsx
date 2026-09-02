@@ -11,6 +11,8 @@ import CosmicAudio from "./CosmicAudio"
 import TenBlackHoles from "./TenBlackHoles"
 import { BLACK_HOLE_DATA } from "./blackHolesData"
 import InterstellarNavigator from "./InterstellarNavigator"
+import InterstellarDust from "./InterstellarDust"
+import InterstellarNebulae from "./InterstellarNebulae"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -114,6 +116,11 @@ function App() {
           
           {/* 10 Relativistic 3D Black Holes Distributed Across All 6 Cosmic Scales */}
           <TenBlackHoles flyTo={flyTo} />
+
+          {/* Luminous Interstellar Dust Streaming in the Deep Void Gaps */}
+          <InterstellarDust count={2200} />
+          {/* Ethereal Gaseous Nebular Clouds between Stars */}
+          <InterstellarNebulae />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -133,7 +140,7 @@ function App() {
         />
 
         {/* Real-time Interstellar Flight Engine (Traverse gaps between solar systems) */}
-        <InterstellarNavigator cameraControlRef={cameraControlRef} />
+        <InterstellarNavigator cameraControlRef={cameraControlRef} flyTo={flyTo} />
 
         <EffectComposer disableNormalPass>
           <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.5} intensity={1.2} mipmapBlur />
@@ -215,7 +222,41 @@ function App() {
         • <b>W / S / A / D or Arrows:</b> Cruise through interstellar gaps<br />
         • <b>Shift + W:</b> Light-speed interstellar warp boost<br />
         • <b>Left Drag:</b> 360° Look | <b>Click Star:</b> Fly to system<br />
-        <div style={{ marginTop: 10, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+        <div style={{ display: "flex", gap: 6, marginTop: 8, marginBottom: 8 }}>
+          <button
+            onClick={() => flyTo([0, 20, 45], 25)}
+            style={{
+              background: "rgba(0, 216, 255, 0.18)",
+              border: "1px solid rgba(0, 216, 255, 0.6)",
+              color: "#00d8ff",
+              padding: "4px 8px",
+              borderRadius: 6,
+              fontSize: 10,
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.2s ease"
+            }}
+          >
+            🛸 Return to Sol (R)
+          </button>
+          <button
+            onClick={() => flyTo([0, 25000, 140000], 140000)}
+            style={{
+              background: "rgba(170, 102, 255, 0.18)",
+              border: "1px solid rgba(170, 102, 255, 0.6)",
+              color: "#aa66ff",
+              padding: "4px 8px",
+              borderRadius: 6,
+              fontSize: 10,
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.2s ease"
+            }}
+          >
+            🌌 Galaxy View
+          </button>
+        </div>
+        <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
           <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC BLACK HOLES:</b>
           <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 180, overflowY: "auto" }}>
             {BLACK_HOLE_DATA.map((bh) => (
