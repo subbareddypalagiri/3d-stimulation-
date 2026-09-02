@@ -12,6 +12,7 @@ import TenBlackHoles from "./TenBlackHoles"
 import { BLACK_HOLE_DATA } from "./blackHolesData"
 import InterstellarNavigator from "./InterstellarNavigator"
 import InterstellarDust from "./InterstellarDust"
+import MultiverseFinalSkyPano from "./MultiverseFinalSkyPano"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -118,6 +119,9 @@ function App() {
 
           {/* Luminous Interstellar Dust Streaming in the Deep Void Gaps */}
           <InterstellarDust count={2200} />
+
+          {/* Ultimate Multiverse Horizon Milky Way Sky Panorama GLB Model */}
+          <MultiverseFinalSkyPano activeCenter={galaxyCenter} />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -251,6 +255,22 @@ function App() {
             }}
           >
             🌌 Galaxy View
+          </button>
+          <button
+            onClick={() => flyTo([0, 35000000, 95000000], 95000000)}
+            style={{
+              background: "rgba(255, 68, 170, 0.18)",
+              border: "1px solid rgba(255, 68, 170, 0.6)",
+              color: "#ff44aa",
+              padding: "4px 8px",
+              borderRadius: 6,
+              fontSize: 10,
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.2s ease"
+            }}
+          >
+            🫧 Multiverse Horizon
           </button>
         </div>
         <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
