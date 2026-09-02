@@ -298,12 +298,12 @@ export default function Sun({
   return (
     <group ref={groupRef} position={position} {...props}>
       <mesh>
-        <sphereGeometry args={[3, 128, 128]} />
+        <sphereGeometry args={[3, 48, 48]} />
         <sunMaterial ref={sunMatRef} uTexture={sunTexture} />
       </mesh>
       
       <mesh>
-        <sphereGeometry args={[3.05, 128, 128]} />
+        <sphereGeometry args={[3.05, 48, 48]} />
         <fireMaterial ref={fireMatRef} uTexture={sunTexture} transparent depthWrite={false} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} />
       </mesh>
     </group>
