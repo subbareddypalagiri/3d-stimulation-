@@ -8,7 +8,8 @@ import UniverseManager from "./UniverseManager"
 import MilkyWay from "./MilkyWay"
 import CosmicWeb from "./CosmicWeb"
 import CosmicAudio from "./CosmicAudio"
-import TenBlackHoles, { BLACK_HOLE_DATA } from "./TenBlackHoles"
+import TenBlackHoles from "./TenBlackHoles"
+import { BLACK_HOLE_DATA } from "./blackHolesData"
 
 // Live tracker for the 6 Cosmic Scales
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {

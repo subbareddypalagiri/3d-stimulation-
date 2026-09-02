@@ -14,6 +14,7 @@ const diskVert = `
 
 const diskFrag = `
   uniform float uTime;
+  uniform float uOpacity;
   uniform vec3 uColor;
   varying vec2 vUv;
 
@@ -80,7 +81,8 @@ const diskFrag = `
     col = mix(col, hotColor, photonRing * 0.85 + plasma * 0.5);
 
     float intensity = (plasma * 1.8 + photonRing * 2.8) * envelope * (0.4 + dopplerBoost);
-    gl_FragColor = vec4(col * intensity * 2.4, clamp(intensity, 0.0, 1.0));
+    float finalAlpha = clamp(intensity * uOpacity, 0.0, 1.0);
+    gl_FragColor = vec4(col * intensity * 2.4, finalAlpha);
   }
 `
 
@@ -96,6 +98,7 @@ const haloVert = `
 
 const haloFrag = `
   uniform float uTime;
+  uniform float uOpacity;
   uniform vec3 uColor;
   varying vec2 vUv;
 
@@ -110,7 +113,7 @@ const haloFrag = `
     float ring = exp(-pow((r - 0.32) * 22.0, 2.0)) * 2.8;
 
     vec3 col = mix(uColor, vec3(1.0, 0.95, 0.9), ring * 0.7);
-    float alpha = clamp((arc * 0.9 + ring * 1.8) * shimmer, 0.0, 1.0);
+    float alpha = clamp((arc * 0.9 + ring * 1.8) * shimmer * uOpacity, 0.0, 1.0);
 
     gl_FragColor = vec4(col * alpha * 2.4, alpha);
   }
@@ -120,6 +123,8 @@ export default function BlackHoleSingularity({
   position = [0, 0, 0],
   color = "#ffaa00",
   scale = 1.0,
+  minDist = 0,
+  maxDist = 1500000000,
   flyTo
 }) {
   const groupRef = useRef()
@@ -128,14 +133,37 @@ export default function BlackHoleSingularity({
 
   const uniforms = useMemo(() => ({
     uTime: { value: 0 },
+    uOpacity: { value: 1.0 },
     uColor: { value: new THREE.Color(color) }
   }), [color])
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock, camera }) => {
     const t = clock.elapsedTime
     if (diskRef.current) diskRef.current.material.uniforms.uTime.value = t
     if (verticalHaloRef.current) verticalHaloRef.current.material.uniforms.uTime.value = t
 
+    // Distance culling: Only visible when camera is in this cosmic level!
+    const camDist = camera.position.length()
+
+    if (camDist < minDist || camDist > maxDist) {
+      if (groupRef.current) groupRef.current.visible = false
+      return
+    }
+
+    if (groupRef.current) groupRef.current.visible = true
+
+    // Smooth opacity fade at level boundaries
+    let op = 1.0
+    if (minDist > 0 && camDist < minDist * 1.5) {
+      op = Math.min(1.0, (camDist - minDist) / (minDist * 0.5))
+    } else if (camDist > maxDist * 0.75) {
+      op = Math.max(0.0, 1.0 - (camDist - maxDist * 0.75) / (maxDist * 0.25))
+    }
+
+    if (diskRef.current) diskRef.current.material.uniforms.uOpacity.value = op
+    if (verticalHaloRef.current) verticalHaloRef.current.material.uniforms.uOpacity.value = op
+
+    // Slow majestic precession
     if (groupRef.current) {
       groupRef.current.rotation.y = t * 0.04
     }
@@ -187,7 +215,7 @@ export default function BlackHoleSingularity({
       </mesh>
 
       {/* 4. GRAVITATIONAL ACCRETION LIGHT */}
-      <pointLight color={color} intensity={3.5} distance={280 * scale} decay={1.8} />
+      <pointLight color={color} intensity={2.5} distance={180 * scale} decay={1.8} />
     </group>
   )
 }
