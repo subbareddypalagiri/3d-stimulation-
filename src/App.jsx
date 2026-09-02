@@ -8,6 +8,7 @@ import UniverseManager from "./UniverseManager"
 import MilkyWay from "./MilkyWay"
 import CosmicWeb from "./CosmicWeb"
 import CosmicAudio from "./CosmicAudio"
+import FourSingularities from "./FourSingularities"
 
 // Live tracker for the 6 Cosmic Scales
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -97,6 +98,9 @@ function App() {
           />
           <MilkyWay position={galaxyCenter} />
           <CosmicWeb activeCenter={galaxyCenter} />
+          
+          {/* 4 Relativistic 3D Black Hole Singularities with Proximity 3D Portals */}
+          <FourSingularities flyTo={flyTo} />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -172,26 +176,55 @@ function App() {
         </div>
       </div>
 
-      {/* Top Right: Free Flight Controls Guide */}
+      {/* Top Right: Free Flight Controls Guide & 4 Singularity Warps */}
       <div style={{
         position: "absolute",
         top: 20,
         right: 20,
         color: "#aabbcc",
         fontFamily: "system-ui, -apple-system, sans-serif",
-        background: "rgba(5, 10, 25, 0.7)",
-        padding: "10px 18px",
-        borderRadius: 10,
-        backdropFilter: "blur(14px)",
-        border: "1px solid rgba(255,255,255,0.1)",
+        background: "rgba(5, 10, 25, 0.75)",
+        padding: "12px 18px",
+        borderRadius: 12,
+        backdropFilter: "blur(16px)",
+        border: "1px solid rgba(255,255,255,0.12)",
         fontSize: 11,
         lineHeight: 1.5,
-        pointerEvents: "none"
+        boxShadow: "0 8px 32px rgba(0,0,0,0.6)"
       }}>
-        <b style={{ color: "#ffffff" }}>🎮 Free Cosmic Navigation:</b><br />
-        • <b>Scroll Wheel:</b> Zoom In / Out seamlessly across all 6 levels<br />
-        • <b>Left Click + Drag:</b> Orbit & look in any 3D direction<br />
-        • <b>Right Click + Drag:</b> Pan freely across space
+        <b style={{ color: "#ffffff" }}>🎮 Cosmic Flight Controls:</b><br />
+        • <b>Scroll Wheel:</b> Slow cinematic zoom<br />
+        • <b>Left Click + Drag:</b> 360° 3D Orbit<br />
+        
+        <div style={{ marginTop: 10, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+          <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 3D SINGULARITIES:</b>
+          <div style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {[
+              { name: "Sol", pos: [280, 45, 140] },
+              { name: "Haappy", pos: [820, 95, -460] },
+              { name: "Yama AI", pos: [1750, 220, -1150] },
+              { name: "Syn-Nex", pos: [-3850, 320, -2750] }
+            ].map((s, i) => (
+              <button
+                key={i}
+                onClick={() => flyTo(s.pos, 35)}
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(0,216,255,0.3)",
+                  color: "#00d8ff",
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease"
+                }}
+              >
+                🕳️ {s.name}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
