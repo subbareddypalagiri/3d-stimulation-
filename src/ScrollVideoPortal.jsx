@@ -10,19 +10,36 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
   const targetFrameRef = useRef(1)
   const animFrameIdRef = useRef(null)
   const lastMouseXRef = useRef(null)
+  const isExitingRef = useRef(false)
 
   const [displayFrame, setDisplayFrame] = useState(1)
   const [loadProgress, setLoadProgress] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [whiteFlash, setWhiteFlash] = useState(true)
 
+  // Smooth Exit to Cosmos with White Flash Transition
+  const handleExit = useCallback(() => {
+    if (isExitingRef.current) return
+    isExitingRef.current = true
+    setIsPlaying(false)
+    setWhiteFlash(true)
+    setTimeout(() => {
+      isExitingRef.current = false
+      if (onClose) onClose()
+    }, 350)
+  }, [onClose])
+
   // Trigger pure white flashout whenever portal opens ("screen mottam white aipoyi")
   useEffect(() => {
     if (isOpen) {
+      isExitingRef.current = false
       setWhiteFlash(true)
+      currentFrameRef.current = 1
+      targetFrameRef.current = 1
+      setDisplayFrame(1)
       const timer = setTimeout(() => {
         setWhiteFlash(false)
-      }, 700) // Smooth flash dissolution over 700ms
+      }, 700)
       return () => clearTimeout(timer)
     }
   }, [isOpen])
@@ -47,12 +64,10 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
       }
     }
 
-    // Priority load first 150 immediately
     for (let i = 1; i <= priorityLimit; i++) {
       loadSingleFrame(i)
     }
 
-    // Background load the rest
     const loadRemaining = () => {
       for (let i = priorityLimit + 1; i <= TOTAL_FRAMES; i++) {
         loadSingleFrame(i)
@@ -143,6 +158,13 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
       e.preventDefault()
       setIsPlaying(false)
       const delta = e.deltaY * 0.35
+
+      // Reverse Exit to Cosmos: If at start (frame 1) and scrolling backward, return to cosmos!
+      if (currentFrameRef.current <= 2 && delta < -10) {
+        handleExit()
+        return
+      }
+
       targetFrameRef.current = Math.max(1, Math.min(TOTAL_FRAMES, targetFrameRef.current + delta))
     }
 
@@ -151,7 +173,6 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
       setIsPlaying(false)
       if (lastMouseXRef.current !== null) {
         const deltaX = e.clientX - lastMouseXRef.current
-        // Moving mouse right moves forward, moving left moves backward
         targetFrameRef.current = Math.max(1, Math.min(TOTAL_FRAMES, targetFrameRef.current + deltaX * 1.8))
       }
       lastMouseXRef.current = e.clientX
@@ -161,14 +182,18 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
       lastMouseXRef.current = null
     }
 
-    // 3. Keyboard controls
+    // 3. Keyboard controls: Esc, Backspace, or ArrowLeft at start returns to cosmos
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        if (onClose) onClose()
+      if (e.key === "Escape" || e.key === "Backspace") {
+        handleExit()
       } else if (e.key === "ArrowRight") {
         targetFrameRef.current = Math.min(TOTAL_FRAMES, targetFrameRef.current + 8)
       } else if (e.key === "ArrowLeft") {
-        targetFrameRef.current = Math.max(1, targetFrameRef.current - 8)
+        if (currentFrameRef.current <= 2) {
+          handleExit()
+        } else {
+          targetFrameRef.current = Math.max(1, targetFrameRef.current - 8)
+        }
       } else if (e.key === " ") {
         setIsPlaying((p) => !p)
       }
@@ -185,7 +210,7 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
       window.removeEventListener("mouseleave", handleMouseLeave)
       window.removeEventListener("keydown", handleKeyDown)
     }
-  }, [isOpen, onClose])
+  }, [isOpen, handleExit])
 
   if (!isOpen) return null
 
@@ -228,7 +253,7 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
           pointerEvents: "none",
           zIndex: 100,
           opacity: whiteFlash ? 1 : 0,
-          transition: "opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1)"
+          transition: "opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1)"
         }}
       />
 
@@ -241,7 +266,7 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
           justifyContent: "space-between",
           alignItems: "center",
           padding: "16px 28px",
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.85), transparent)",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.88), transparent)",
           backdropFilter: "blur(8px)"
         }}
       >
@@ -298,21 +323,26 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
             {isPlaying ? "⏸️ Pause" : "▶️ Auto Play"}
           </button>
 
+          {/* Prominent High-Visibility Return to Cosmos Button */}
           <button
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleExit()
+            }}
             style={{
-              background: "rgba(255, 68, 68, 0.25)",
-              border: "1px solid rgba(255, 68, 68, 0.6)",
-              color: "#ff8888",
-              padding: "6px 14px",
+              background: "linear-gradient(135deg, rgba(0, 216, 255, 0.35), rgba(255, 68, 170, 0.35))",
+              border: "1.5px solid #00ffff",
+              color: "#ffffff",
+              padding: "8px 18px",
               borderRadius: 8,
-              fontSize: 11,
-              fontWeight: 700,
+              fontSize: 12,
+              fontWeight: 800,
               cursor: "pointer",
+              boxShadow: "0 0 16px rgba(0, 216, 255, 0.5)",
               transition: "all 0.2s ease"
             }}
           >
-            ✕ Return to Cosmos (Esc)
+            🌌 ✕ Return to Cosmos (Esc)
           </button>
         </div>
       </div>
@@ -359,14 +389,29 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, display: "flex", alignItems: "center", gap: 10 }}>
-            <span>🖱️ <b>Move Mouse Left/Right</b> OR <b>Scroll Wheel</b> to scrub frames</span>
+            <span>🖱️ <b>Move Mouse</b> or <b>Scroll Wheel</b> to scrub frames</span>
             <span style={{ color: "rgba(255,255,255,0.3)" }}>|</span>
-            <span>⌨️ <b>Space</b>: Auto-Play | <b>Esc</b>: Back to Cosmos</span>
+            <span>⏪ <b>Scroll Wheel Backward past Frame 1</b> returns to Cosmos!</span>
           </div>
 
-          <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 10 }}>
-            Preloaded: {loadProgress}% ({imagesRef.current.size} / {TOTAL_FRAMES} frames)
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              handleExit()
+            }}
+            style={{
+              background: "rgba(255,255,255,0.12)",
+              border: "1px solid rgba(255,255,255,0.3)",
+              color: "#00ffff",
+              padding: "5px 14px",
+              borderRadius: 6,
+              fontSize: 11,
+              fontWeight: 700,
+              cursor: "pointer"
+            }}
+          >
+            🛸 Back to Space (Esc)
+          </button>
         </div>
       </div>
     </div>

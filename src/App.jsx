@@ -18,7 +18,7 @@ import CosmicSingularityDot from "./CosmicSingularityDot"
 import ScrollVideoPortal from "./ScrollVideoPortal"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
-function CosmicLevelTracker({ onLevelUpdate, onCrossCosmicSphereExit, activeCenter = [0, 0, 0] }) {
+function CosmicLevelTracker({ onLevelUpdate, onCrossCosmicSphereExit, activeCenter = [0, 0, 0], isPortalOpen = false, exitCooldownRef }) {
   const centerVec = useRef(new THREE.Vector3())
   const lastUpdate = useRef(0)
   const lastProgress = useRef(1)
@@ -29,11 +29,13 @@ function CosmicLevelTracker({ onLevelUpdate, onCrossCosmicSphereExit, activeCent
     centerVec.current.set(...activeCenter)
     const dist = camera.position.distanceTo(centerVec.current)
 
+    const inCooldown = exitCooldownRef && Date.now() < exitCooldownRef.current
+
     // Automatically detect crossing outside the cosmic sphere ("cosmic sphere bayatiki ragane screen mottam white aipoyi")
-    if (dist > 1300000000 && !hasTriggeredExit.current) {
+    if (dist > 1300000000 && !hasTriggeredExit.current && !isPortalOpen && !inCooldown) {
       hasTriggeredExit.current = true
       if (onCrossCosmicSphereExit) onCrossCosmicSphereExit()
-    } else if (dist < 1050000000 && hasTriggeredExit.current) {
+    } else if (dist < 1000000000) {
       hasTriggeredExit.current = false
     }
 
@@ -95,6 +97,7 @@ function App() {
   const cameraControlRef = useRef()
   const [galaxyCenter, setGalaxyCenter] = useState([0, 0, 0])
   const [isPortalOpen, setIsPortalOpen] = useState(false)
+  const exitCooldownRef = useRef(0)
   const [telemetry, setTelemetry] = useState({
     level: "LEVEL 1: STELLAR NEIGHBORHOOD",
     desc: "Sol & 24 Neighboring Star Systems",
@@ -131,7 +134,9 @@ function App() {
         <CosmicLevelTracker 
           onLevelUpdate={setTelemetry} 
           onCrossCosmicSphereExit={() => setIsPortalOpen(true)}
-          activeCenter={galaxyCenter} 
+          activeCenter={galaxyCenter}
+          isPortalOpen={isPortalOpen}
+          exitCooldownRef={exitCooldownRef}
         />
 
         <Suspense fallback={null}>
@@ -434,8 +439,10 @@ function App() {
         isOpen={isPortalOpen} 
         onClose={() => {
           setIsPortalOpen(false)
+          exitCooldownRef.current = Date.now() + 4000 // 4 second cooldown prevents re-triggering
           if (cameraControlRef.current) {
-            cameraControlRef.current.setLookAt(0, 300000000, 950000000, 0, 0, 0, true)
+            // Instantly place camera safely inside cosmic sphere at 680M AU
+            cameraControlRef.current.setLookAt(0, 200000000, 650000000, 0, 0, 0, false)
           }
         }} 
       />
