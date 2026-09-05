@@ -9,20 +9,30 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
   const currentFrameRef = useRef(1)
   const targetFrameRef = useRef(1)
   const animFrameIdRef = useRef(null)
-  const isDraggingRef = useRef(false)
-  const lastMouseYRef = useRef(0)
+  const lastMouseXRef = useRef(null)
 
   const [displayFrame, setDisplayFrame] = useState(1)
   const [loadProgress, setLoadProgress] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [whiteFlash, setWhiteFlash] = useState(true)
+
+  // Trigger pure white flashout whenever portal opens ("screen mottam white aipoyi")
+  useEffect(() => {
+    if (isOpen) {
+      setWhiteFlash(true)
+      const timer = setTimeout(() => {
+        setWhiteFlash(false)
+      }, 700) // Smooth flash dissolution over 700ms
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen])
 
   // Preload frames incrementally
   useEffect(() => {
     if (!isOpen) return
 
     let loadedCount = 0
-    // Priority: preload first 120 frames instantly
-    const priorityLimit = 120
+    const priorityLimit = 150
 
     const loadSingleFrame = (idx) => {
       if (imagesRef.current.has(idx)) return
@@ -37,19 +47,19 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
       }
     }
 
-    // Load initial 120 immediately
+    // Priority load first 150 immediately
     for (let i = 1; i <= priorityLimit; i++) {
       loadSingleFrame(i)
     }
 
-    // Load the rest smoothly in idle chunks
+    // Background load the rest
     const loadRemaining = () => {
       for (let i = priorityLimit + 1; i <= TOTAL_FRAMES; i++) {
         loadSingleFrame(i)
       }
     }
 
-    const timeout = setTimeout(loadRemaining, 300)
+    const timeout = setTimeout(loadRemaining, 200)
     return () => clearTimeout(timeout)
   }, [isOpen])
 
@@ -64,7 +74,6 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
     const img = imagesRef.current.get(clampedIdx)
 
     if (img && img.complete && img.naturalWidth > 0) {
-      // Responsive contain draw
       const cw = canvas.width
       const ch = canvas.height
       const iw = img.naturalWidth
@@ -94,7 +103,7 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
       // Smooth exponential lerp
       const diff = targetFrameRef.current - currentFrameRef.current
       if (Math.abs(diff) > 0.01) {
-        currentFrameRef.current += diff * 0.18
+        currentFrameRef.current += diff * 0.22
       } else {
         currentFrameRef.current = targetFrameRef.current
       }
@@ -125,56 +134,58 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
     return () => window.removeEventListener("resize", handleResize)
   }, [isOpen, drawFrame])
 
-  // Mouse Wheel Scrubbing Listener
+  // Mouse Move & Wheel Listeners: Move mouse OR scroll wheel to scrub frames!
   useEffect(() => {
     if (!isOpen) return
 
+    // 1. Mouse Wheel scrubbing
     const handleWheel = (e) => {
       e.preventDefault()
       setIsPlaying(false)
-
-      // Natural scroll scrub sensitivity
-      const delta = e.deltaY * 0.28
+      const delta = e.deltaY * 0.35
       targetFrameRef.current = Math.max(1, Math.min(TOTAL_FRAMES, targetFrameRef.current + delta))
     }
 
+    // 2. Mouse Movement across screen (Horizontal Cursor Move scrubbing)
+    const handleMouseMove = (e) => {
+      setIsPlaying(false)
+      if (lastMouseXRef.current !== null) {
+        const deltaX = e.clientX - lastMouseXRef.current
+        // Moving mouse right moves forward, moving left moves backward
+        targetFrameRef.current = Math.max(1, Math.min(TOTAL_FRAMES, targetFrameRef.current + deltaX * 1.8))
+      }
+      lastMouseXRef.current = e.clientX
+    }
+
+    const handleMouseLeave = () => {
+      lastMouseXRef.current = null
+    }
+
+    // 3. Keyboard controls
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
         if (onClose) onClose()
       } else if (e.key === "ArrowRight") {
-        targetFrameRef.current = Math.min(TOTAL_FRAMES, targetFrameRef.current + 6)
+        targetFrameRef.current = Math.min(TOTAL_FRAMES, targetFrameRef.current + 8)
       } else if (e.key === "ArrowLeft") {
-        targetFrameRef.current = Math.max(1, targetFrameRef.current - 6)
+        targetFrameRef.current = Math.max(1, targetFrameRef.current - 8)
       } else if (e.key === " ") {
         setIsPlaying((p) => !p)
       }
     }
 
     window.addEventListener("wheel", handleWheel, { passive: false })
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mouseleave", handleMouseLeave)
     window.addEventListener("keydown", handleKeyDown)
+
     return () => {
       window.removeEventListener("wheel", handleWheel)
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("mouseleave", handleMouseLeave)
       window.removeEventListener("keydown", handleKeyDown)
     }
   }, [isOpen, onClose])
-
-  // Drag scrubber for touch / mouse drag
-  const handleMouseDown = (e) => {
-    isDraggingRef.current = true
-    lastMouseYRef.current = e.clientY
-  }
-
-  const handleMouseMove = (e) => {
-    if (!isDraggingRef.current) return
-    setIsPlaying(false)
-    const delta = (lastMouseYRef.current - e.clientY) * 1.5
-    lastMouseYRef.current = e.clientY
-    targetFrameRef.current = Math.max(1, Math.min(TOTAL_FRAMES, targetFrameRef.current + delta))
-  }
-
-  const handleMouseUp = () => {
-    isDraggingRef.current = false
-  }
 
   if (!isOpen) return null
 
@@ -183,9 +194,6 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
 
   return (
     <div
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
       style={{
         position: "fixed",
         inset: 0,
@@ -194,8 +202,9 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        cursor: "grab",
-        userSelect: "none"
+        cursor: "ew-resize",
+        userSelect: "none",
+        overflow: "hidden"
       }}
     >
       {/* Background Frame Render Canvas */}
@@ -210,6 +219,19 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
         }}
       />
 
+      {/* Screen Mottam White Flashout ("screen mottam white aipoyi") */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "#ffffff",
+          pointerEvents: "none",
+          zIndex: 100,
+          opacity: whiteFlash ? 1 : 0,
+          transition: "opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1)"
+        }}
+      />
+
       {/* Top HUD Header */}
       <div
         style={{
@@ -218,27 +240,27 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "16px 24px",
+          padding: "16px 28px",
           background: "linear-gradient(to bottom, rgba(0,0,0,0.85), transparent)",
           backdropFilter: "blur(8px)"
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div
             style={{
-              width: 10,
-              height: 10,
+              width: 12,
+              height: 12,
               borderRadius: "50%",
               background: "#ffffff",
-              boxShadow: "0 0 14px #ffffff, 0 0 28px #00ffff"
+              boxShadow: "0 0 16px #ffffff, 0 0 32px #00ffff"
             }}
           />
           <div>
             <div style={{ color: "#ffffff", fontWeight: 800, fontSize: 13, letterSpacing: "0.08em" }}>
-              ⚪ PRIMORDIAL SINGULARITY PORTAL
+              ⚪ BEYOND COSMIC SPHERE: SINGULARITY PORTAL
             </div>
-            <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 10 }}>
-              Ultra-Smooth Scroll Frame Sequence (Apple Scrubber Engine)
+            <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 10 }}>
+              Move Mouse Left/Right or Scroll Wheel to Scrub Video Frames
             </div>
           </div>
         </div>
@@ -248,7 +270,7 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
             style={{
               background: "rgba(255,255,255,0.08)",
               border: "1px solid rgba(255,255,255,0.15)",
-              padding: "4px 10px",
+              padding: "5px 12px",
               borderRadius: 6,
               color: "#00ffff",
               fontSize: 11,
@@ -262,7 +284,7 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
           <button
             onClick={() => setIsPlaying((p) => !p)}
             style={{
-              background: isPlaying ? "rgba(0, 255, 200, 0.2)" : "rgba(255,255,255,0.1)",
+              background: isPlaying ? "rgba(0, 255, 200, 0.25)" : "rgba(255,255,255,0.1)",
               border: `1px solid ${isPlaying ? "#00ffc8" : "rgba(255,255,255,0.2)"}`,
               color: isPlaying ? "#00ffc8" : "#ffffff",
               padding: "6px 14px",
@@ -279,9 +301,9 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
           <button
             onClick={onClose}
             style={{
-              background: "rgba(255, 68, 68, 0.2)",
-              border: "1px solid rgba(255, 68, 68, 0.5)",
-              color: "#ff6666",
+              background: "rgba(255, 68, 68, 0.25)",
+              border: "1px solid rgba(255, 68, 68, 0.6)",
+              color: "#ff8888",
               padding: "6px 14px",
               borderRadius: 8,
               fontSize: 11,
@@ -290,21 +312,21 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
               transition: "all 0.2s ease"
             }}
           >
-            ✕ Exit to Cosmos (Esc)
+            ✕ Return to Cosmos (Esc)
           </button>
         </div>
       </div>
 
-      {/* Bottom HUD Controls & Scrubber */}
+      {/* Bottom HUD Controls & Interactive Scrubber */}
       <div
         style={{
           position: "relative",
           zIndex: 10,
-          padding: "20px 30px",
-          background: "linear-gradient(to top, rgba(0,0,0,0.9), transparent)",
+          padding: "20px 32px",
+          background: "linear-gradient(to top, rgba(0,0,0,0.92), transparent)",
           display: "flex",
           flexDirection: "column",
-          gap: 10
+          gap: 12
         }}
       >
         {/* Interactive Progress Bar */}
@@ -317,9 +339,9 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
           }}
           style={{
             width: "100%",
-            height: 8,
-            background: "rgba(255,255,255,0.12)",
-            borderRadius: 4,
+            height: 9,
+            background: "rgba(255,255,255,0.14)",
+            borderRadius: 5,
             cursor: "pointer",
             position: "relative",
             overflow: "hidden"
@@ -330,20 +352,20 @@ export default function ScrollVideoPortal({ isOpen, onClose }) {
               width: `${progressPercent}%`,
               height: "100%",
               background: "linear-gradient(90deg, #00d8ff, #ff00ea, #ffffff)",
-              boxShadow: "0 0 12px #00d8ff"
+              boxShadow: "0 0 14px #00d8ff"
             }}
           />
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, display: "flex", alignItems: "center", gap: 8 }}>
-            <span>🖱️ <b>Scroll Mouse Wheel</b> (Forward/Backward) or <b>Drag</b> to scrub smoothly</span>
+          <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, display: "flex", alignItems: "center", gap: 10 }}>
+            <span>🖱️ <b>Move Mouse Left/Right</b> OR <b>Scroll Wheel</b> to scrub frames</span>
             <span style={{ color: "rgba(255,255,255,0.3)" }}>|</span>
-            <span>⌨️ <b>Arrow Keys</b>: Step | <b>Space</b>: Play/Pause</span>
+            <span>⌨️ <b>Space</b>: Auto-Play | <b>Esc</b>: Back to Cosmos</span>
           </div>
 
           <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 10 }}>
-            Cache: {loadProgress}% loaded ({imagesRef.current.size} / {TOTAL_FRAMES} frames)
+            Preloaded: {loadProgress}% ({imagesRef.current.size} / {TOTAL_FRAMES} frames)
           </div>
         </div>
       </div>

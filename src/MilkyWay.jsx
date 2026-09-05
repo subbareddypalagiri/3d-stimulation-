@@ -156,10 +156,11 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
       interiorMaterialRef.current.uniforms.uTime.value = time
       
       let interiorOpacity = 0
-      if (dist > 800 && dist < 35000) {
-        interiorOpacity = Math.min((dist - 800) / 2500, 1.0)
-      } else if (dist >= 35000 && dist < 50000) {
-        interiorOpacity = Math.max(1.0 - (dist - 35000) / 15000, 0.0)
+      // Solar system and 24 star systems have deep, expansive interstellar breathing room
+      if (dist > 6000 && dist < 55000) {
+        interiorOpacity = Math.min((dist - 6000) / 25000, 1.0)
+      } else if (dist >= 55000 && dist < 85000) {
+        interiorOpacity = Math.max(1.0 - (dist - 55000) / 30000, 0.0)
       }
       
       interiorMaterialRef.current.uniforms.uOpacity.value = interiorOpacity
@@ -171,17 +172,17 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
       exteriorMaterialRef.current.uniforms.uTime.value = time
       
       let exteriorOpacity = 0
-      // Fades in smoothly as you leave the 25 stars stellar cluster (dist 35K to 65K)
-      if (dist > 35000 && dist <= 65000) {
-        exteriorOpacity = (dist - 35000) / 30000
+      // Fades in smoothly as you leave the 25 stars stellar cluster (dist 55K to 95K)
+      if (dist > 55000 && dist <= 95000) {
+        exteriorOpacity = (dist - 55000) / 40000
       } 
       // Fully visible grand Milky Way galaxy
-      else if (dist > 65000 && dist <= 220000) {
+      else if (dist > 95000 && dist <= 380000) {
         exteriorOpacity = 1.0
       }
       // Smoothly blends into the 1,000 galaxies cluster (ZERO dead gaps!)
-      else if (dist > 220000 && dist < 360000) {
-        exteriorOpacity = 1.0 - ((dist - 220000) / 140000)
+      else if (dist > 380000 && dist < 650000) {
+        exteriorOpacity = 1.0 - ((dist - 380000) / 270000)
       }
       
       exteriorMaterialRef.current.uniforms.uOpacity.value = Math.max(0, exteriorOpacity)
@@ -193,7 +194,7 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
     <group position={position}>
       {/* THE INTERIOR (SKYBOX) */}
       <mesh ref={interiorRef}>
-        <sphereGeometry args={[45000, 64, 64]} />
+        <sphereGeometry args={[75000, 64, 64]} />
         <shaderMaterial 
           ref={interiorMaterialRef}
           vertexShader={livingVertexShader}
@@ -209,7 +210,7 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
       
       {/* THE EXTERIOR (GRAND SPIRAL GALAXY DISC) */}
       <mesh ref={exteriorRef}>
-        <planeGeometry args={[260000, 130000]} />
+        <planeGeometry args={[450000, 225000]} />
         <shaderMaterial 
           ref={exteriorMaterialRef}
           vertexShader={livingVertexShader}

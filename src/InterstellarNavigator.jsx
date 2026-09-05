@@ -70,13 +70,17 @@ export default function InterstellarNavigator({ cameraControlRef, flyTo }) {
     const camDist = camera.position.length()
     let baseSpeed = 90 // Cruising speed in stellar neighborhood
     if (camDist > 10000 && camDist <= 60000) {
-      baseSpeed = 750
-    } else if (camDist > 60000 && camDist <= 300000) {
-      baseSpeed = 4500
-    } else if (camDist > 300000 && camDist <= 2000000) {
-      baseSpeed = 40000
-    } else if (camDist > 2000000) {
-      baseSpeed = 300000
+      baseSpeed = 1000
+    } else if (camDist > 60000 && camDist <= 450000) {
+      baseSpeed = 8000
+    } else if (camDist > 450000 && camDist <= 2500000) {
+      baseSpeed = 70000
+    } else if (camDist > 2500000 && camDist <= 50000000) {
+      baseSpeed = 1500000
+    } else if (camDist > 50000000 && camDist <= 250000000) {
+      baseSpeed = 20000000
+    } else if (camDist > 250000000) {
+      baseSpeed = Math.max(100000000, camDist * 0.35)
     }
 
     const currentSpeed = shift ? baseSpeed * 3.8 : baseSpeed

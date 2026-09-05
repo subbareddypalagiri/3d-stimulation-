@@ -18,54 +18,64 @@ import CosmicSingularityDot from "./CosmicSingularityDot"
 import ScrollVideoPortal from "./ScrollVideoPortal"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
-function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
+function CosmicLevelTracker({ onLevelUpdate, onCrossCosmicSphereExit, activeCenter = [0, 0, 0] }) {
   const centerVec = useRef(new THREE.Vector3())
   const lastUpdate = useRef(0)
   const lastProgress = useRef(1)
+  const hasTriggeredExit = useRef(false)
 
   useFrame(({ camera, clock }) => {
     const now = clock.elapsedTime
     centerVec.current.set(...activeCenter)
     const dist = camera.position.distanceTo(centerVec.current)
 
+    // Automatically detect crossing outside the cosmic sphere ("cosmic sphere bayatiki ragane screen mottam white aipoyi")
+    if (dist > 1300000000 && !hasTriggeredExit.current) {
+      hasTriggeredExit.current = true
+      if (onCrossCosmicSphereExit) onCrossCosmicSphereExit()
+    } else if (dist < 1050000000 && hasTriggeredExit.current) {
+      hasTriggeredExit.current = false
+    }
+
     let level = "LEVEL 1: STELLAR NEIGHBORHOOD"
     let desc = "Sol & 24 Neighboring Star Systems"
     let color = "#ffaa33"
     let progress = 1
 
-    if (dist > 40000 && dist <= 250000) {
+    // Expansive interstellar distance before reaching Milky Way
+    if (dist > 80000 && dist <= 450000) {
       level = "LEVEL 2: THE MILKY WAY GALAXY"
       desc = "Spiral Arms & Galactic Core"
       color = "#00d8ff"
       progress = 2
-    } else if (dist > 250000 && dist <= 1800000) {
+    } else if (dist > 450000 && dist <= 2500000) {
       level = "LEVEL 3: VIRGO SUPERCLUSTER"
       desc = "1,000 Distant Galaxies"
       color = "#aa66ff"
       progress = 3
-    } else if (dist > 1800000 && dist <= 8000000) {
+    } else if (dist > 2500000 && dist <= 12000000) {
       level = "LEVEL 4: THE GREAT COSMIC WEB"
       desc = "Dark Matter Filaments & Observable Universe"
       color = "#33ddaa"
       progress = 4
-    } else if (dist > 8000000 && dist <= 45000000) {
+    } else if (dist > 12000000 && dist <= 60000000) {
       level = "LEVEL 5: THE NASA MULTIVERSE"
       desc = "100 Eternal Inflation Bubble Universes"
       color = "#ff44aa"
       progress = 5
-    } else if (dist > 45000000 && dist <= 180000000) {
+    } else if (dist > 60000000 && dist <= 220000000) {
       level = "LEVEL 6: THE OMNIVERSE BULK"
       desc = "20 Bold Inflaton Mega-Domains (Each with Unique Colors)"
       color = "#ffd700"
       progress = 6
-    } else if (dist > 180000000 && dist <= 22000000000) {
-      level = "LEVEL 7: 10 COSMIC REALMS"
-      desc = "Pantheon of Celestial Sky Panorama Spheres"
+    } else if (dist > 220000000 && dist <= 1300000000) {
+      level = "LEVEL 7: COSMIC REALMS SPHERE"
+      desc = "Milky Way Sky Panorama enclosing the Omniverse"
       color = "#00ffff"
       progress = 7
-    } else if (dist > 22000000000) {
-      level = "LEVEL 8: THE PRIMORDIAL SINGULARITY"
-      desc = "Mysterious White Singularity Dot in the Void (Click to Open Video)"
+    } else if (dist > 1300000000) {
+      level = "LEVEL 8: WHITE TRANSCENDENCE"
+      desc = "Cosmic White Flash into Interactive Video Frames"
       color = "#ffffff"
       progress = 8
     }
@@ -118,7 +128,11 @@ function App() {
         <ambientLight intensity={0.08} />
 
         {/* Live cosmological telemetry tracker */}
-        <CosmicLevelTracker onLevelUpdate={setTelemetry} activeCenter={galaxyCenter} />
+        <CosmicLevelTracker 
+          onLevelUpdate={setTelemetry} 
+          onCrossCosmicSphereExit={() => setIsPortalOpen(true)}
+          activeCenter={galaxyCenter} 
+        />
 
         <Suspense fallback={null}>
           <UniverseManager 
@@ -418,7 +432,12 @@ function App() {
       {/* Interactive Apple-Grade Scroll Video Frame Scrubber Portal */}
       <ScrollVideoPortal 
         isOpen={isPortalOpen} 
-        onClose={() => setIsPortalOpen(false)} 
+        onClose={() => {
+          setIsPortalOpen(false)
+          if (cameraControlRef.current) {
+            cameraControlRef.current.setLookAt(0, 300000000, 950000000, 0, 0, 0, true)
+          }
+        }} 
       />
     </div>
   )
