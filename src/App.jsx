@@ -152,7 +152,7 @@ function App() {
           <MultiverseFinalSkyPano activeCenter={galaxyCenter} flyTo={flyTo} />
 
           {/* Level 8: The Mysterious Pulsating White Singularity Dot */}
-          <CosmicSingularityDot onActivatePortal={() => setIsPortalOpen(true)} flyTo={flyTo} />
+          <CosmicSingularityDot flyTo={flyTo} />
         </Suspense>
 
         {/* Deep cosmic starfield */}

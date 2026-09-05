@@ -62,27 +62,15 @@ export default function CosmicSingularityDot({ onActivatePortal, flyTo }) {
   const dotSize = 250000000 // 250 Million AU radiant beacon
 
   return (
-    <group ref={groupRef} position={[0, 0, 0]}>
+    <group ref={groupRef} position={[0, 0, 0]} raycast={() => null}>
       {/* Central Blinding White Core */}
-      <mesh
-        onClick={(e) => {
-          e.stopPropagation()
-          if (onActivatePortal) onActivatePortal()
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation()
-          document.body.style.cursor = "pointer"
-        }}
-        onPointerOut={(e) => {
-          document.body.style.cursor = "auto"
-        }}
-      >
+      <mesh raycast={() => null}>
         <sphereGeometry args={[dotSize * 0.4, 32, 16]} />
         <meshBasicMaterial color="#ffffff" />
       </mesh>
 
       {/* Billboarding Pulsating Radiant Corona */}
-      <mesh scale={[dotSize * 3.5, dotSize * 3.5, 1]}>
+      <mesh scale={[dotSize * 3.5, dotSize * 3.5, 1]} raycast={() => null}>
         <planeGeometry args={[1, 1]} />
         <shaderMaterial
           ref={coronaMatRef}
