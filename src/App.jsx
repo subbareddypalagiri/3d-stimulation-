@@ -98,7 +98,8 @@ function App() {
   const cameraControlRef = useRef()
   const [galaxyCenter, setGalaxyCenter] = useState([0, 0, 0])
   const [isPortalOpen, setIsPortalOpen] = useState(false)
-  const [showMonument, setShowMonument] = useState(false)
+  const [showMonument, setShowMonument] = useState(true)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const exitCooldownRef = useRef(0)
   const [telemetry, setTelemetry] = useState({
     level: "LEVEL 1: STELLAR NEIGHBORHOOD",
@@ -243,227 +244,320 @@ function App() {
         </div>
       </div>
 
-      {/* Top Right: Free Flight Controls Guide & 4 Singularity Warps */}
-      <div style={{
-        position: "absolute",
-        top: 20,
-        right: 20,
-        color: "#aabbcc",
-        fontFamily: "system-ui, -apple-system, sans-serif",
-        background: "rgba(5, 10, 25, 0.75)",
-        padding: "12px 18px",
-        borderRadius: 12,
-        backdropFilter: "blur(16px)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        fontSize: 11,
-        lineHeight: 1.5,
-        boxShadow: "0 8px 32px rgba(0,0,0,0.6)"
-      }}>
-        <b style={{ color: "#ffffff" }}>🎮 Interstellar Flight Controls:</b><br />
-        • <b>Scroll Wheel:</b> Continuous zoom & fly past systems<br />
-        • <b>W / S / A / D or Arrows:</b> Cruise through interstellar gaps<br />
-        • <b>Shift + W:</b> Light-speed interstellar warp boost<br />
-        • <b>Left Drag:</b> 360° Look | <b>Click Star:</b> Fly to system<br />
-        <div style={{ display: "flex", gap: 6, marginTop: 8, marginBottom: 8 }}>
-          <button
-            onClick={() => flyTo([0, 20, 45], 25)}
-            style={{
-              background: "rgba(0, 216, 255, 0.18)",
-              border: "1px solid rgba(0, 216, 255, 0.6)",
-              color: "#00d8ff",
-              padding: "4px 8px",
-              borderRadius: 6,
-              fontSize: 10,
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "all 0.2s ease"
-            }}
-          >
-            🛸 Return to Sol (R)
-          </button>
-          <button
-            onClick={() => {
-              const next = !showMonument
-              setShowMonument(next)
-              if (next && cameraControlRef.current) {
-                cameraControlRef.current.setLookAt(0, 24, 30, 0, 22, 0, true)
-              }
-            }}
-            style={{
-              background: showMonument
-                ? "linear-gradient(135deg, rgba(94, 234, 212, 0.4), rgba(139, 92, 246, 0.4))"
-                : "rgba(255, 255, 255, 0.08)",
-              border: `1px solid ${showMonument ? "#5eead4" : "rgba(255, 255, 255, 0.25)"}`,
-              color: showMonument ? "#5eead4" : "#ffffff",
-              padding: "4px 8px",
-              borderRadius: 6,
-              fontSize: 10,
-              fontWeight: 700,
-              cursor: "pointer",
-              boxShadow: showMonument ? "0 0 10px rgba(94, 234, 212, 0.4)" : "none",
-              transition: "all 0.2s ease"
-            }}
-            title="Click to toggle Subbareddy Palagiri Monument"
-          >
-            👑 {showMonument ? "Hide Monument" : "Monument"}
-          </button>
-          <button
-            onClick={() => flyTo([0, 25000, 140000], 140000)}
-            style={{
-              background: "rgba(170, 102, 255, 0.18)",
-              border: "1px solid rgba(170, 102, 255, 0.6)",
-              color: "#aa66ff",
-              padding: "4px 8px",
-              borderRadius: 6,
-              fontSize: 10,
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "all 0.2s ease"
-            }}
-          >
-            🌌 Galaxy View
-          </button>
-          <button
-            onClick={() => flyTo([0, 35000000, 95000000], 95000000)}
-            style={{
-              background: "rgba(255, 68, 170, 0.18)",
-              border: "1px solid rgba(255, 68, 170, 0.6)",
-              color: "#ff44aa",
-              padding: "4px 8px",
-              borderRadius: 6,
-              fontSize: 10,
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "all 0.2s ease"
-            }}
-          >
-            🫧 Multiverse
-          </button>
-          <button
-            onClick={() => {
-              if (cameraControlRef.current) {
-                cameraControlRef.current.setLookAt(0, 9500000000, 26000000000, 0, 0, 0, true)
-              }
-            }}
-            style={{
-              background: "rgba(0, 255, 255, 0.18)",
-              border: "1px solid rgba(0, 255, 255, 0.6)",
-              color: "#00ffff",
-              padding: "4px 8px",
-              borderRadius: 6,
-              fontSize: 10,
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "all 0.2s ease"
-            }}
-          >
-            🌌 10 Cosmic Spheres
-          </button>
-          <button
-            onClick={() => {
-              if (cameraControlRef.current) {
-                cameraControlRef.current.setLookAt(0, 11000000000, 32000000000, 0, 0, 0, true)
-              }
-            }}
-            style={{
-              background: "rgba(255, 255, 255, 0.2)",
-              border: "1px solid rgba(255, 255, 255, 0.8)",
-              color: "#ffffff",
-              padding: "4px 8px",
-              borderRadius: 6,
-              fontSize: 10,
-              fontWeight: 800,
-              cursor: "pointer",
-              boxShadow: "0 0 10px rgba(255,255,255,0.4)"
-            }}
-          >
-            ⚪ Singularity Dot
-          </button>
-          <button
-            onClick={() => setIsPortalOpen(true)}
-            style={{
-              background: "linear-gradient(90deg, rgba(0, 216, 255, 0.3), rgba(255, 0, 234, 0.3))",
-              border: "1px solid #00d8ff",
-              color: "#00ffff",
-              padding: "4px 8px",
-              borderRadius: 6,
-              fontSize: 10,
-              fontWeight: 800,
-              cursor: "pointer",
-              boxShadow: "0 0 10px rgba(0, 216, 255, 0.4)"
-            }}
-          >
-            🎬 Video Portal
-          </button>
-        </div>
-        <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-          <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC BLACK HOLES:</b>
-          <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
-            {BLACK_HOLE_DATA.map((bh) => (
-              <button
-                key={bh.id}
-                onClick={() => flyTo(bh.pos, 40 * bh.scale)}
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: `1px solid ${bh.color}55`,
-                  color: bh.color,
-                  padding: "4px 6px",
-                  borderRadius: 6,
-                  fontSize: 9,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  transition: "all 0.2s ease"
-                }}
-                title={`${bh.name} (${bh.level})`}
-              >
-                🕳️ {bh.name}
-              </button>
-            ))}
+      {/* Top Right: Compact Toggle Button for Flight Controls & Warps HUD */}
+      {!isMenuOpen ? (
+        <button
+          onClick={() => setIsMenuOpen(true)}
+          style={{
+            position: "absolute",
+            top: 20,
+            right: 20,
+            background: "rgba(5, 10, 25, 0.82)",
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(0, 216, 255, 0.5)",
+            color: "#00e5ff",
+            padding: "8px 16px",
+            borderRadius: 24,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.03em",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            boxShadow: "0 4px 20px rgba(0, 216, 255, 0.25)",
+            transition: "all 0.25s ease",
+            zIndex: 100
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(0, 216, 255, 0.2)"
+            e.currentTarget.style.boxShadow = "0 0 25px rgba(0, 216, 255, 0.5)"
+            e.currentTarget.style.transform = "scale(1.04)"
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(5, 10, 25, 0.82)"
+            e.currentTarget.style.boxShadow = "0 4px 20px rgba(0, 216, 255, 0.25)"
+            e.currentTarget.style.transform = "scale(1)"
+          }}
+          title="Open Flight Controls & Cosmic Warps"
+        >
+          <span style={{ fontSize: 14 }}>🛸</span>
+          <span>Controls & Warps ▾</span>
+        </button>
+      ) : (
+        <div style={{
+          position: "absolute",
+          top: 20,
+          right: 20,
+          width: 380,
+          maxHeight: "88vh",
+          overflowY: "auto",
+          color: "#aabbcc",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          background: "rgba(5, 10, 25, 0.9)",
+          padding: "14px 18px",
+          borderRadius: 16,
+          backdropFilter: "blur(20px)",
+          border: "1px solid rgba(0, 216, 255, 0.35)",
+          fontSize: 11,
+          lineHeight: 1.5,
+          boxShadow: "0 12px 40px rgba(0,0,0,0.8), 0 0 25px rgba(0, 216, 255, 0.15)",
+          zIndex: 100
+        }}>
+          {/* Header with Close / Minimize Button */}
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 10,
+            paddingBottom: 8,
+            borderBottom: "1px solid rgba(255,255,255,0.12)"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 16 }}>🛸</span>
+              <b style={{ color: "#ffffff", fontSize: 12, letterSpacing: "0.02em" }}>Flight Controls & Warps</b>
+            </div>
+            <button
+              onClick={() => setIsMenuOpen(false)}
+              style={{
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                color: "#e2e8f0",
+                padding: "3px 10px",
+                borderRadius: 12,
+                fontSize: 10,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255, 75, 75, 0.3)"
+                e.currentTarget.style.borderColor = "rgba(255, 75, 75, 0.6)"
+                e.currentTarget.style.color = "#ffffff"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)"
+                e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.2)"
+                e.currentTarget.style.color = "#e2e8f0"
+              }}
+              title="Close menu"
+            >
+              ✕ Close
+            </button>
+          </div>
+
+          <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 8, lineHeight: 1.4 }}>
+            • <b>Scroll:</b> Continuous zoom & fly past systems<br />
+            • <b>W/S/A/D:</b> Cruise void gaps | <b>Shift:</b> Warp boost<br />
+            • <b>Drag:</b> 360° Look | <b>Click Star:</b> Fly to system
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
+            <button
+              onClick={() => flyTo([0, 20, 45], 25)}
+              style={{
+                background: "rgba(0, 216, 255, 0.18)",
+                border: "1px solid rgba(0, 216, 255, 0.6)",
+                color: "#00d8ff",
+                padding: "5px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 700,
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+            >
+              🛸 Return to Sol (R)
+            </button>
+            <button
+              onClick={() => {
+                const next = !showMonument
+                setShowMonument(next)
+                if (next && cameraControlRef.current) {
+                  cameraControlRef.current.setLookAt(0, 24, 30, 0, 22, 0, true)
+                }
+              }}
+              style={{
+                background: showMonument
+                  ? "linear-gradient(135deg, rgba(94, 234, 212, 0.4), rgba(139, 92, 246, 0.4))"
+                  : "rgba(255, 255, 255, 0.08)",
+                border: `1px solid ${showMonument ? "#5eead4" : "rgba(255, 255, 255, 0.25)"}`,
+                color: showMonument ? "#5eead4" : "#ffffff",
+                padding: "5px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 700,
+                cursor: "pointer",
+                boxShadow: showMonument ? "0 0 10px rgba(94, 234, 212, 0.4)" : "none",
+                transition: "all 0.2s ease"
+              }}
+              title="Click to toggle Subbareddy Palagiri Monument"
+            >
+              👑 {showMonument ? "Hide Monument" : "Show Monument"}
+            </button>
+            <button
+              onClick={() => flyTo([0, 25000, 140000], 140000)}
+              style={{
+                background: "rgba(170, 102, 255, 0.18)",
+                border: "1px solid rgba(170, 102, 255, 0.6)",
+                color: "#aa66ff",
+                padding: "5px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 700,
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+            >
+              🌌 Galaxy View
+            </button>
+            <button
+              onClick={() => flyTo([0, 35000000, 95000000], 95000000)}
+              style={{
+                background: "rgba(255, 68, 170, 0.18)",
+                border: "1px solid rgba(255, 68, 170, 0.6)",
+                color: "#ff44aa",
+                padding: "5px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 700,
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+            >
+              🫧 Multiverse
+            </button>
+            <button
+              onClick={() => {
+                if (cameraControlRef.current) {
+                  cameraControlRef.current.setLookAt(0, 9500000000, 26000000000, 0, 0, 0, true)
+                }
+              }}
+              style={{
+                background: "rgba(0, 255, 255, 0.18)",
+                border: "1px solid rgba(0, 255, 255, 0.6)",
+                color: "#00ffff",
+                padding: "5px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 700,
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+            >
+              🌌 10 Spheres
+            </button>
+            <button
+              onClick={() => {
+                if (cameraControlRef.current) {
+                  cameraControlRef.current.setLookAt(0, 11000000000, 32000000000, 0, 0, 0, true)
+                }
+              }}
+              style={{
+                background: "rgba(255, 255, 255, 0.2)",
+                border: "1px solid rgba(255, 255, 255, 0.8)",
+                color: "#ffffff",
+                padding: "5px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 800,
+                cursor: "pointer",
+                boxShadow: "0 0 10px rgba(255,255,255,0.4)"
+              }}
+            >
+              ⚪ Singularity Dot
+            </button>
+            <button
+              onClick={() => setIsPortalOpen(true)}
+              style={{
+                gridColumn: "1 / -1",
+                background: "linear-gradient(90deg, rgba(0, 216, 255, 0.3), rgba(255, 0, 234, 0.3))",
+                border: "1px solid #00d8ff",
+                color: "#00ffff",
+                padding: "6px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 800,
+                cursor: "pointer",
+                boxShadow: "0 0 10px rgba(0, 216, 255, 0.4)"
+              }}
+            >
+              🎬 Video Portal
+            </button>
+          </div>
+
+          {/* Black Holes Warp List */}
+          <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+            <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC BLACK HOLES:</b>
+            <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
+              {BLACK_HOLE_DATA.map((bh) => (
+                <button
+                  key={bh.id}
+                  onClick={() => flyTo(bh.pos, 40 * bh.scale)}
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: `1px solid ${bh.color}55`,
+                    color: bh.color,
+                    padding: "4px 6px",
+                    borderRadius: 6,
+                    fontSize: 9,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    transition: "all 0.2s ease"
+                  }}
+                  title={`${bh.name} (${bh.level})`}
+                >
+                  🕳️ {bh.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Realms Warp List */}
+          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+            <b style={{ color: "#ff44cc", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC REALMS (GLB SPHERES):</b>
+            <div style={{ marginTop: 5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
+              {TEN_COSMIC_SPHERES.map((realm) => (
+                <button
+                  key={realm.id}
+                  onClick={() => {
+                    if (cameraControlRef.current) {
+                      const r = 1100000000 * realm.scale
+                      cameraControlRef.current.setLookAt(
+                        realm.pos[0], realm.pos[1] + r * 1.5, realm.pos[2] + r * 2.8,
+                        realm.pos[0], realm.pos[1], realm.pos[2],
+                        true
+                      )
+                    }
+                  }}
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: `1px solid ${realm.c1}77`,
+                    color: realm.c1,
+                    padding: "4px 6px",
+                    borderRadius: 6,
+                    fontSize: 9,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    transition: "all 0.2s ease"
+                  }}
+                  title={realm.name}
+                >
+                  🔮 {realm.name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-        <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-          <b style={{ color: "#ff44cc", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC REALMS (GLB SPHERES):</b>
-          <div style={{ marginTop: 5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
-            {TEN_COSMIC_SPHERES.map((realm) => (
-              <button
-                key={realm.id}
-                onClick={() => {
-                  if (cameraControlRef.current) {
-                    const r = 1100000000 * realm.scale
-                    cameraControlRef.current.setLookAt(
-                      realm.pos[0], realm.pos[1] + r * 1.5, realm.pos[2] + r * 2.8,
-                      realm.pos[0], realm.pos[1], realm.pos[2],
-                      true
-                    )
-                  }
-                }}
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: `1px solid ${realm.c1}77`,
-                  color: realm.c1,
-                  padding: "4px 6px",
-                  borderRadius: 6,
-                  fontSize: 9,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  transition: "all 0.2s ease"
-                }}
-                title={realm.name}
-              >
-                🔮 {realm.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Interactive Apple-Grade Scroll Video Frame Scrubber Portal */}
       <ScrollVideoPortal 
@@ -477,48 +571,6 @@ function App() {
           }
         }} 
       />
-
-      {/* Floating Status Badge when Monument is Opened */}
-      {showMonument && (
-        <div
-          style={{
-            position: "fixed",
-            top: 24,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 1000,
-            background: "rgba(10, 15, 30, 0.88)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(94, 234, 212, 0.6)",
-            borderRadius: 24,
-            padding: "6px 18px",
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-            boxShadow: "0 0 24px rgba(94, 234, 212, 0.3)"
-          }}
-        >
-          <span style={{ color: "#5eead4", fontSize: 11, fontWeight: 800, letterSpacing: "0.08em" }}>
-            👑 SUBBAREDDY PALAGIRI MONUMENT
-          </span>
-          <button
-            onClick={() => setShowMonument(false)}
-            style={{
-              background: "rgba(255, 68, 68, 0.25)",
-              border: "1px solid rgba(255, 68, 68, 0.6)",
-              color: "#ff8888",
-              padding: "3px 10px",
-              borderRadius: 12,
-              fontSize: 10,
-              cursor: "pointer",
-              fontWeight: 700,
-              transition: "all 0.2s ease"
-            }}
-          >
-            ✕ Hide
-          </button>
-        </div>
-      )}
     </div>
   )
 }
