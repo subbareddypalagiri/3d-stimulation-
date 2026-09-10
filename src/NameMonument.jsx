@@ -18,8 +18,7 @@ const FONT_5x7 = {
   " ": ["00000", "00000", "00000", "00000", "00000", "00000", "00000"]
 }
 
-// Builds refined, compact 3D voxel word meshes
-function WordVoxels({ word, cellSize = 0.22, colorA, colorB, yOffset = 0 }) {
+function WordVoxels({ word, cellSize = 0.15, colorA, colorB, yOffset = 0 }) {
   const voxelGeo = useMemo(
     () => new THREE.BoxGeometry(cellSize * 0.88, cellSize * 0.88, cellSize * 0.6),
     [cellSize]
@@ -40,9 +39,9 @@ function WordVoxels({ word, cellSize = 0.22, colorA, colorB, yOffset = 0 }) {
       const mat = new THREE.MeshStandardMaterial({
         color,
         emissive: color,
-        emissiveIntensity: 0.85,
-        roughness: 0.25,
-        metalness: 0.3
+        emissiveIntensity: 0.9,
+        roughness: 0.22,
+        metalness: 0.35
       })
 
       for (let r = 0; r < rows; r++) {
@@ -79,45 +78,41 @@ function WordVoxels({ word, cellSize = 0.22, colorA, colorB, yOffset = 0 }) {
   )
 }
 
-export default function NameMonument({ position = [0, 26, 0] }) {
+export default function NameMonument({ position = [0, 22, 0], visible = false }) {
   const groupRef = useRef()
 
-  useFrame(({ clock, camera }) => {
-    if (!groupRef.current) return
+  useFrame(({ clock }) => {
+    if (!groupRef.current || !visible) return
     const t = clock.elapsedTime
-
-    // Delicate subtle floating and slow rotation
-    groupRef.current.position.y = position[1] + Math.sin(t * 0.4) * 0.4
-    groupRef.current.rotation.y = Math.sin(t * 0.2) * 0.2
-
-    // Proximity LOD: Visible strictly in the Solar System view (dist < 650 AU)
-    const dist = camera.position.length()
-    groupRef.current.visible = dist < 650
+    groupRef.current.position.y = position[1] + Math.sin(t * 0.4) * 0.3
+    groupRef.current.rotation.y = Math.sin(t * 0.2) * 0.18
   })
+
+  if (!visible) return null
 
   return (
     <group ref={groupRef} position={position}>
-      {/* Subtle, localized accent lights so it never bleeds or dominates scene */}
-      <pointLight color="#8b5cf6" intensity={0.8} distance={16} position={[5, 4, 6]} />
-      <pointLight color="#5eead4" intensity={0.6} distance={16} position={[-5, -2, 5]} />
-      <pointLight color="#f5c542" intensity={0.5} distance={12} position={[0, -4, -3]} />
+      {/* Subtle localized lights */}
+      <pointLight color="#8b5cf6" intensity={0.5} distance={12} position={[4, 3, 5]} />
+      <pointLight color="#5eead4" intensity={0.4} distance={12} position={[-4, -2, 4]} />
+      <pointLight color="#f5c542" intensity={0.3} distance={10} position={[0, -3, -2]} />
 
-      {/* LINE 1: SUBBAREDDY (Refined, slim 13 AU wide signature) */}
+      {/* LINE 1: SUBBAREDDY (Ultra-sleek ~8.8 AU wide) */}
       <WordVoxels
         word="SUBBAREDDY"
-        cellSize={0.22}
+        cellSize={0.15}
         colorA={0x5eead4}
         colorB={0x8b5cf6}
-        yOffset={1.15}
+        yOffset={0.8}
       />
 
       {/* LINE 2: PALAGIRI */}
       <WordVoxels
         word="PALAGIRI"
-        cellSize={0.22}
+        cellSize={0.15}
         colorA={0xf5c542}
         colorB={0xff5470}
-        yOffset={-1.15}
+        yOffset={-0.8}
       />
     </group>
   )

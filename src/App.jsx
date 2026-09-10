@@ -98,6 +98,7 @@ function App() {
   const cameraControlRef = useRef()
   const [galaxyCenter, setGalaxyCenter] = useState([0, 0, 0])
   const [isPortalOpen, setIsPortalOpen] = useState(false)
+  const [showMonument, setShowMonument] = useState(false)
   const exitCooldownRef = useRef(0)
   const [telemetry, setTelemetry] = useState({
     level: "LEVEL 1: STELLAR NEIGHBORHOOD",
@@ -160,8 +161,8 @@ function App() {
           {/* Level 8: The Mysterious Pulsating White Singularity Dot */}
           <CosmicSingularityDot flyTo={flyTo} />
 
-          {/* 3D Celestial Voxel Monument: SUBBAREDDY PALAGIRI Floating Above Sol */}
-          <NameMonument position={[0, 26, 0]} />
+          {/* 3D Celestial Voxel Monument: SUBBAREDDY PALAGIRI (On-demand toggleable) */}
+          <NameMonument position={[0, 22, 0]} visible={showMonument} />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -282,25 +283,29 @@ function App() {
           </button>
           <button
             onClick={() => {
-              if (cameraControlRef.current) {
-                cameraControlRef.current.setLookAt(0, 30, 42, 0, 26, 0, true)
+              const next = !showMonument
+              setShowMonument(next)
+              if (next && cameraControlRef.current) {
+                cameraControlRef.current.setLookAt(0, 24, 30, 0, 22, 0, true)
               }
             }}
             style={{
-              background: "linear-gradient(135deg, rgba(94, 234, 212, 0.25), rgba(139, 92, 246, 0.25))",
-              border: "1px solid #5eead4",
-              color: "#5eead4",
+              background: showMonument
+                ? "linear-gradient(135deg, rgba(94, 234, 212, 0.4), rgba(139, 92, 246, 0.4))"
+                : "rgba(255, 255, 255, 0.08)",
+              border: `1px solid ${showMonument ? "#5eead4" : "rgba(255, 255, 255, 0.25)"}`,
+              color: showMonument ? "#5eead4" : "#ffffff",
               padding: "4px 8px",
               borderRadius: 6,
               fontSize: 10,
               fontWeight: 700,
               cursor: "pointer",
-              boxShadow: "0 0 10px rgba(94, 234, 212, 0.3)",
+              boxShadow: showMonument ? "0 0 10px rgba(94, 234, 212, 0.4)" : "none",
               transition: "all 0.2s ease"
             }}
-            title="Warp to Subbareddy Palagiri Monument above Sol"
+            title="Click to toggle Subbareddy Palagiri Monument"
           >
-            👑 Monument
+            👑 {showMonument ? "Hide Monument" : "Monument"}
           </button>
           <button
             onClick={() => flyTo([0, 25000, 140000], 140000)}
@@ -472,6 +477,48 @@ function App() {
           }
         }} 
       />
+
+      {/* Floating Status Badge when Monument is Opened */}
+      {showMonument && (
+        <div
+          style={{
+            position: "fixed",
+            top: 24,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1000,
+            background: "rgba(10, 15, 30, 0.88)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid rgba(94, 234, 212, 0.6)",
+            borderRadius: 24,
+            padding: "6px 18px",
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+            boxShadow: "0 0 24px rgba(94, 234, 212, 0.3)"
+          }}
+        >
+          <span style={{ color: "#5eead4", fontSize: 11, fontWeight: 800, letterSpacing: "0.08em" }}>
+            👑 SUBBAREDDY PALAGIRI MONUMENT
+          </span>
+          <button
+            onClick={() => setShowMonument(false)}
+            style={{
+              background: "rgba(255, 68, 68, 0.25)",
+              border: "1px solid rgba(255, 68, 68, 0.6)",
+              color: "#ff8888",
+              padding: "3px 10px",
+              borderRadius: 12,
+              fontSize: 10,
+              cursor: "pointer",
+              fontWeight: 700,
+              transition: "all 0.2s ease"
+            }}
+          >
+            ✕ Hide
+          </button>
+        </div>
+      )}
     </div>
   )
 }
