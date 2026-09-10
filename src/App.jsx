@@ -161,7 +161,7 @@ function App() {
           <CosmicSingularityDot flyTo={flyTo} />
 
           {/* 3D Celestial Voxel Monument: SUBBAREDDY PALAGIRI Floating Above Sol */}
-          <NameMonument position={[0, 68, -10]} />
+          <NameMonument position={[0, 26, 0]} />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -283,7 +283,7 @@ function App() {
           <button
             onClick={() => {
               if (cameraControlRef.current) {
-                cameraControlRef.current.setLookAt(0, 72, 75, 0, 66, -10, true)
+                cameraControlRef.current.setLookAt(0, 30, 42, 0, 26, 0, true)
               }
             }}
             style={{

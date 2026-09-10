@@ -18,10 +18,10 @@ const FONT_5x7 = {
   " ": ["00000", "00000", "00000", "00000", "00000", "00000", "00000"]
 }
 
-// Builds 3D voxel word meshes with genuine extruded box geometry
-function WordVoxels({ word, cellSize = 1.0, colorA, colorB, yOffset = 0 }) {
+// Builds refined, compact 3D voxel word meshes
+function WordVoxels({ word, cellSize = 0.22, colorA, colorB, yOffset = 0 }) {
   const voxelGeo = useMemo(
-    () => new THREE.BoxGeometry(cellSize * 0.86, cellSize * 0.86, cellSize * 0.55),
+    () => new THREE.BoxGeometry(cellSize * 0.88, cellSize * 0.88, cellSize * 0.6),
     [cellSize]
   )
 
@@ -40,9 +40,9 @@ function WordVoxels({ word, cellSize = 1.0, colorA, colorB, yOffset = 0 }) {
       const mat = new THREE.MeshStandardMaterial({
         color,
         emissive: color,
-        emissiveIntensity: 0.75,
-        roughness: 0.28,
-        metalness: 0.35
+        emissiveIntensity: 0.85,
+        roughness: 0.25,
+        metalness: 0.3
       })
 
       for (let r = 0; r < rows; r++) {
@@ -79,45 +79,45 @@ function WordVoxels({ word, cellSize = 1.0, colorA, colorB, yOffset = 0 }) {
   )
 }
 
-export default function NameMonument({ position = [0, 62, -15] }) {
+export default function NameMonument({ position = [0, 26, 0] }) {
   const groupRef = useRef()
 
   useFrame(({ clock, camera }) => {
     if (!groupRef.current) return
     const t = clock.elapsedTime
 
-    // Gentle float and yaw sway
-    groupRef.current.position.y = position[1] + Math.sin(t * 0.35) * 1.2
-    groupRef.current.rotation.y = Math.sin(t * 0.18) * 0.25
+    // Delicate subtle floating and slow rotation
+    groupRef.current.position.y = position[1] + Math.sin(t * 0.4) * 0.4
+    groupRef.current.rotation.y = Math.sin(t * 0.2) * 0.2
 
-    // Proximity LOD: Visible in stellar neighborhood & local space (dist < 25,000 AU)
+    // Proximity LOD: Visible strictly in the Solar System view (dist < 650 AU)
     const dist = camera.position.length()
-    groupRef.current.visible = dist < 25000
+    groupRef.current.visible = dist < 650
   })
 
   return (
     <group ref={groupRef} position={position}>
-      {/* 3-Point Colored Key Lights to illuminate the monument */}
-      <pointLight color="#8b5cf6" intensity={2.8} distance={60} position={[15, 12, 18]} />
-      <pointLight color="#5eead4" intensity={2.2} distance={60} position={[-18, -8, 16]} />
-      <pointLight color="#f5c542" intensity={1.6} distance={50} position={[0, -14, -8]} />
+      {/* Subtle, localized accent lights so it never bleeds or dominates scene */}
+      <pointLight color="#8b5cf6" intensity={0.8} distance={16} position={[5, 4, 6]} />
+      <pointLight color="#5eead4" intensity={0.6} distance={16} position={[-5, -2, 5]} />
+      <pointLight color="#f5c542" intensity={0.5} distance={12} position={[0, -4, -3]} />
 
-      {/* LINE 1: SUBBAREDDY (Electric Cyan -> Royal Purple) */}
+      {/* LINE 1: SUBBAREDDY (Refined, slim 13 AU wide signature) */}
       <WordVoxels
         word="SUBBAREDDY"
-        cellSize={0.9}
+        cellSize={0.22}
         colorA={0x5eead4}
         colorB={0x8b5cf6}
-        yOffset={4.8}
+        yOffset={1.15}
       />
 
-      {/* LINE 2: PALAGIRI (Solar Gold -> Coral Pink) */}
+      {/* LINE 2: PALAGIRI */}
       <WordVoxels
         word="PALAGIRI"
-        cellSize={0.9}
+        cellSize={0.22}
         colorA={0xf5c542}
         colorB={0xff5470}
-        yOffset={-4.8}
+        yOffset={-1.15}
       />
     </group>
   )
