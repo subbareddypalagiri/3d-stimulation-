@@ -16,6 +16,7 @@ import MultiverseFinalSkyPano from "./MultiverseFinalSkyPano"
 import { TEN_COSMIC_SPHERES } from "./cosmicSpheresData"
 import CosmicSingularityDot from "./CosmicSingularityDot"
 import ScrollVideoPortal from "./ScrollVideoPortal"
+import NameMonument from "./NameMonument"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, onCrossCosmicSphereExit, activeCenter = [0, 0, 0], isPortalOpen = false, exitCooldownRef }) {
@@ -158,6 +159,9 @@ function App() {
 
           {/* Level 8: The Mysterious Pulsating White Singularity Dot */}
           <CosmicSingularityDot flyTo={flyTo} />
+
+          {/* 3D Celestial Voxel Monument: SUBBAREDDY PALAGIRI Floating Above Sol */}
+          <NameMonument position={[0, 68, -10]} />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -275,6 +279,28 @@ function App() {
             }}
           >
             🛸 Return to Sol (R)
+          </button>
+          <button
+            onClick={() => {
+              if (cameraControlRef.current) {
+                cameraControlRef.current.setLookAt(0, 72, 75, 0, 66, -10, true)
+              }
+            }}
+            style={{
+              background: "linear-gradient(135deg, rgba(94, 234, 212, 0.25), rgba(139, 92, 246, 0.25))",
+              border: "1px solid #5eead4",
+              color: "#5eead4",
+              padding: "4px 8px",
+              borderRadius: 6,
+              fontSize: 10,
+              fontWeight: 700,
+              cursor: "pointer",
+              boxShadow: "0 0 10px rgba(94, 234, 212, 0.3)",
+              transition: "all 0.2s ease"
+            }}
+            title="Warp to Subbareddy Palagiri Monument above Sol"
+          >
+            👑 Monument
           </button>
           <button
             onClick={() => flyTo([0, 25000, 140000], 140000)}
