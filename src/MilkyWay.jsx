@@ -119,9 +119,9 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
   })
 
   return (
-    <group position={position}>
+    <group position={position} raycast={() => null}>
       {/* THE EXTERIOR GRAND SPIRAL GALAXY DISC */}
-      <mesh ref={exteriorRef} rotation={[-Math.PI / 6, 0, 0]}>
+      <mesh ref={exteriorRef} rotation={[-Math.PI / 6, 0, 0]} raycast={() => null}>
         <planeGeometry args={[450000, 225000]} />
         <shaderMaterial 
           ref={exteriorMaterialRef}

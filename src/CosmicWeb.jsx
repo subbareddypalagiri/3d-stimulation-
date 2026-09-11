@@ -584,9 +584,9 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
   })
 
   return (
-    <group position={activeCenter}>
+    <group position={activeCenter} raycast={() => null}>
       {/* LEVEL 6: 20 BOLD OMNIVERSE MEGA-DOMAINS (NormalBlending = NO BLOWOUT!) */}
-      <instancedMesh ref={omniverseRef} args={[null, null, OMNIVERSE_COUNT]} frustumCulled={false}>
+      <instancedMesh ref={omniverseRef} args={[null, null, OMNIVERSE_COUNT]} frustumCulled={false} raycast={() => null}>
         <sphereGeometry args={[1, 48, 48]}>
           <instancedBufferAttribute attach="attributes-aColor1" args={[oColor1, 3]} />
           <instancedBufferAttribute attach="attributes-aColor2" args={[oColor2, 3]} />
@@ -606,14 +606,14 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
       </instancedMesh>
 
       {/* LEVEL 5: 100 NASA BUBBLE UNIVERSES (100% 3D Omnidirectional, DoubleSide = NEVER CUTS OFF!) */}
-      <instancedMesh ref={multRef} args={[null, null, MULT_COUNT]} frustumCulled={false}>
+      <instancedMesh ref={multRef} args={[null, null, MULT_COUNT]} frustumCulled={false} raycast={() => null}>
         <sphereGeometry args={[1, 64, 64]}>
           <instancedBufferAttribute attach="attributes-instanceSeed" args={[mSeeds, 1]} />
         </sphereGeometry>
         <shaderMaterial 
           ref={multMat} 
           vertexShader={bubbleVert} 
-          fragmentShader={bubbleFrag}
+          fragmentShader={bubbleFrag} 
           uniforms={mUni} 
           transparent 
           depthWrite={false} 
@@ -623,7 +623,7 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
       </instancedMesh>
 
       {/* INFLATON QUANTUM STARDUST PARTICLES */}
-      <points ref={inflatonRef}>
+      <points ref={inflatonRef} raycast={() => null}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[inflatonPos, 3]} />
           <bufferAttribute attach="attributes-pColor" args={[inflatonCols, 3]} />
@@ -640,7 +640,7 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
       </points>
 
       {/* LEVEL 4: LOCAL COSMIC WEB SHELLS */}
-      <instancedMesh ref={webRef} args={[null, null, WEB_COUNT]} frustumCulled={false}>
+      <instancedMesh ref={webRef} args={[null, null, WEB_COUNT]} frustumCulled={false} raycast={() => null}>
         <sphereGeometry args={[UNIV_R, 48, 48]}>
           <instancedBufferAttribute attach="attributes-instanceSeed" args={[wSeeds, 1]} />
         </sphereGeometry>
@@ -657,7 +657,7 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
       </instancedMesh>
 
       {/* LEVEL 3: 1000 SPIRAL GALAXIES CLUSTER */}
-      <instancedMesh ref={galaxyRef} args={[null, null, GALAXY_COUNT]} frustumCulled={false}>
+      <instancedMesh ref={galaxyRef} args={[null, null, GALAXY_COUNT]} frustumCulled={false} raycast={() => null}>
         <planeGeometry args={[32000, 16000]}>
           <instancedBufferAttribute attach="attributes-instanceSeed" args={[gSeeds, 1]} />
         </planeGeometry>

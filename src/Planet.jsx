@@ -43,7 +43,7 @@ export default function Planet({
   return (
     <group ref={groupRef}>
       {/* Subtle Orbital Line */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
+      <mesh rotation={[Math.PI / 2, 0, 0]} raycast={() => null}>
         <ringGeometry args={[position[0] - 0.06, position[0] + 0.06, 64]} />
         <meshBasicMaterial color="#335577" transparent opacity={0.06} side={THREE.DoubleSide} depthWrite={false} />
       </mesh>

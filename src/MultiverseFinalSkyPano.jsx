@@ -77,20 +77,10 @@ function SingleCosmicSphere({ sphere, texture, onSelect }) {
   const radius = 1100000000 * sphere.scale
 
   return (
-    <group position={sphere.pos}>
+    <group position={sphere.pos} raycast={() => null}>
       <mesh
         ref={meshRef}
-        onClick={(e) => {
-          e.stopPropagation()
-          if (onSelect) onSelect(sphere.pos, radius)
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation()
-          document.body.style.cursor = "pointer"
-        }}
-        onPointerOut={(e) => {
-          document.body.style.cursor = "auto"
-        }}
+        raycast={() => null}
       >
         <sphereGeometry args={[radius, 48, 24]} />
         <shaderMaterial
@@ -107,7 +97,7 @@ function SingleCosmicSphere({ sphere, texture, onSelect }) {
   )
 }
 
-export default function MultiverseFinalSkyPano({ activeCenter = [0, 0, 0], flyTo }) {
+export default function MultiverseFinalSkyPano({ activeCenter = [0, 0, 0] }) {
   const groupRef = useRef()
   const texture = useLoader(THREE.TextureLoader, "/textures/milkyway_pano.jpg")
 
@@ -129,15 +119,12 @@ export default function MultiverseFinalSkyPano({ activeCenter = [0, 0, 0], flyTo
   })
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} raycast={() => null}>
       {TEN_COSMIC_SPHERES.map((sphere) => (
         <SingleCosmicSphere
           key={sphere.id}
           sphere={sphere}
           texture={texture}
-          onSelect={(pos, radius) => {
-            if (flyTo) flyTo(pos, radius * 1.5)
-          }}
         />
       ))}
     </group>

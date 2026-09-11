@@ -180,17 +180,13 @@ export default function BlackHoleSingularity({
       ref={groupRef}
       position={position}
       scale={[scale, scale, scale]}
-      onClick={(e) => {
-        e.stopPropagation()
-        if (flyTo) flyTo(position, 40 * scale)
-      }}
-      style={{ cursor: "pointer" }}
+      raycast={() => null}
     >
       {/* 1. THE EVENT HORIZON: Pure Light-Absorbing Black Sphere (Shared Geo) */}
-      <mesh geometry={sharedHorizonGeo} material={sharedBlackMat} />
+      <mesh geometry={sharedHorizonGeo} material={sharedBlackMat} raycast={() => null} />
 
       {/* 2. THE MAIN ACCRETION DISK (Shared Geo & Emissive Additive Shader) */}
-      <mesh ref={diskRef} geometry={sharedDiskGeo} rotation={[-Math.PI / 2.25, 0, 0]}>
+      <mesh ref={diskRef} geometry={sharedDiskGeo} rotation={[-Math.PI / 2.25, 0, 0]} raycast={() => null}>
         <shaderMaterial
           vertexShader={diskVert}
           fragmentShader={diskFrag}
@@ -203,7 +199,7 @@ export default function BlackHoleSingularity({
       </mesh>
 
       {/* 3. THE RELATIVISTIC VERTICAL LENSING HALO (Shared Geo) */}
-      <mesh ref={verticalHaloRef} geometry={sharedHaloGeo} rotation={[0, 0, Math.PI / 6]}>
+      <mesh ref={verticalHaloRef} geometry={sharedHaloGeo} rotation={[0, 0, Math.PI / 6]} raycast={() => null}>
         <shaderMaterial
           vertexShader={haloVert}
           fragmentShader={haloFrag}

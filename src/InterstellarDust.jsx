@@ -126,7 +126,7 @@ export default function InterstellarDust({ count = 2200 }) {
   })
 
   return (
-    <points ref={pointsRef}>
+    <points ref={pointsRef} raycast={() => null}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"

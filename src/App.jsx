@@ -142,7 +142,7 @@ function App() {
           <InterstellarDust count={2200} />
 
           {/* 10 Colossal Cosmic Realm Spheres (GLB Panorama with light-mixing colors) */}
-          <MultiverseFinalSkyPano activeCenter={galaxyCenter} flyTo={flyTo} />
+          <MultiverseFinalSkyPano activeCenter={galaxyCenter} />
 
           {/* Level 8: The Mysterious Pulsating White Singularity Dot */}
           <CosmicSingularityDot flyTo={flyTo} />
@@ -152,7 +152,9 @@ function App() {
         </Suspense>
 
         {/* Deep cosmic starfield */}
-        <Stars radius={15000} depth={500} count={3000} factor={8} saturation={1} fade speed={0.5} />
+        <group raycast={() => null}>
+          <Stars radius={15000} depth={500} count={3000} factor={8} saturation={1} fade speed={0.5} />
+        </group>
         
         {/* Ultra-Slow, Deep & Gradual Planetarium Camera Controls */}
         <CameraControls 
