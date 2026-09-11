@@ -24,31 +24,12 @@ export default function InterstellarNavigator({ cameraControlRef, flyTo }) {
       keysPressed.current[e.code] = false
     }
 
-    // Two-way Wheel handler for seamless interstellar flight
-    const handleWheel = (e) => {
-      const controls = cameraControlRef.current
-      if (!controls) return
-
-      const distToTarget = controls.distance
-
-      // When scrolling forward (zooming IN) past a solar system
-      if (e.deltaY < 0 && distToTarget <= 28) {
-        controls.forward(22, true)
-      }
-      // When scrolling backward (zooming OUT) to escape back into space
-      else if (e.deltaY > 0 && distToTarget <= 28) {
-        controls.forward(-22, true)
-      }
-    }
-
     window.addEventListener("keydown", handleKeyDown)
     window.addEventListener("keyup", handleKeyUp)
-    window.addEventListener("wheel", handleWheel, { passive: true })
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
       window.removeEventListener("keyup", handleKeyUp)
-      window.removeEventListener("wheel", handleWheel)
     }
   }, [cameraControlRef, flyTo])
 

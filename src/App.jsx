@@ -19,26 +19,15 @@ import ScrollVideoPortal from "./ScrollVideoPortal"
 import NameMonument from "./NameMonument"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
-function CosmicLevelTracker({ onLevelUpdate, onCrossCosmicSphereExit, activeCenter = [0, 0, 0], isPortalOpen = false, exitCooldownRef }) {
+function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
   const centerVec = useRef(new THREE.Vector3())
   const lastUpdate = useRef(0)
   const lastProgress = useRef(1)
-  const hasTriggeredExit = useRef(false)
 
   useFrame(({ camera, clock }) => {
     const now = clock.elapsedTime
     centerVec.current.set(...activeCenter)
     const dist = camera.position.distanceTo(centerVec.current)
-
-    const inCooldown = exitCooldownRef && Date.now() < exitCooldownRef.current
-
-    // Automatically detect crossing outside the cosmic sphere ("cosmic sphere bayatiki ragane screen mottam white aipoyi")
-    if (dist > 1300000000 && !hasTriggeredExit.current && !isPortalOpen && !inCooldown) {
-      hasTriggeredExit.current = true
-      if (onCrossCosmicSphereExit) onCrossCosmicSphereExit()
-    } else if (dist < 1000000000) {
-      hasTriggeredExit.current = false
-    }
 
     let level = "LEVEL 1: STELLAR NEIGHBORHOOD"
     let desc = "Sol & 24 Neighboring Star Systems"
@@ -77,8 +66,8 @@ function CosmicLevelTracker({ onLevelUpdate, onCrossCosmicSphereExit, activeCent
       color = "#00ffff"
       progress = 7
     } else if (dist > 1300000000) {
-      level = "LEVEL 8: WHITE TRANSCENDENCE"
-      desc = "Cosmic White Flash into Interactive Video Frames"
+      level = "LEVEL 8: DEEP VOID SINGULARITY"
+      desc = "The Infinite Outer Horizon & Celestial Singularity"
       color = "#ffffff"
       progress = 8
     }
@@ -100,7 +89,6 @@ function App() {
   const [isPortalOpen, setIsPortalOpen] = useState(false)
   const [showMonument, setShowMonument] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const exitCooldownRef = useRef(0)
   const [telemetry, setTelemetry] = useState({
     level: "LEVEL 1: STELLAR NEIGHBORHOOD",
     desc: "Sol & 24 Neighboring Star Systems",
@@ -136,10 +124,7 @@ function App() {
         {/* Live cosmological telemetry tracker */}
         <CosmicLevelTracker 
           onLevelUpdate={setTelemetry} 
-          onCrossCosmicSphereExit={() => setIsPortalOpen(true)}
           activeCenter={galaxyCenter}
-          isPortalOpen={isPortalOpen}
-          exitCooldownRef={exitCooldownRef}
         />
 
         <Suspense fallback={null}>
@@ -169,17 +154,17 @@ function App() {
         {/* Deep cosmic starfield */}
         <Stars radius={15000} depth={500} count={3000} factor={8} saturation={1} fade speed={0.5} />
         
-        {/* Ultra-Slow, Deep & Gradual Planetarium Camera Controls with Infinity Dolly */}
+        {/* Ultra-Slow, Deep & Gradual Planetarium Camera Controls */}
         <CameraControls 
           ref={cameraControlRef} 
           makeDefault 
-          maxDistance={50000000000} 
+          maxDistance={4000000000} 
           minDistance={2}
           smoothTime={0.4}
           dollySpeed={0.035}
           truckSpeed={0.4}
           dollyToCursor={true}
-          infinityDolly={true}
+          infinityDolly={false}
         />
 
         {/* Real-time Interstellar Flight Engine (Traverse gaps between solar systems) */}
@@ -564,7 +549,6 @@ function App() {
         isOpen={isPortalOpen} 
         onClose={() => {
           setIsPortalOpen(false)
-          exitCooldownRef.current = Date.now() + 4000 // 4 second cooldown prevents re-triggering
           if (cameraControlRef.current) {
             // Instantly place camera safely inside cosmic sphere at 680M AU
             cameraControlRef.current.setLookAt(0, 200000000, 650000000, 0, 0, 0, false)
