@@ -17,6 +17,8 @@ import { TEN_COSMIC_SPHERES } from "./cosmicSpheresData"
 import CosmicSingularityDot from "./CosmicSingularityDot"
 import ScrollVideoPortal from "./ScrollVideoPortal"
 import NameMonument from "./NameMonument"
+import EmuInTheSky from "./EmuInTheSky"
+import AlienNebulaRealm from "./AlienNebulaRealm"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -154,6 +156,12 @@ function App() {
 
           {/* 3D Celestial Voxel Monument: SUBBAREDDY PALAGIRI (On-demand toggleable) */}
           <NameMonument position={[0, 22, 0]} visible={showMonument} />
+
+          {/* Level 2: Ancient Milky Way Constellation: Emu in the Sky */}
+          <EmuInTheSky position={[-35000, 3200, 32000]} scale={65} />
+
+          {/* Level 8: 8K Self-Illuminating Alien Space Nebula Realm */}
+          <AlienNebulaRealm position={[-8200000000, -1100000000, 3900000000]} scale={130000} />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -460,9 +468,26 @@ function App() {
               ⚪ Singularity Dot
             </button>
             <button
+              onClick={() => flyTo([-35000, 4200, 48000], 18000)}
+              style={{
+                background: "linear-gradient(135deg, rgba(0, 229, 255, 0.25), rgba(255, 136, 204, 0.25))",
+                border: "1px solid #00e5ff",
+                color: "#00e5ff",
+                padding: "5px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 700,
+                cursor: "pointer",
+                boxShadow: "0 0 10px rgba(0, 229, 255, 0.3)",
+                transition: "all 0.2s ease"
+              }}
+              title="Warp to Emu in the Sky 3D Constellation"
+            >
+              🦤 Emu in Sky
+            </button>
+            <button
               onClick={() => setIsPortalOpen(true)}
               style={{
-                gridColumn: "1 / -1",
                 background: "linear-gradient(90deg, rgba(0, 216, 255, 0.3), rgba(255, 0, 234, 0.3))",
                 border: "1px solid #00d8ff",
                 color: "#00ffff",
@@ -512,6 +537,36 @@ function App() {
           {/* Realms Warp List */}
           <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
             <b style={{ color: "#ff44cc", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC REALMS (GLB SPHERES):</b>
+            <button
+              onClick={() => {
+                if (cameraControlRef.current) {
+                  cameraControlRef.current.setLookAt(
+                    -8200000000, -1100000000 + 400000000, 3900000000 + 800000000,
+                    -8200000000, -1100000000, 3900000000,
+                    true
+                  )
+                }
+              }}
+              style={{
+                width: "100%",
+                marginTop: 5,
+                marginBottom: 6,
+                background: "linear-gradient(90deg, rgba(255, 0, 170, 0.3), rgba(0, 255, 255, 0.3))",
+                border: "1px solid #ff00aa",
+                color: "#ff88dd",
+                padding: "5px 8px",
+                borderRadius: 6,
+                fontSize: 9,
+                fontWeight: 800,
+                cursor: "pointer",
+                textAlign: "center",
+                boxShadow: "0 0 10px rgba(255, 0, 170, 0.3)",
+                transition: "all 0.2s ease"
+              }}
+              title="Warp directly inside the 8K Alien Space Nebula Realm"
+            >
+              🌌 Warp Inside 8K Alien Space Nebula Realm
+            </button>
             <div style={{ marginTop: 5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
               {TEN_COSMIC_SPHERES.map((realm) => (
                 <button
