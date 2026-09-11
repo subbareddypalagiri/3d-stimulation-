@@ -60,16 +60,21 @@ function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
       desc = "20 Bold Inflaton Mega-Domains (Each with Unique Colors)"
       color = "#ffd700"
       progress = 6
-    } else if (dist > 220000000 && dist <= 1300000000) {
-      level = "LEVEL 7: COSMIC REALMS SPHERE"
+    } else if (dist > 220000000 && dist <= 3500000000) {
+      level = "LEVEL 7: PRIME COSMIC REALM"
       desc = "Milky Way Sky Panorama enclosing the Omniverse"
       color = "#00ffff"
       progress = 7
-    } else if (dist > 1300000000) {
-      level = "LEVEL 8: DEEP VOID SINGULARITY"
-      desc = "The Infinite Outer Horizon & Celestial Singularity"
-      color = "#ffffff"
+    } else if (dist > 3500000000 && dist <= 22000000000) {
+      level = "LEVEL 8: 10 COSMIC REALMS"
+      desc = "All 10 Colossal Multiverse Realm Spheres in Deep Void"
+      color = "#ff44cc"
       progress = 8
+    } else if (dist > 22000000000) {
+      level = "LEVEL 9: THE COSMIC SINGULARITY"
+      desc = "Pulsating White Singularity Dot at the Horizon of Infinity"
+      color = "#ffffff"
+      progress = 9
     }
 
     // Only update React state when level changes, or at most 5 times per second (prevents GC frame drops!)
@@ -160,7 +165,7 @@ function App() {
         <CameraControls 
           ref={cameraControlRef} 
           makeDefault 
-          maxDistance={4000000000} 
+          maxDistance={65000000000} 
           minDistance={2}
           smoothTime={0.4}
           dollySpeed={0.035}
@@ -190,7 +195,7 @@ function App() {
         background: "rgba(5, 10, 25, 0.8)", 
         padding: "16px 24px", 
         borderRadius: 14, 
-        backdropFilter: "blur(20px)",
+        backdropFilter: "blur(20px)", 
         border: `1px solid ${telemetry.color}55`,
         boxShadow: `0 8px 32px rgba(0,0,0,0.6), 0 0 20px ${telemetry.color}33`,
         maxWidth: 420,
@@ -216,14 +221,14 @@ function App() {
         </div>
 
         <div style={{ fontSize: 11, color: "#8899aa", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
-          <span>Scale: Level {telemetry.progress} of 6</span>
+          <span>Scale: Level {telemetry.progress} of 9</span>
           <span>Distance: {telemetry.dist.toLocaleString()} AU/units</span>
         </div>
 
-        {/* 6-Level Progress Bar */}
+        {/* 9-Level Progress Bar */}
         <div style={{ width: "100%", height: 3, background: "rgba(255,255,255,0.15)", borderRadius: 2, marginTop: 10, overflow: "hidden" }}>
           <div style={{ 
-            width: `${(telemetry.progress / 6) * 100}%`, 
+            width: `${(telemetry.progress / 9) * 100}%`, 
             height: "100%", 
             background: telemetry.color,
             transition: "width 0.4s ease, background 0.4s ease"
