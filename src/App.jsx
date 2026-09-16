@@ -97,9 +97,10 @@ function App() {
   const [galaxyCenter, setGalaxyCenter] = useState([0, 0, 0])
   const [isPortalOpen, setIsPortalOpen] = useState(false)
   const [isBlackHoleModalOpen, setIsBlackHoleModalOpen] = useState(false)
+  const [isPIPClosed, setIsPIPClosed] = useState(false)
   const [blackHoleTarget, setBlackHoleTarget] = useState({
     title: "M87: Post-Milky Way Relativistic Black Hole",
-    subtitle: "Virgo Supercluster • 620,000 AU Beyond Milky Way • Raymarched Null Geodesics"
+    subtitle: "Virgo Supercluster • 550,000 AU Beyond Milky Way • Raymarched Null Geodesics"
   })
   const [showMonument, setShowMonument] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -172,12 +173,12 @@ function App() {
 
           {/* Level 3: Relativistic Raymarched Black Hole Gateway (Past Milky Way) */}
           <RelativisticBlackHoleGateway
-            position={[-620000, 190000, 540000]}
-            scale={250}
+            position={[150000, 60000, -520000]}
+            scale={4200}
             onOpenSimulation={() => {
               setBlackHoleTarget({
                 title: "M87: Post-Milky Way Relativistic Black Hole",
-                subtitle: "Virgo Supercluster • 620,000 AU Beyond Milky Way • Raymarched Null Geodesics"
+                subtitle: "Virgo Supercluster • 550,000 AU Beyond Milky Way • Raymarched Null Geodesics"
               })
               setIsBlackHoleModalOpen(true)
             }}
@@ -265,47 +266,87 @@ function App() {
         </div>
       </div>
 
-      {/* Top Right: Compact Toggle Button for Flight Controls & Warps HUD */}
-      {!isMenuOpen ? (
+      {/* Top Right Header Controls & Direct Black Hole Warp Button */}
+      <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 10, zIndex: 100 }}>
         <button
-          onClick={() => setIsMenuOpen(true)}
+          onClick={() => {
+            flyTo([150000, 60000, -520000], 120000)
+            setBlackHoleTarget({
+              title: "M87: Post-Milky Way Relativistic Singularity",
+              subtitle: "Virgo Sector • 550,000 AU Beyond Milky Way • Raymarched Null Geodesics"
+            })
+            setIsBlackHoleModalOpen(true)
+          }}
           style={{
-            position: "absolute",
-            top: 20,
-            right: 20,
-            background: "rgba(5, 10, 25, 0.82)",
+            background: "linear-gradient(135deg, rgba(255, 110, 0, 0.45), rgba(255, 0, 80, 0.45))",
             backdropFilter: "blur(16px)",
-            border: "1px solid rgba(0, 216, 255, 0.5)",
-            color: "#00e5ff",
+            border: "1.5px solid #ff7700",
+            color: "#ffcc66",
             padding: "8px 16px",
             borderRadius: 24,
             fontSize: 12,
-            fontWeight: 700,
+            fontWeight: 800,
             letterSpacing: "0.03em",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             gap: 8,
-            boxShadow: "0 4px 20px rgba(0, 216, 255, 0.25)",
-            transition: "all 0.25s ease",
-            zIndex: 100
+            boxShadow: "0 0 20px rgba(255, 110, 0, 0.6)",
+            transition: "all 0.25s ease"
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(0, 216, 255, 0.2)"
-            e.currentTarget.style.boxShadow = "0 0 25px rgba(0, 216, 255, 0.5)"
-            e.currentTarget.style.transform = "scale(1.04)"
+            e.currentTarget.style.transform = "scale(1.05)"
+            e.currentTarget.style.boxShadow = "0 0 30px rgba(255, 120, 20, 0.9)"
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(5, 10, 25, 0.82)"
-            e.currentTarget.style.boxShadow = "0 4px 20px rgba(0, 216, 255, 0.25)"
             e.currentTarget.style.transform = "scale(1)"
+            e.currentTarget.style.boxShadow = "0 0 20px rgba(255, 110, 0, 0.6)"
           }}
-          title="Open Flight Controls & Cosmic Warps"
+          title="Fly directly to the WebGPU Relativistic Black Hole past the Milky Way"
         >
-          <span style={{ fontSize: 14 }}>🛸</span>
-          <span>Controls & Warps ▾</span>
+          <span style={{ fontSize: 16 }}>🌀</span>
+          <span>Post-Milky Way Black Hole</span>
         </button>
-      ) : (
+
+        {!isMenuOpen && (
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            style={{
+              background: "rgba(5, 10, 25, 0.82)",
+              backdropFilter: "blur(16px)",
+              border: "1px solid rgba(0, 216, 255, 0.5)",
+              color: "#00d8ff",
+              padding: "8px 16px",
+              borderRadius: 24,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: "0.03em",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              boxShadow: "0 4px 20px rgba(0, 216, 255, 0.25)",
+              transition: "all 0.25s ease"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(0, 216, 255, 0.2)"
+              e.currentTarget.style.boxShadow = "0 0 25px rgba(0, 216, 255, 0.5)"
+              e.currentTarget.style.transform = "scale(1.04)"
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(5, 10, 25, 0.82)"
+              e.currentTarget.style.boxShadow = "0 4px 20px rgba(0, 216, 255, 0.25)"
+              e.currentTarget.style.transform = "scale(1)"
+            }}
+            title="Open Flight Controls & Cosmic Warps"
+          >
+            <span style={{ fontSize: 14 }}>🛸</span>
+            <span>Controls & Warps ▾</span>
+          </button>
+        )}
+      </div>
+
+      {isMenuOpen && (
         <div style={{
           position: "absolute",
           top: 20,
@@ -663,49 +704,138 @@ function App() {
         }} 
       />
 
-      {/* Post-Milky Way Floating Relativistic HUD Trigger */}
-      {telemetry.progress >= 3 && !isBlackHoleModalOpen && !isPortalOpen && (
-        <button
-          onClick={() => {
-            setIsBlackHoleModalOpen(true)
-          }}
+      {/* Live Floating Observation Window When Past the Milky Way (Level 3+) */}
+      {telemetry.progress >= 3 && !isBlackHoleModalOpen && !isPortalOpen && !isPIPClosed && (
+        <div
           style={{
             position: "absolute",
             bottom: 24,
-            left: 24,
-            background: "rgba(10, 15, 30, 0.88)",
-            border: "1px solid #ff7700",
-            color: "#ffaa44",
-            padding: "10px 18px",
-            borderRadius: 14,
+            right: 24,
+            width: 380,
+            height: 280,
+            background: "rgba(5, 10, 25, 0.92)",
+            border: "1.5px solid #ff7700",
+            borderRadius: 16,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.8), 0 0 30px rgba(255, 110, 20, 0.5)",
             backdropFilter: "blur(20px)",
-            boxShadow: "0 6px 25px rgba(255, 110, 20, 0.4), 0 0 15px rgba(255, 110, 20, 0.2)",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            zIndex: 90,
+            transition: "all 0.3s ease"
+          }}
+        >
+          {/* Header Bar */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "8px 12px",
+            background: "rgba(20, 10, 5, 0.85)",
+            borderBottom: "1px solid rgba(255, 120, 20, 0.3)"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: "#ff7700",
+                boxShadow: "0 0 8px #ff7700"
+              }} />
+              <b style={{ color: "#ffaa44", fontSize: 11, letterSpacing: "0.5px" }}>
+                LIVE: POST-MILKY WAY BLACK HOLE
+              </b>
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button
+                onClick={() => {
+                  flyTo([150000, 60000, -520000], 120000)
+                }}
+                style={{
+                  background: "rgba(0, 229, 255, 0.2)",
+                  border: "1px solid rgba(0, 229, 255, 0.6)",
+                  color: "#00e5ff",
+                  padding: "2px 8px",
+                  borderRadius: 6,
+                  fontSize: 10,
+                  cursor: "pointer",
+                  fontWeight: 700
+                }}
+                title="Warp camera directly in front of this black hole in 3D"
+              >
+                🛸 Warp
+              </button>
+              <button
+                onClick={() => setIsBlackHoleModalOpen(true)}
+                style={{
+                  background: "rgba(255, 140, 40, 0.25)",
+                  border: "1px solid rgba(255, 140, 40, 0.6)",
+                  color: "#ffcc66",
+                  padding: "2px 8px",
+                  borderRadius: 6,
+                  fontSize: 10,
+                  cursor: "pointer",
+                  fontWeight: 700
+                }}
+                title="Open full-screen WebGPU simulation"
+              >
+                ⛶ Expand
+              </button>
+              <button
+                onClick={() => setIsPIPClosed(true)}
+                style={{
+                  background: "rgba(255, 255, 255, 0.1)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  color: "#aaa",
+                  padding: "2px 6px",
+                  borderRadius: 6,
+                  fontSize: 10,
+                  cursor: "pointer"
+                }}
+                title="Minimize window"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          {/* Live WebGPU Canvas */}
+          <div style={{ flex: 1, position: "relative" }}>
+            <RelativisticBlackHole
+              title="M87: Post-Milky Way Singularity"
+              subtitle="Drag to orbit • Relativistic Doppler beaming"
+              isFullscreen={false}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Floating Reopen Badge if minimized */}
+      {telemetry.progress >= 3 && !isBlackHoleModalOpen && isPIPClosed && (
+        <button
+          onClick={() => setIsPIPClosed(false)}
+          style={{
+            position: "absolute",
+            bottom: 24,
+            right: 24,
+            background: "rgba(10, 15, 30, 0.9)",
+            border: "1.5px solid #ff7700",
+            color: "#ffaa44",
+            padding: "10px 16px",
+            borderRadius: 24,
+            backdropFilter: "blur(16px)",
+            boxShadow: "0 0 20px rgba(255, 110, 20, 0.4)",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            gap: 12,
-            zIndex: 80,
-            transition: "all 0.25s ease"
+            gap: 8,
+            fontSize: 12,
+            fontWeight: 800,
+            zIndex: 90
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-3px)"
-            e.currentTarget.style.borderColor = "#ffaa44"
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)"
-            e.currentTarget.style.borderColor = "#ff7700"
-          }}
-          title="Inspect Post-Milky Way WebGPU Raymarched Relativistic Black Hole"
         >
-          <span style={{ fontSize: 22 }}>🌀</span>
-          <div style={{ textAlign: "left" }}>
-            <div style={{ color: "#8899aa", fontSize: 10, fontWeight: 700, letterSpacing: "0.5px" }}>
-              PAST MILKY WAY • RELATIVISTIC SECTOR
-            </div>
-            <div style={{ color: "#ffffff", fontSize: 12, fontWeight: 800 }}>
-              Inspect WebGPU Event Horizon
-            </div>
-          </div>
+          <span>🌀</span>
+          <span>Open Black Hole Monitor</span>
         </button>
       )}
 
