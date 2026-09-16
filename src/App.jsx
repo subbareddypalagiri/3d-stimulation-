@@ -19,6 +19,8 @@ import ScrollVideoPortal from "./ScrollVideoPortal"
 import NameMonument from "./NameMonument"
 import EmuInTheSky from "./EmuInTheSky"
 import AlienNebulaRealm from "./AlienNebulaRealm"
+import RelativisticBlackHoleGateway from "./RelativisticBlackHoleGateway"
+import RelativisticBlackHole from "./RelativisticBlackHole"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -94,6 +96,11 @@ function App() {
   const cameraControlRef = useRef()
   const [galaxyCenter, setGalaxyCenter] = useState([0, 0, 0])
   const [isPortalOpen, setIsPortalOpen] = useState(false)
+  const [isBlackHoleModalOpen, setIsBlackHoleModalOpen] = useState(false)
+  const [blackHoleTarget, setBlackHoleTarget] = useState({
+    title: "M87: Post-Milky Way Relativistic Black Hole",
+    subtitle: "Virgo Supercluster • 620,000 AU Beyond Milky Way • Raymarched Null Geodesics"
+  })
   const [showMonument, setShowMonument] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [telemetry, setTelemetry] = useState({
@@ -162,6 +169,20 @@ function App() {
 
           {/* Level 8: 8K Self-Illuminating Alien Space Nebula Realm */}
           <AlienNebulaRealm position={[-8200000000, -1100000000, 3900000000]} scale={130000} />
+
+          {/* Level 3: Relativistic Raymarched Black Hole Gateway (Past Milky Way) */}
+          <RelativisticBlackHoleGateway
+            position={[-620000, 190000, 540000]}
+            scale={250}
+            onOpenSimulation={() => {
+              setBlackHoleTarget({
+                title: "M87: Post-Milky Way Relativistic Black Hole",
+                subtitle: "Virgo Supercluster • 620,000 AU Beyond Milky Way • Raymarched Null Geodesics"
+              })
+              setIsBlackHoleModalOpen(true)
+            }}
+            flyTo={flyTo}
+          />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -486,6 +507,30 @@ function App() {
               🦤 Emu in Sky
             </button>
             <button
+              onClick={() => {
+                flyTo([-620000, 190000, 540000], 40 * 250)
+                setBlackHoleTarget({
+                  title: "M87: Post-Milky Way Relativistic Black Hole",
+                  subtitle: "Virgo Supercluster • 620,000 AU Beyond Milky Way • Raymarched Null Geodesics"
+                })
+              }}
+              style={{
+                background: "linear-gradient(135deg, rgba(255, 119, 0, 0.3), rgba(255, 40, 0, 0.2))",
+                border: "1px solid #ff8800",
+                color: "#ffaa44",
+                padding: "6px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 800,
+                cursor: "pointer",
+                boxShadow: "0 0 10px rgba(255, 120, 20, 0.35)",
+                transition: "all 0.2s ease"
+              }}
+              title="Warp directly to M87 Relativistic Black Hole past Milky Way"
+            >
+              🌀 M87 Black Hole
+            </button>
+            <button
               onClick={() => setIsPortalOpen(true)}
               style={{
                 background: "linear-gradient(90deg, rgba(0, 216, 255, 0.3), rgba(255, 0, 234, 0.3))",
@@ -617,6 +662,81 @@ function App() {
           }
         }} 
       />
+
+      {/* Post-Milky Way Floating Relativistic HUD Trigger */}
+      {telemetry.progress >= 3 && !isBlackHoleModalOpen && !isPortalOpen && (
+        <button
+          onClick={() => {
+            setIsBlackHoleModalOpen(true)
+          }}
+          style={{
+            position: "absolute",
+            bottom: 24,
+            left: 24,
+            background: "rgba(10, 15, 30, 0.88)",
+            border: "1px solid #ff7700",
+            color: "#ffaa44",
+            padding: "10px 18px",
+            borderRadius: 14,
+            backdropFilter: "blur(20px)",
+            boxShadow: "0 6px 25px rgba(255, 110, 20, 0.4), 0 0 15px rgba(255, 110, 20, 0.2)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            zIndex: 80,
+            transition: "all 0.25s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-3px)"
+            e.currentTarget.style.borderColor = "#ffaa44"
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)"
+            e.currentTarget.style.borderColor = "#ff7700"
+          }}
+          title="Inspect Post-Milky Way WebGPU Raymarched Relativistic Black Hole"
+        >
+          <span style={{ fontSize: 22 }}>🌀</span>
+          <div style={{ textAlign: "left" }}>
+            <div style={{ color: "#8899aa", fontSize: 10, fontWeight: 700, letterSpacing: "0.5px" }}>
+              PAST MILKY WAY • RELATIVISTIC SECTOR
+            </div>
+            <div style={{ color: "#ffffff", fontSize: 12, fontWeight: 800 }}>
+              Inspect WebGPU Event Horizon
+            </div>
+          </div>
+        </button>
+      )}
+
+      {/* Full-Screen / Modal Interactive WebGPU Relativistic Black Hole Viewer */}
+      {isBlackHoleModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            zIndex: 9999,
+            background: "rgba(0, 0, 0, 0.88)",
+            backdropFilter: "blur(24px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px"
+          }}
+        >
+          <div style={{ width: "94vw", height: "90vh", maxWidth: "1400px", maxHeight: "900px" }}>
+            <RelativisticBlackHole
+              title={blackHoleTarget.title}
+              subtitle={blackHoleTarget.subtitle}
+              isFullscreen={false}
+              onClose={() => setIsBlackHoleModalOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
