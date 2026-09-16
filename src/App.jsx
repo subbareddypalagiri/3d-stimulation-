@@ -174,7 +174,7 @@ function App() {
           {/* Level 3: Relativistic Raymarched Black Hole Gateway (Past Milky Way) */}
           <RelativisticBlackHoleGateway
             position={[150000, 60000, -520000]}
-            scale={4200}
+            radius={18000}
             onOpenSimulation={() => {
               setBlackHoleTarget({
                 title: "M87: Post-Milky Way Relativistic Black Hole",
@@ -270,12 +270,11 @@ function App() {
       <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 10, zIndex: 100 }}>
         <button
           onClick={() => {
-            flyTo([150000, 60000, -520000], 120000)
+            flyTo([150000, 60000, -520000], 65000)
             setBlackHoleTarget({
               title: "M87: Post-Milky Way Relativistic Singularity",
               subtitle: "Virgo Sector • 550,000 AU Beyond Milky Way • Raymarched Null Geodesics"
             })
-            setIsBlackHoleModalOpen(true)
           }}
           style={{
             background: "linear-gradient(135deg, rgba(255, 110, 0, 0.45), rgba(255, 0, 80, 0.45))",
