@@ -157,6 +157,29 @@ function App() {
     }
   }
 
+  const flyToNameMonument = () => {
+    setShowMonument(true)
+    if (cameraControlRef.current) {
+      setGalaxyCenter([0, 22, 0])
+      cameraControlRef.current.setLookAt(
+        0, 22.8, 14,
+        0, 22, 0,
+        true
+      )
+    }
+  }
+
+  const flyToSkillWeb = () => {
+    if (cameraControlRef.current) {
+      setGalaxyCenter([110000, 32000, -180000])
+      cameraControlRef.current.setLookAt(
+        110000 + 4200, 32000 + 2400, -180000 + 6800,
+        110000, 32000, -180000,
+        true
+      )
+    }
+  }
+
   const flyTo = (absPosition, radius, distanceMultiplier = 1.0) => {
     if (cameraControlRef.current) {
       // If targeting Prime Cosmic Realm, use exact front-facing Claude perspective
@@ -215,7 +238,7 @@ function App() {
           <CosmicSingularityDot flyTo={flyTo} />
 
           {/* 3D Celestial Voxel Monument: SUBBAREDDY PALAGIRI (On-demand toggleable) */}
-          <NameMonument position={[0, 22, 0]} visible={showMonument} />
+          <NameMonument position={[0, 22, 0]} visible={showMonument} onFocus={flyToNameMonument} />
 
           {/* Level 2: Ancient Milky Way Constellation: Emu in the Sky */}
           <EmuInTheSky position={[-35000, 3200, 32000]} scale={65} />
@@ -389,7 +412,42 @@ function App() {
 
         <button
           onClick={() => {
-            flyTo([110000, 32000, -180000], 12000, 0.45)
+            flyToNameMonument()
+          }}
+          style={{
+            background: "linear-gradient(135deg, rgba(139, 92, 246, 0.45), rgba(94, 234, 212, 0.45))",
+            backdropFilter: "blur(16px)",
+            border: "1.5px solid #a78bfa",
+            color: "#e0e7ff",
+            padding: "8px 16px",
+            borderRadius: 24,
+            fontSize: 12,
+            fontWeight: 800,
+            letterSpacing: "0.03em",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            boxShadow: "0 0 20px rgba(167, 139, 250, 0.6)",
+            transition: "all 0.25s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.05)"
+            e.currentTarget.style.boxShadow = "0 0 30px rgba(167, 139, 250, 0.9)"
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)"
+            e.currentTarget.style.boxShadow = "0 0 20px rgba(167, 139, 250, 0.6)"
+          }}
+          title="Fly directly to 3D Subbareddy Palagiri Celestial Monument"
+        >
+          <span style={{ fontSize: 16 }}>👑</span>
+          <span>Name Monument</span>
+        </button>
+
+        <button
+          onClick={() => {
+            flyToSkillWeb()
           }}
           style={{
             background: "linear-gradient(135deg, rgba(0, 240, 255, 0.4), rgba(180, 50, 255, 0.4))",
@@ -829,29 +887,23 @@ function App() {
             </button>
             <button
               onClick={() => {
-                const next = !showMonument
-                setShowMonument(next)
-                if (next && cameraControlRef.current) {
-                  cameraControlRef.current.setLookAt(0, 24, 30, 0, 22, 0, true)
-                }
+                flyToNameMonument()
               }}
               style={{
-                background: showMonument
-                  ? "linear-gradient(135deg, rgba(94, 234, 212, 0.4), rgba(139, 92, 246, 0.4))"
-                  : "rgba(255, 255, 255, 0.08)",
-                border: `1px solid ${showMonument ? "#5eead4" : "rgba(255, 255, 255, 0.25)"}`,
-                color: showMonument ? "#5eead4" : "#ffffff",
+                background: "linear-gradient(135deg, rgba(94, 234, 212, 0.35), rgba(139, 92, 246, 0.35))",
+                border: "1px solid #5eead4",
+                color: "#5eead4",
                 padding: "5px 8px",
                 borderRadius: 6,
                 fontSize: 10,
                 fontWeight: 700,
                 cursor: "pointer",
-                boxShadow: showMonument ? "0 0 10px rgba(94, 234, 212, 0.4)" : "none",
+                boxShadow: "0 0 10px rgba(94, 234, 212, 0.4)",
                 transition: "all 0.2s ease"
               }}
-              title="Click to toggle Subbareddy Palagiri Monument"
+              title="Fly directly to 3D Subbareddy Palagiri Monument"
             >
-              👑 {showMonument ? "Hide Monument" : "Show Monument"}
+              👑 Name Monument
             </button>
             <button
               onClick={() => flyTo([0, 25000, 140000], 140000)}

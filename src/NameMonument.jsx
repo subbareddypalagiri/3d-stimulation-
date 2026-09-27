@@ -78,7 +78,7 @@ function WordVoxels({ word, cellSize = 0.15, colorA, colorB, yOffset = 0 }) {
   )
 }
 
-export default function NameMonument({ position = [0, 22, 0], visible = false }) {
+export default function NameMonument({ position = [0, 22, 0], visible = false, onFocus }) {
   const groupRef = useRef()
 
   useFrame(({ clock }) => {
@@ -91,11 +91,31 @@ export default function NameMonument({ position = [0, 22, 0], visible = false })
   if (!visible) return null
 
   return (
-    <group ref={groupRef} position={position}>
+    <group
+      ref={groupRef}
+      position={position}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (onFocus) onFocus()
+      }}
+      onPointerOver={(e) => {
+        e.stopPropagation()
+        document.body.style.cursor = "pointer"
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = "auto"
+      }}
+    >
       {/* Subtle localized lights */}
       <pointLight color="#8b5cf6" intensity={0.5} distance={12} position={[4, 3, 5]} />
       <pointLight color="#5eead4" intensity={0.4} distance={12} position={[-4, -2, 4]} />
       <pointLight color="#f5c542" intensity={0.3} distance={10} position={[0, -3, -2]} />
+
+      {/* Invisible clickable hitbox for easy focus click */}
+      <mesh visible={false} position={[0, 0, 0]}>
+        <boxGeometry args={[11, 4, 3]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
 
       {/* LINE 1: SUBBAREDDY (Ultra-sleek ~8.8 AU wide) */}
       <WordVoxels
