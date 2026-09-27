@@ -109,6 +109,25 @@ function App() {
   })
   const [showMonument, setShowMonument] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isSpeedModalOpen, setIsSpeedModalOpen] = useState(false)
+  const [mouseSensitivity, setMouseSensitivity] = useState(() => {
+    try {
+      const saved = localStorage.getItem("cosmic_mouse_sensitivity")
+      return saved ? JSON.parse(saved) : { scroll: 0.6, rotate: 0.6 }
+    } catch {
+      return { scroll: 0.6, rotate: 0.6 }
+    }
+  })
+
+  const updateSensitivity = (newSens) => {
+    setMouseSensitivity(newSens)
+    try {
+      localStorage.setItem("cosmic_mouse_sensitivity", JSON.stringify(newSens))
+    } catch (e) {
+      console.warn(e)
+    }
+  }
+
   const [primeLayoutMode, setPrimeLayoutMode] = useState("rows")
   const [activePrimePlanet, setActivePrimePlanet] = useState(null)
   const [telemetry, setTelemetry] = useState({
@@ -219,15 +238,17 @@ function App() {
           <Stars radius={15000} depth={500} count={3000} factor={8} saturation={1} fade speed={0.5} />
         </group>
         
-        {/* Responsive, Smooth & Natural 3D Planetarium Camera Controls */}
+        {/* Responsive, Smooth & Natural 3D Planetarium Camera Controls with User Sensitivity */}
         <CameraControls 
           ref={cameraControlRef} 
           makeDefault 
           maxDistance={65000000000} 
           minDistance={0.5}
           smoothTime={0.25}
-          dollySpeed={1.0}
-          truckSpeed={1.0}
+          azimuthRotateSpeed={mouseSensitivity.rotate}
+          polarRotateSpeed={mouseSensitivity.rotate}
+          truckSpeed={mouseSensitivity.rotate}
+          dollySpeed={mouseSensitivity.scroll}
           dollyToCursor={true}
           infinityDolly={true}
         />
@@ -235,8 +256,11 @@ function App() {
         {/* Real-time Interstellar Flight Engine (Traverse gaps between solar systems) */}
         <InterstellarNavigator cameraControlRef={cameraControlRef} flyTo={flyTo} />
 
-        {/* 360° Free of Motion Scroll Navigator (Fly towards mouse look direction to any planet or star) */}
-        <CosmicFlightNavigator cameraControlRef={cameraControlRef} />
+        {/* 360° Free of Motion Scroll Navigator with Dynamic User Speed */}
+        <CosmicFlightNavigator 
+          cameraControlRef={cameraControlRef} 
+          scrollSpeed={mouseSensitivity.scroll} 
+        />
 
         <EffectComposer disableNormalPass>
           <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.5} intensity={1.2} mipmapBlur />
@@ -408,6 +432,34 @@ function App() {
           <span>Prime Realm Projects</span>
         </button>
 
+        <button
+          onClick={() => setIsSpeedModalOpen(!isSpeedModalOpen)}
+          style={{
+            background: isSpeedModalOpen
+              ? "linear-gradient(135deg, rgba(0, 216, 255, 0.35), rgba(56, 189, 248, 0.35))"
+              : "rgba(5, 10, 25, 0.82)",
+            backdropFilter: "blur(16px)",
+            border: `1.5px solid ${isSpeedModalOpen ? "#38bdf8" : "rgba(56, 189, 248, 0.5)"}`,
+            color: isSpeedModalOpen ? "#ffffff" : "#38bdf8",
+            padding: "8px 14px",
+            borderRadius: 24,
+            fontSize: 12,
+            fontWeight: 800,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            boxShadow: isSpeedModalOpen
+              ? "0 0 25px rgba(56, 189, 248, 0.7)"
+              : "0 4px 15px rgba(0, 216, 255, 0.2)",
+            transition: "all 0.25s ease"
+          }}
+          title="Adjust Mouse Scroll & Look Flight Speed"
+        >
+          <span style={{ fontSize: 14 }}>🖱️</span>
+          <span>Speed: {mouseSensitivity.scroll.toFixed(1)}x ▾</span>
+        </button>
+
         {!isMenuOpen && (
           <button
             onClick={() => setIsMenuOpen(true)}
@@ -445,6 +497,142 @@ function App() {
           </button>
         )}
       </div>
+
+      {/* Quick Mouse Sensitivity Adjustment Popover */}
+      {isSpeedModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 72,
+            right: isMenuOpen ? 410 : 20,
+            width: 320,
+            background: "rgba(5, 10, 25, 0.95)",
+            border: "1.5px solid #38bdf8",
+            borderRadius: 16,
+            padding: "16px 18px",
+            backdropFilter: "blur(24px)",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.85), 0 0 30px rgba(56, 189, 248, 0.35)",
+            color: "#e2e8f0",
+            fontFamily: "system-ui, -apple-system, sans-serif",
+            zIndex: 110,
+            display: "flex",
+            flexDirection: "column",
+            gap: 12
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 16 }}>🖱️</span>
+              <b style={{ color: "#38bdf8", fontSize: 13 }}>Mouse & Flight Speed</b>
+            </div>
+            <button
+              onClick={() => setIsSpeedModalOpen(false)}
+              style={{
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "none",
+                color: "#94a3b8",
+                padding: "2px 8px",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontSize: 11
+              }}
+            >
+              ✕ Done
+            </button>
+          </div>
+
+          {/* Quick Presets */}
+          <div>
+            <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 6, fontWeight: 700, letterSpacing: "0.04em" }}>
+              SPEED PRESETS:
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5 }}>
+              {[
+                { label: "🐢 Smooth", scroll: 0.35, rotate: 0.4 },
+                { label: "👌 Balanced", scroll: 0.6, rotate: 0.6 },
+                { label: "⚡ Fast", scroll: 1.2, rotate: 1.0 }
+              ].map((p) => {
+                const isSelected = Math.abs(mouseSensitivity.scroll - p.scroll) < 0.05
+                return (
+                  <button
+                    key={p.label}
+                    onClick={() => updateSensitivity({ scroll: p.scroll, rotate: p.rotate })}
+                    style={{
+                      background: isSelected ? "rgba(56, 189, 248, 0.3)" : "rgba(255, 255, 255, 0.06)",
+                      border: `1px solid ${isSelected ? "#38bdf8" : "rgba(255, 255, 255, 0.15)"}`,
+                      color: isSelected ? "#38bdf8" : "#cbd5e1",
+                      padding: "5px 6px",
+                      borderRadius: 8,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Slider 1: Scroll Flight Speed */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
+              <span>🚀 Scroll Flight Speed:</span>
+              <b style={{ color: "#38bdf8" }}>{mouseSensitivity.scroll.toFixed(2)}x</b>
+            </div>
+            <input
+              type="range"
+              min="0.1"
+              max="2.5"
+              step="0.05"
+              value={mouseSensitivity.scroll}
+              onChange={(e) => {
+                updateSensitivity({ ...mouseSensitivity, scroll: parseFloat(e.target.value) })
+              }}
+              style={{
+                width: "100%",
+                accentColor: "#38bdf8",
+                cursor: "pointer"
+              }}
+            />
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#64748b" }}>
+              <span>0.1x (Fine)</span>
+              <span>1.0x (Standard)</span>
+              <span>2.5x (Speed)</span>
+            </div>
+          </div>
+
+          {/* Slider 2: Mouse Look / Drag Rotation Speed */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
+              <span>🔄 Look & Drag Speed:</span>
+              <b style={{ color: "#38bdf8" }}>{mouseSensitivity.rotate.toFixed(2)}x</b>
+            </div>
+            <input
+              type="range"
+              min="0.1"
+              max="2.0"
+              step="0.05"
+              value={mouseSensitivity.rotate}
+              onChange={(e) => {
+                updateSensitivity({ ...mouseSensitivity, rotate: parseFloat(e.target.value) })
+              }}
+              style={{
+                width: "100%",
+                accentColor: "#38bdf8",
+                cursor: "pointer"
+              }}
+            />
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#64748b" }}>
+              <span>0.1x (Gentle)</span>
+              <span>1.0x (Standard)</span>
+              <span>2.0x (Swift)</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isMenuOpen && (
         <div style={{
@@ -512,6 +700,89 @@ function App() {
             • <b>Scroll:</b> Continuous zoom & fly past systems<br />
             • <b>W/S/A/D:</b> Cruise void gaps | <b>Shift:</b> Warp boost<br />
             • <b>Drag:</b> 360° Look | <b>Click Star:</b> Fly to system
+          </div>
+
+          {/* Mouse & Flight Sensitivity Controls inside Menu */}
+          <div style={{
+            background: "rgba(56, 189, 248, 0.08)",
+            border: "1px solid rgba(56, 189, 248, 0.25)",
+            borderRadius: 10,
+            padding: "10px 12px",
+            marginBottom: 10
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <b style={{ color: "#38bdf8", fontSize: 10, letterSpacing: "0.04em" }}>🖱️ MOUSE & FLIGHT SPEED ADJUST:</b>
+              <span style={{ fontSize: 9, color: "#94a3b8" }}>{mouseSensitivity.scroll.toFixed(2)}x</span>
+            </div>
+
+            {/* Presets */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, marginBottom: 8 }}>
+              {[
+                { label: "🐢 Smooth (0.35x)", scroll: 0.35, rotate: 0.4 },
+                { label: "👌 Balanced (0.6x)", scroll: 0.6, rotate: 0.6 },
+                { label: "⚡ Fast (1.2x)", scroll: 1.2, rotate: 1.0 }
+              ].map((p) => {
+                const isSelected = Math.abs(mouseSensitivity.scroll - p.scroll) < 0.05
+                return (
+                  <button
+                    key={p.label}
+                    onClick={() => updateSensitivity({ scroll: p.scroll, rotate: p.rotate })}
+                    style={{
+                      background: isSelected ? "rgba(56, 189, 248, 0.3)" : "rgba(255, 255, 255, 0.06)",
+                      border: `1px solid ${isSelected ? "#38bdf8" : "rgba(255, 255, 255, 0.15)"}`,
+                      color: isSelected ? "#38bdf8" : "#cbd5e1",
+                      padding: "4px 4px",
+                      borderRadius: 6,
+                      fontSize: 8.5,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      textAlign: "center",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Scroll speed slider */}
+            <div style={{ marginBottom: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9.5, color: "#cbd5e1", marginBottom: 2 }}>
+                <span>🚀 Scroll Flight Speed:</span>
+                <b style={{ color: "#38bdf8" }}>{mouseSensitivity.scroll.toFixed(2)}x</b>
+              </div>
+              <input
+                type="range"
+                min="0.1"
+                max="2.5"
+                step="0.05"
+                value={mouseSensitivity.scroll}
+                onChange={(e) => {
+                  updateSensitivity({ ...mouseSensitivity, scroll: parseFloat(e.target.value) })
+                }}
+                style={{ width: "100%", accentColor: "#38bdf8", cursor: "pointer", height: 4 }}
+              />
+            </div>
+
+            {/* Rotation speed slider */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9.5, color: "#cbd5e1", marginBottom: 2 }}>
+                <span>🔄 Look & Drag Speed:</span>
+                <b style={{ color: "#38bdf8" }}>{mouseSensitivity.rotate.toFixed(2)}x</b>
+              </div>
+              <input
+                type="range"
+                min="0.1"
+                max="2.0"
+                step="0.05"
+                value={mouseSensitivity.rotate}
+                onChange={(e) => {
+                  updateSensitivity({ ...mouseSensitivity, rotate: parseFloat(e.target.value) })
+                }}
+                style={{ width: "100%", accentColor: "#38bdf8", cursor: "pointer", height: 4 }}
+              />
+            </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>

@@ -7,7 +7,7 @@ import { useThree } from "@react-three/fiber"
  * Scrolling mouse wheel translates camera & target forward/backward along view vector,
  * allowing effortless free motion to any planet, star, or deep-space nebula without pivot locks.
  */
-export default function CosmicFlightNavigator({ cameraControlRef }) {
+export default function CosmicFlightNavigator({ cameraControlRef, scrollSpeed = 0.6 }) {
   const { gl, camera } = useThree()
 
   useEffect(() => {
@@ -28,29 +28,30 @@ export default function CosmicFlightNavigator({ cameraControlRef }) {
 
       // Adaptive cosmological speed curve based on camera distance
       const camDist = camera.position.length()
-      let speed = 14
+      let speed = 12
 
       if (camDist < 120) {
-        speed = 5 // Close-up planet surface inspection
+        speed = 4 // Close-up planet surface inspection
       } else if (camDist < 600) {
-        speed = 28 // Solar system cruise
+        speed = 22 // Solar system cruise
       } else if (camDist < 3000) {
-        speed = 180 // Outer Kuiper / Oort boundary
+        speed = 140 // Outer Kuiper / Oort boundary
       } else if (camDist < 25000) {
-        speed = 1500 // Interstellar neighbor stars
+        speed = 1100 // Interstellar neighbor stars
       } else if (camDist < 100000) {
-        speed = 9500 // Milky Way spiral boundary
+        speed = 7000 // Milky Way spiral boundary
       } else if (camDist < 600000) {
-        speed = 48000 // Intergalactic deep void & Skill Web transit
+        speed = 36000 // Intergalactic deep void & Skill Web transit
       } else if (camDist < 5000000) {
-        speed = 320000 // Local galactic group
+        speed = 240000 // Local galactic group
       } else if (camDist < 50000000) {
-        speed = 2800000 // Virgo supercluster
+        speed = 2000000 // Virgo supercluster
       } else {
-        speed = Math.max(14000000, camDist * 0.16) // Cosmic web & multiverse horizons
+        speed = Math.max(10000000, camDist * 0.12) // Cosmic web & multiverse horizons
       }
 
-      const totalDistance = forwardDir * speed * (isShift ? 4.0 : 1.0)
+      // Apply user-configured scrollSpeed multiplier
+      const totalDistance = forwardDir * speed * scrollSpeed * (isShift ? 3.0 : 1.0)
       controls.forward(totalDistance, true)
     }
 
@@ -58,7 +59,7 @@ export default function CosmicFlightNavigator({ cameraControlRef }) {
     return () => {
       canvas.removeEventListener("wheel", handleWheel)
     }
-  }, [gl, camera, cameraControlRef])
+  }, [gl, camera, cameraControlRef, scrollSpeed])
 
   return null
 }
