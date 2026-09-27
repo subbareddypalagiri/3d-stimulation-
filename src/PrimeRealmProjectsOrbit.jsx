@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
+import { useKineticTrackball } from "./useKineticTrackball"
 
 /* ---------------------------------------------------------------------
    5x7 PIXEL FONT — for pixel labels and 3D voxel text
@@ -409,15 +410,33 @@ export default function PrimeRealmProjectsOrbit({
     })
   })
 
+  const trackballGroupRef = useRef()
+  const { bindGrab } = useKineticTrackball({
+    targetRef: trackballGroupRef,
+    idleDriftY: 0.0006,
+    idleDriftX: 0,
+    sensitivityX: 0.005,
+    sensitivityY: 0.004,
+    damping: 0.92,
+    clampPitch: false
+  })
+
   return (
     <group position={position} scale={[scale, scale, scale]}>
-      {/* 3D Voxel Lettering Monument: PROJECTS WITH PASSION */}
-      <group ref={titleRef}>
-        <primitive object={voxelTitleGroup} />
-      </group>
+      {/* 360° Free Kinetic Trackball Grab Sphere for the Prime Projects Realm */}
+      <mesh {...bindGrab}>
+        <sphereGeometry args={[140, 24, 24]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
 
-      {/* 13 Project Planets */}
-      {planetData.map((p, idx) => {
+      <group ref={trackballGroupRef}>
+        {/* 3D Voxel Lettering Monument: PROJECTS WITH PASSION */}
+        <group ref={titleRef}>
+          <primitive object={voxelTitleGroup} />
+        </group>
+
+        {/* 13 Project Planets */}
+        {planetData.map((p, idx) => {
         const glowHex = "#" + new THREE.Color(p.colorC).getHexString()
         const isActive = activePlanet && activePlanet.name === p.name
 
@@ -563,6 +582,7 @@ export default function PrimeRealmProjectsOrbit({
 
       {/* Ambient Realm illumination */}
       <ambientLight intensity={0.4} />
+      </group>
     </group>
   )
 }

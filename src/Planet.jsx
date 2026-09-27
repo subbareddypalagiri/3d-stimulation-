@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useFrame, useLoader } from '@react-three/fiber'
 import * as THREE from 'three'
 import { TextureLoader } from 'three'
+import { useKineticTrackball } from './useKineticTrackball'
 
 export default function Planet({ 
   position, 
@@ -15,6 +16,8 @@ export default function Planet({
   ring = null
 }) {
   const planetRef = useRef()
+  const planetRotGroupRef = useRef()
+  const cloudsRef = useRef()
   const groupRef = useRef()
 
   // Safely load textures only if they are provided
@@ -35,9 +38,33 @@ export default function Planet({
   const specularMap = textures.specular ? loadedTextures[texIndex++] : null;
   const cloudsMap = textures.clouds ? loadedTextures[texIndex++] : null;
 
+  const handleClick = (e) => {
+    if (onClick) {
+      const worldPos = new THREE.Vector3()
+      if (planetRef.current) {
+        planetRef.current.getWorldPosition(worldPos)
+      } else if (e?.object) {
+        e.object.getWorldPosition(worldPos)
+      }
+      onClick([worldPos.x, worldPos.y, worldPos.z], radius)
+    }
+  }
+
+  // 360° Free Kinetic Trackball for the planet
+  const { bindGrab } = useKineticTrackball({
+    targetRef: planetRotGroupRef,
+    idleDriftY: rotationSpeed,
+    idleDriftX: 0,
+    sensitivityX: 0.007,
+    sensitivityY: 0.006,
+    damping: 0.92,
+    clampPitch: false,
+    onClick: handleClick
+  })
+
   useFrame((state, delta) => {
     if (groupRef.current) groupRef.current.rotation.y += delta * orbitSpeed
-    if (planetRef.current) planetRef.current.rotation.y += delta * rotationSpeed
+    if (cloudsRef.current) cloudsRef.current.rotation.y += delta * (rotationSpeed * 0.4)
   })
 
   return (
@@ -48,73 +75,56 @@ export default function Planet({
         <meshBasicMaterial color="#335577" transparent opacity={0.06} side={THREE.DoubleSide} depthWrite={false} />
       </mesh>
 
-      <group 
-        position={position} 
-        onClick={(e) => {
-          e.stopPropagation()
-          if (onClick) {
-            const worldPos = new THREE.Vector3()
-            if (planetRef.current) {
-              planetRef.current.getWorldPosition(worldPos)
-            } else {
-              e.object.getWorldPosition(worldPos)
-            }
-            onClick([worldPos.x, worldPos.y, worldPos.z], radius)
-          }
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation()
-          document.body.style.cursor = 'pointer'
-        }}
-        onPointerOut={(e) => {
-          document.body.style.cursor = 'auto'
-        }}
-      >
-        {/* Invisible expanded hit target for effortless clicking from any angle or distance */}
-        <mesh>
-          <sphereGeometry args={[Math.max(radius * 3.2, 4.0), 16, 16]} />
+      <group position={position}>
+        {/* Invisible expanded hit target for 360° grab rotation & clicking */}
+        <mesh {...bindGrab}>
+          <sphereGeometry args={[Math.max(radius * 3.4, 4.2), 16, 16]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
-        <mesh ref={planetRef} castShadow receiveShadow>
-          <sphereGeometry args={[radius, 48, 48]} />
-          <meshPhysicalMaterial
-            map={colorMap}
-            color={!colorMap ? color : '#ffffff'}
-            normalMap={normalMap}
-            roughnessMap={specularMap}
-            clearcoat={specularMap ? 0.5 : 0.0} 
-            clearcoatRoughness={0.1}
-            metalness={specularMap ? 0.1 : 0.0}
-            roughness={specularMap ? 0.8 : (colorMap ? 0.6 : 0.8)}
-          />
-        </mesh>
 
-        {hasClouds && cloudsMap && (
-          <mesh>
-            <sphereGeometry args={[radius * 1.01, 128, 128]} />
-            <meshStandardMaterial
-              map={cloudsMap}
-              transparent={true}
-              opacity={0.8}
-              depthWrite={false}
-              blending={THREE.AdditiveBlending}
+        {/* Rotatable Planet Body */}
+        <group ref={planetRotGroupRef}>
+          <mesh ref={planetRef} castShadow receiveShadow>
+            <sphereGeometry args={[radius, 48, 48]} />
+            <meshPhysicalMaterial
+              map={colorMap}
+              color={!colorMap ? color : '#ffffff'}
+              normalMap={normalMap}
+              roughnessMap={specularMap}
+              clearcoat={specularMap ? 0.5 : 0.0} 
+              clearcoatRoughness={0.1}
+              metalness={specularMap ? 0.1 : 0.0}
+              roughness={specularMap ? 0.8 : (colorMap ? 0.6 : 0.8)}
             />
           </mesh>
-        )}
 
-        {/* Cinematic Rings (Saturn/Uranus) */}
-        {ring && (
-          <mesh rotation={[Math.PI / 2 + 0.2, 0, 0]} castShadow receiveShadow>
-            <ringGeometry args={[ring.innerRadius, ring.outerRadius, 128]} />
-            <meshPhysicalMaterial 
-              color={ring.color}
-              transparent 
-              opacity={0.9} 
-              side={THREE.DoubleSide} 
-              roughness={0.8}
-            />
-          </mesh>
-        )}
+          {hasClouds && cloudsMap && (
+            <mesh ref={cloudsRef}>
+              <sphereGeometry args={[radius * 1.01, 128, 128]} />
+              <meshStandardMaterial
+                map={cloudsMap}
+                transparent={true}
+                opacity={0.8}
+                depthWrite={false}
+                blending={THREE.AdditiveBlending}
+              />
+            </mesh>
+          )}
+
+          {/* Cinematic Rings (Saturn/Uranus) */}
+          {ring && (
+            <mesh rotation={[Math.PI / 2 + 0.2, 0, 0]} castShadow receiveShadow>
+              <ringGeometry args={[ring.innerRadius, ring.outerRadius, 128]} />
+              <meshPhysicalMaterial 
+                color={ring.color}
+                transparent 
+                opacity={0.9} 
+                side={THREE.DoubleSide} 
+                roughness={0.8}
+              />
+            </mesh>
+          )}
+        </group>
       </group>
     </group>
   )

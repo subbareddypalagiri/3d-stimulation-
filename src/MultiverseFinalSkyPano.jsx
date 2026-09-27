@@ -1,6 +1,7 @@
-import React, { useRef, useMemo } from "react"
+import React, { useRef, useMemo, useState } from "react"
 import { useLoader, useFrame } from "@react-three/fiber"
 import * as THREE from "three"
+import { useKineticTrackball } from "./useKineticTrackball"
 
 import { TEN_COSMIC_SPHERES } from "./cosmicSpheresData"
 
@@ -52,8 +53,8 @@ const sphereFragmentShader = `
   }
 `
 
-function SingleCosmicSphere({ sphere, texture, onSelect }) {
-  const meshRef = useRef()
+function SingleCosmicSphere({ sphere, texture, onSelect, isVisible }) {
+  const rotGroupRef = useRef()
   const matRef = useRef()
 
   const uniforms = useMemo(() => ({
@@ -64,12 +65,21 @@ function SingleCosmicSphere({ sphere, texture, onSelect }) {
     uOpacity: { value: 1.0 }
   }), [texture, sphere])
 
+  const driftDir = sphere.id % 2 === 0 ? 1 : -1
+  const { bindGrab } = useKineticTrackball({
+    targetRef: rotGroupRef,
+    enabled: isVisible,
+    idleDriftY: 0.0006 * driftDir,
+    idleDriftX: 0,
+    sensitivityX: 0.005,
+    sensitivityY: 0.004,
+    damping: 0.93,
+    clampPitch: false
+  })
+
   useFrame(({ clock }) => {
     if (matRef.current) {
       matRef.current.uniforms.uTime.value = clock.elapsedTime + sphere.id * 1.5
-    }
-    if (meshRef.current) {
-      meshRef.current.rotation.y = clock.elapsedTime * 0.0015 * (sphere.id % 2 === 0 ? 1 : -1)
     }
   })
 
@@ -77,28 +87,37 @@ function SingleCosmicSphere({ sphere, texture, onSelect }) {
   const radius = 1100000000 * sphere.scale
 
   return (
-    <group position={sphere.pos} raycast={() => null}>
-      <mesh
-        ref={meshRef}
-        raycast={() => null}
-      >
-        <sphereGeometry args={[radius, 48, 24]} />
-        <shaderMaterial
-          ref={matRef}
-          vertexShader={sphereVertexShader}
-          fragmentShader={sphereFragmentShader}
-          uniforms={uniforms}
-          side={THREE.DoubleSide}
-          transparent={true}
-          depthWrite={false}
-        />
-      </mesh>
+    <group position={sphere.pos}>
+      {/* 360° Rotatable Cosmic Sphere */}
+      <group ref={rotGroupRef}>
+        <mesh raycast={() => null}>
+          <sphereGeometry args={[radius, 48, 24]} />
+          <shaderMaterial
+            ref={matRef}
+            vertexShader={sphereVertexShader}
+            fragmentShader={sphereFragmentShader}
+            uniforms={uniforms}
+            side={THREE.DoubleSide}
+            transparent={true}
+            depthWrite={false}
+          />
+        </mesh>
+      </group>
+
+      {/* Interactive 3D Grab Hit Sphere for 360° Rotation */}
+      {isVisible && (
+        <mesh {...bindGrab}>
+          <sphereGeometry args={[radius * 1.02, 16, 16]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
+        </mesh>
+      )}
     </group>
   )
 }
 
 export default function MultiverseFinalSkyPano({ activeCenter = [0, 0, 0] }) {
   const groupRef = useRef()
+  const [isLevel7, setIsLevel7] = useState(false)
   const texture = useLoader(THREE.TextureLoader, "/textures/milkyway_pano.jpg")
 
   useMemo(() => {
@@ -115,16 +134,21 @@ export default function MultiverseFinalSkyPano({ activeCenter = [0, 0, 0] }) {
   useFrame(({ camera }) => {
     if (!groupRef.current) return
     const dist = camera.position.length()
-    groupRef.current.visible = dist > 140000000
+    const visible = dist > 140000000
+    groupRef.current.visible = visible
+    if (visible !== isLevel7) {
+      setIsLevel7(visible)
+    }
   })
 
   return (
-    <group ref={groupRef} raycast={() => null}>
+    <group ref={groupRef}>
       {TEN_COSMIC_SPHERES.map((sphere) => (
         <SingleCosmicSphere
           key={sphere.id}
           sphere={sphere}
           texture={texture}
+          isVisible={isLevel7}
         />
       ))}
     </group>

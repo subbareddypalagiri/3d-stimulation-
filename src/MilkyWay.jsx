@@ -86,14 +86,27 @@ const proceduralFragmentShader = `
   }
 `
 
+import { useKineticTrackball } from './useKineticTrackball'
+
 export default function MilkyWay({ position = [0, 0, 0] }) {
   const exteriorRef = useRef()
   const exteriorMaterialRef = useRef()
+  const trackballGroupRef = useRef()
 
   const proceduralUniforms = useMemo(() => ({
     uTime: { value: 0 },
     uOpacity: { value: 0.0 }
   }), [])
+
+  const { bindGrab } = useKineticTrackball({
+    targetRef: trackballGroupRef,
+    idleDriftY: 0.0003,
+    idleDriftX: 0,
+    sensitivityX: 0.004,
+    sensitivityY: 0.003,
+    damping: 0.94,
+    clampPitch: false
+  })
 
   useFrame(({ clock, camera }) => {
     const time = clock.getElapsedTime()
@@ -119,21 +132,29 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
   })
 
   return (
-    <group position={position} raycast={() => null}>
-      {/* THE EXTERIOR GRAND SPIRAL GALAXY DISC */}
-      <mesh ref={exteriorRef} rotation={[-Math.PI / 6, 0, 0]} raycast={() => null}>
+    <group position={position}>
+      {/* THE EXTERIOR GRAND SPIRAL GALAXY DISC WITH 360° KINETIC TRACKBALL */}
+      <group ref={trackballGroupRef}>
+        <mesh ref={exteriorRef} rotation={[-Math.PI / 6, 0, 0]} raycast={() => null}>
+          <planeGeometry args={[450000, 225000]} />
+          <shaderMaterial 
+            ref={exteriorMaterialRef}
+            vertexShader={livingVertexShader}
+            fragmentShader={proceduralFragmentShader}
+            uniforms={proceduralUniforms}
+            transparent={true}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            fog={false}
+          />
+        </mesh>
+      </group>
+
+      {/* Interactive 3D Grab Plane */}
+      <mesh {...bindGrab} rotation={[-Math.PI / 6, 0, 0]}>
         <planeGeometry args={[450000, 225000]} />
-        <shaderMaterial 
-          ref={exteriorMaterialRef}
-          vertexShader={livingVertexShader}
-          fragmentShader={proceduralFragmentShader}
-          uniforms={proceduralUniforms}
-          transparent={true}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-          fog={false}
-        />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
       </mesh>
     </group>
   )

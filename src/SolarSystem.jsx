@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import Sun from './Sun'
 import Planet from './Planet'
+import { useKineticTrackball } from './useKineticTrackball'
 
 const AVAILABLE_TEXTURES = [
   { color: '/textures/mercury.jpg' },
@@ -105,6 +106,22 @@ export default function SolarSystem({
     }
   })
 
+  const sunGroupRef = useRef()
+  const { bindGrab: bindSunGrab } = useKineticTrackball({
+    targetRef: sunGroupRef,
+    idleDriftY: 0.002,
+    idleDriftX: 0,
+    sensitivityX: 0.005,
+    sensitivityY: 0.004,
+    damping: 0.92,
+    clampPitch: false,
+    onClick: () => {
+      if (onSelectSystem) {
+        onSelectSystem(position, scale)
+      }
+    }
+  })
+
   return (
     <group position={position} scale={[scale, scale, scale]}>
       {/* Dynamic pointLight ONLY for Home Sol system (preserves pure 60fps & prevents lighting blowout) */}
@@ -117,30 +134,18 @@ export default function SolarSystem({
         />
       )}
       
-      {/* Interactive Sun with clean hit target */}
-      <group
-        onClick={(e) => {
-          e.stopPropagation()
-          if (onSelectSystem) {
-            onSelectSystem(position, scale)
-          }
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation()
-          document.body.style.cursor = 'pointer'
-        }}
-        onPointerOut={(e) => {
-          document.body.style.cursor = 'auto'
-        }}
-      >
-        <Sun 
-          colorDark={sunColors.colorDark || sunColors.dark}
-          colorRed={sunColors.colorRed || sunColors.red}
-          colorOrange={sunColors.colorOrange || sunColors.org}
-          colorWhite={sunColors.colorWhite || sunColors.wht}
-        />
-        <mesh>
-          <sphereGeometry args={[10, 16, 16]} />
+      {/* Interactive Sun with 360° kinetic trackball and hit target */}
+      <group>
+        <group ref={sunGroupRef}>
+          <Sun 
+            colorDark={sunColors.colorDark || sunColors.dark}
+            colorRed={sunColors.colorRed || sunColors.red}
+            colorOrange={sunColors.colorOrange || sunColors.org}
+            colorWhite={sunColors.colorWhite || sunColors.wht}
+          />
+        </group>
+        <mesh {...bindSunGrab}>
+          <sphereGeometry args={[11, 16, 16]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
       </group>

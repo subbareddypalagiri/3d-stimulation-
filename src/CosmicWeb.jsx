@@ -1,6 +1,7 @@
-import React, { useRef, useMemo } from "react"
+import React, { useRef, useMemo, useState } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
+import { useKineticTrackball } from "./useKineticTrackball"
 
 // ============================================================
 // 1. GALAXY SHADER (1000 Spiral Galaxies Cluster)
@@ -594,10 +595,28 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
     omniverseRef.current.instanceMatrix.needsUpdate = true
   }, [oPos, oScales, dummy])
 
+  const [isCosmicScale, setIsCosmicScale] = useState(false)
+  const trackballGroupRef = useRef()
+  const { bindGrab } = useKineticTrackball({
+    targetRef: trackballGroupRef,
+    enabled: isCosmicScale,
+    idleDriftY: 0.0001,
+    idleDriftX: 0,
+    sensitivityX: 0.003,
+    sensitivityY: 0.002,
+    damping: 0.94,
+    clampPitch: false
+  })
+
   useFrame(({ clock, camera }) => {
     const t = clock.elapsedTime
     const center = new THREE.Vector3(...activeCenter)
     const dist = camera.position.distanceTo(center)
+
+    const isScale = dist > 220000 && dist < 1200000000
+    if (isScale !== isCosmicScale) {
+      setIsCosmicScale(isScale)
+    }
 
     // 1. 1000 Galaxies Cluster (220K -> 2.2M)
     if (galaxyRef.current && galaxyMat.current) {
@@ -650,9 +669,18 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
   })
 
   return (
-    <group position={activeCenter} raycast={() => null}>
-      {/* LEVEL 6: 20 BOLD OMNIVERSE MEGA-DOMAINS (NormalBlending = NO BLOWOUT!) */}
-      <instancedMesh ref={omniverseRef} args={[null, null, OMNIVERSE_COUNT]} frustumCulled={false} raycast={() => null}>
+    <group position={activeCenter}>
+      {/* 360° Free Kinetic Trackball Grab Sphere for the Cosmic Web */}
+      {isCosmicScale && (
+        <mesh {...bindGrab}>
+          <sphereGeometry args={[95000000, 24, 24]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+
+      <group ref={trackballGroupRef}>
+        {/* LEVEL 6: 20 BOLD OMNIVERSE MEGA-DOMAINS (NormalBlending = NO BLOWOUT!) */}
+        <instancedMesh ref={omniverseRef} args={[null, null, OMNIVERSE_COUNT]} frustumCulled={false} raycast={() => null}>
         <sphereGeometry args={[1, 48, 48]}>
           <instancedBufferAttribute attach="attributes-aColor1" args={[oColor1, 3]} />
           <instancedBufferAttribute attach="attributes-aColor2" args={[oColor2, 3]} />
@@ -738,6 +766,7 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
           side={THREE.DoubleSide} 
         />
       </instancedMesh>
+      </group>
     </group>
   )
 }

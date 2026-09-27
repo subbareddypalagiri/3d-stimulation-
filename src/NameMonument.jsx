@@ -78,62 +78,67 @@ function WordVoxels({ word, cellSize = 0.15, colorA, colorB, yOffset = 0 }) {
   )
 }
 
+import { useKineticTrackball } from "./useKineticTrackball"
+
 export default function NameMonument({ position = [0, 22, 0], visible = false, onFocus }) {
-  const groupRef = useRef()
+  const floatGroupRef = useRef()
+  const rotGroupRef = useRef()
+
+  const { bindGrab } = useKineticTrackball({
+    targetRef: rotGroupRef,
+    enabled: visible,
+    idleDriftY: 0.001,
+    idleDriftX: 0,
+    sensitivityX: 0.006,
+    sensitivityY: 0.005,
+    damping: 0.92,
+    clampPitch: false,
+    onClick: () => {
+      if (onFocus) onFocus()
+    }
+  })
 
   useFrame(({ clock }) => {
-    if (!groupRef.current || !visible) return
+    if (!floatGroupRef.current || !visible) return
     const t = clock.elapsedTime
-    groupRef.current.position.y = position[1] + Math.sin(t * 0.4) * 0.3
-    groupRef.current.rotation.y = Math.sin(t * 0.2) * 0.18
+    floatGroupRef.current.position.y = position[1] + Math.sin(t * 0.4) * 0.3
   })
 
   if (!visible) return null
 
   return (
-    <group
-      ref={groupRef}
-      position={position}
-      onClick={(e) => {
-        e.stopPropagation()
-        if (onFocus) onFocus()
-      }}
-      onPointerOver={(e) => {
-        e.stopPropagation()
-        document.body.style.cursor = "pointer"
-      }}
-      onPointerOut={() => {
-        document.body.style.cursor = "auto"
-      }}
-    >
-      {/* Subtle localized lights */}
-      <pointLight color="#8b5cf6" intensity={0.5} distance={12} position={[4, 3, 5]} />
-      <pointLight color="#5eead4" intensity={0.4} distance={12} position={[-4, -2, 4]} />
-      <pointLight color="#f5c542" intensity={0.3} distance={10} position={[0, -3, -2]} />
+    <group ref={floatGroupRef} position={position}>
+      {/* 360° Rotatable Monument Container */}
+      <group ref={rotGroupRef}>
+        {/* Subtle localized lights */}
+        <pointLight color="#8b5cf6" intensity={0.5} distance={12} position={[4, 3, 5]} />
+        <pointLight color="#5eead4" intensity={0.4} distance={12} position={[-4, -2, 4]} />
+        <pointLight color="#f5c542" intensity={0.3} distance={10} position={[0, -3, -2]} />
 
-      {/* Invisible clickable hitbox for easy focus click */}
-      <mesh visible={false} position={[0, 0, 0]}>
-        <boxGeometry args={[11, 4, 3]} />
+        {/* LINE 1: SUBBAREDDY (Ultra-sleek ~8.8 AU wide) */}
+        <WordVoxels
+          word="SUBBAREDDY"
+          cellSize={0.15}
+          colorA={0x5eead4}
+          colorB={0x8b5cf6}
+          yOffset={0.8}
+        />
+
+        {/* LINE 2: PALAGIRI */}
+        <WordVoxels
+          word="PALAGIRI"
+          cellSize={0.15}
+          colorA={0xf5c542}
+          colorB={0xff5470}
+          yOffset={-0.8}
+        />
+      </group>
+
+      {/* Invisible clickable/grabbable hitbox for 360° spin & focus click */}
+      <mesh position={[0, 0, 0]} {...bindGrab}>
+        <boxGeometry args={[12, 5, 4]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-
-      {/* LINE 1: SUBBAREDDY (Ultra-sleek ~8.8 AU wide) */}
-      <WordVoxels
-        word="SUBBAREDDY"
-        cellSize={0.15}
-        colorA={0x5eead4}
-        colorB={0x8b5cf6}
-        yOffset={0.8}
-      />
-
-      {/* LINE 2: PALAGIRI */}
-      <WordVoxels
-        word="PALAGIRI"
-        cellSize={0.15}
-        colorA={0xf5c542}
-        colorB={0xff5470}
-        yOffset={-0.8}
-      />
     </group>
   )
 }
