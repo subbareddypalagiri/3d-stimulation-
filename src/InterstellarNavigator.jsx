@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
+import { getCosmicFlightSpeed } from "./CosmicFlightNavigator"
 
 export default function InterstellarNavigator({ cameraControlRef, flyTo }) {
   const keysPressed = useRef({})
@@ -47,34 +48,35 @@ export default function InterstellarNavigator({ cameraControlRef, flyTo }) {
 
     if (!forward && !backward && !left && !right) return
 
-    // Dynamically scale flight speed according to cosmic scale depth
-    const camDist = camera.position.length()
-    let baseSpeed = 120 // Cruising speed in stellar neighborhood
-    if (camDist <= 250) {
-      baseSpeed = 45 // Precision docking near planets
-    } else if (camDist > 1000 && camDist <= 10000) {
-      baseSpeed = 1200
-    } else if (camDist > 10000 && camDist <= 60000) {
-      baseSpeed = 6500
-    } else if (camDist > 60000 && camDist <= 450000) {
-      baseSpeed = 45000 // Deep void & Skill Web transit
-    } else if (camDist > 450000 && camDist <= 2500000) {
-      baseSpeed = 280000
-    } else if (camDist > 2500000 && camDist <= 50000000) {
-      baseSpeed = 2500000
-    } else if (camDist > 50000000 && camDist <= 250000000) {
-      baseSpeed = 25000000
-    } else if (camDist > 250000000) {
-      baseSpeed = Math.max(120000000, camDist * 0.45)
-    }
-
-    const currentSpeed = shift ? baseSpeed * 4.5 : baseSpeed
+    // Dynamically scale flight speed using cosmological scale detector
+    const baseSpeed = getCosmicFlightSpeed(camera, controls._target)
+    const currentSpeed = shift ? baseSpeed * 3.5 : baseSpeed
     const dt = Math.min(delta, 0.1)
 
-    if (forward) controls.forward(currentSpeed * dt, false)
-    if (backward) controls.forward(-currentSpeed * dt, false)
-    if (left) controls.truck(-currentSpeed * dt, 0, false)
-    if (right) controls.truck(currentSpeed * dt, 0, false)
+    if (forward) controls.forward(currentSpeed * dt * 2.5, false)
+    if (backward) controls.forward(-currentSpeed * dt * 2.5, false)
+    if (left) controls.truck(-currentSpeed * dt * 2.0, 0, false)
+    if (right) controls.truck(currentSpeed * dt * 2.0, 0, false)
+
+    // Ensure look-ahead target advances forward during keyboard flight
+    const target = controls._target
+    if (target) {
+      const dir = new THREE.Vector3()
+      camera.getWorldDirection(dir)
+      const distToTarget = camera.position.distanceTo(target)
+      const camDist = camera.position.length()
+      const minDist = Math.max(1.8, camDist * 0.0005)
+
+      if (distToTarget < minDist) {
+        const pushDist = Math.max(minDist * 12.0, 25.0)
+        controls.setTarget(
+          camera.position.x + dir.x * pushDist,
+          camera.position.y + dir.y * pushDist,
+          camera.position.z + dir.z * pushDist,
+          false
+        )
+      }
+    }
   })
 
   return null

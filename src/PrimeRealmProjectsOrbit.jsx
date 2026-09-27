@@ -182,9 +182,9 @@ export const PRIME_PROJECTS = [
   { name: "VERDANT AI", url: "#", style: "forest", colorA: 0x081a08, colorB: 0x2e8b3a, colorC: 0xb6ff9e, ring: false, seed: 457 }
 ]
 
-const planetSize = 4.0
-const spacingX = 13
-const rowGapY = 15
+const planetSize = 3.8
+const spacingX = 22.0
+const rowGapY = 22.0
 const rowTopCount = 7
 
 function buildVoxelTitle() {
@@ -228,8 +228,8 @@ function buildVoxelTitle() {
     })
   }
 
-  addWord("PROJECTS WITH", 38.0, 0xd7263d, 0xffb703, [7, 8, 9, 10, 11, 12])
-  addWord("PASSION", 31.2, 0xff6a00, 0xffe066)
+  addWord("PROJECTS WITH", 42.0, 0xd7263d, 0xffb703, [7, 8, 9, 10, 11, 12])
+  addWord("PASSION", 34.0, 0xff6a00, 0xffe066)
   return group
 }
 
@@ -276,6 +276,29 @@ export default function PrimeRealmProjectsOrbit({
     return { planetData: list, voxelTitleGroup: titleMesh }
   }, [])
 
+  // Exact 7-column x 2-row Shuffle layout from Claude HTML with luxurious spacing
+  const shuffleTargets = useMemo(() => {
+    const cols = 7
+    const rows = 2
+    const cellX = 24.0
+    const cellY = 22.0
+    const jitter = 3.2
+
+    // Shuffled slot indices matching Claude HTML distribution
+    const slotOrder = [0, 8, 3, 11, 6, 1, 9, 4, 12, 7, 2, 10, 5]
+    return PRIME_PROJECTS.map((_, i) => {
+      const slotIdx = slotOrder[i]
+      const c = slotIdx % cols
+      const r = Math.floor(slotIdx / cols)
+      const jx = Math.sin(i * 4.3 + 1.2) * jitter
+      const jy = Math.cos(i * 3.7 + 0.8) * jitter
+      const jz = Math.sin(i * 2.1) * 14
+      const x = (c - (cols - 1) / 2) * cellX + jx
+      const y = (r - (rows - 1) / 2) * cellY + jy - 2
+      return new THREE.Vector3(x, y, jz)
+    })
+  }, [])
+
   // Precompute visual guides for spiral and shuffle modes
   const spiralPoints = useMemo(() => {
     const pts = []
@@ -283,31 +306,21 @@ export default function PrimeRealmProjectsOrbit({
     for (let i = 0; i <= 80; i++) {
       const t = (i / 80) * n
       const angle = t * 1.45
-      const radius = 12 + t * 4.2
+      const radius = 16 + t * 4.8
       pts.push(Math.cos(angle) * radius, (t - 6) * 1.2, Math.sin(angle) * radius)
     }
     return new Float32Array(pts)
   }, [])
 
   const shuffleLines = useMemo(() => {
-    const cols = 4
     const pts = []
-    for (let i = 0; i < 12; i++) {
-      const r1 = Math.floor(i / cols), c1 = i % cols
-      const x1 = (c1 - 1.5) * 18 + Math.sin(i * 3.2) * 3
-      const y1 = (r1 - 1.5) * 16 + Math.cos(i * 2.1) * 3
-      const z1 = Math.sin(i * 1.4) * 12
-
-      const j = (i + 1) % 13
-      const r2 = Math.floor(j / cols), c2 = j % cols
-      const x2 = (c2 - 1.5) * 18 + Math.sin(j * 3.2) * 3
-      const y2 = (r2 - 1.5) * 16 + Math.cos(j * 2.1) * 3
-      const z2 = Math.sin(j * 1.4) * 12
-
-      pts.push(x1, y1, z1, x2, y2, z2)
+    for (let i = 0; i < shuffleTargets.length - 1; i++) {
+      const a = shuffleTargets[i]
+      const b = shuffleTargets[i + 1]
+      pts.push(a.x, a.y, a.z, b.x, b.y, b.z)
     }
     return new Float32Array(pts)
-  }, [])
+  }, [shuffleTargets])
 
   // Calculate target positions for each layout mode
   const getTargetPos = (p, i, t) => {
@@ -315,48 +328,58 @@ export default function PrimeRealmProjectsOrbit({
     if (layoutMode === "solar") {
       const isSun = i === 0
       if (isSun) return out.set(0, Math.sin(t * 0.3) * 0.8, 0)
-      const orbitR = 14 + i * 5.5
-      const angle = t * (0.16 - i * 0.007) + i * 0.85
+      const orbitR = 18 + i * 6.5
+      const angle = t * (0.15 - i * 0.006) + i * 0.85
       return out.set(Math.cos(angle) * orbitR, 0, Math.sin(angle) * orbitR)
     } else if (layoutMode === "shuffle") {
-      const cols = 4
-      const r = Math.floor(i / cols), c = i % cols
-      const x = (c - 1.5) * 18 + Math.sin(i * 3.2) * 3
-      const y = (r - 1.5) * 16 + Math.cos(i * 2.1) * 3
-      const z = Math.sin(i * 1.4) * 12
-      return out.set(x, y + Math.sin(t * 0.5 + p.floatSeed) * 0.4, z)
+      const target = shuffleTargets[i]
+      return out.set(
+        target.x,
+        target.y + Math.sin(t * 0.5 + p.floatSeed) * 0.4,
+        target.z
+      )
     } else if (layoutMode === "spiral") {
       const angle = i * 1.45 + t * 0.08
-      const radius = 12 + i * 4.2
+      const radius = 16 + i * 4.8
       return out.set(
         Math.cos(angle) * radius,
-        (i - 6) * 1.2 + Math.sin(t * 0.5 + p.floatSeed) * 0.3,
+        (i - 6) * 1.3 + Math.sin(t * 0.5 + p.floatSeed) * 0.3,
         Math.sin(angle) * radius
       )
     } else if (layoutMode === "rings") {
       const ringNum = i % 3
-      const ringR = 16 + ringNum * 14
-      const ringSpeed = (ringNum % 2 === 0 ? 1 : -1) * (0.09 + ringNum * 0.02)
+      const ringR = 24 + ringNum * 18
+      const ringSpeed = (ringNum % 2 === 0 ? 1 : -1) * (0.08 + ringNum * 0.02)
       const angle = i * 1.6 + t * ringSpeed
-      const ringY = (ringNum - 1) * 10
+      const ringY = (ringNum - 1) * 12
       return out.set(Math.cos(angle) * ringR, ringY + Math.sin(t * 0.6 + p.floatSeed) * 0.35, Math.sin(angle) * ringR)
     } else if (layoutMode === "vn") {
-      // V / N constellation layout
-      const H = 34, W = 22
+      // Large V / N constellation layout matching Claude HTML
+      const H = 48, W = 30, LETTER_GAP = 24
+      const totalW = W * 2 + LETTER_GAP
+      const vOffsetX = -totalW / 2
+      const nOffsetX = -totalW / 2 + W + LETTER_GAP
       let vx = 0, vy = 0
       if (i < 6) {
-        // V shape
+        // V shape (6 planets)
         const tV = i < 3 ? i / 2 : (i - 3) / 2
-        vx = i < 3 ? -24 + tV * (W / 2) : -24 + W / 2 + tV * (W / 2)
-        vy = i < 3 ? H / 2 - tV * H : -H / 2 + tV * H
+        vx = (i < 3 ? tV * (W / 2) : W / 2 + tV * (W / 2)) + vOffsetX
+        vy = (i < 3 ? H / 2 - tV * H : -H / 2 + tV * H) - 10
       } else {
-        // N shape
+        // N shape (7 planets)
         const k = i - 6
-        if (k < 3) { vx = 10; vy = -H / 2 + (k / 2) * H }
-        else if (k === 3) { vx = 10 + W / 2; vy = 0 }
-        else { vx = 10 + W; vy = -H / 2 + ((k - 4) / 2) * H }
+        if (k < 3) {
+          vx = nOffsetX
+          vy = -H / 2 + (k / 2) * H - 10
+        } else if (k === 3) {
+          vx = nOffsetX + W / 2
+          vy = -10
+        } else {
+          vx = nOffsetX + W
+          vy = -H / 2 + ((k - 4) / 2) * H - 10
+        }
       }
-      return out.set(vx, vy - 4 + Math.sin(t * 0.5 + p.floatSeed) * 0.5, Math.sin(t * 0.4 + p.floatSeed) * 1.5)
+      return out.set(vx, vy + Math.sin(t * 0.5 + p.floatSeed) * 0.5, Math.sin(t * 0.4 + p.floatSeed) * 1.5)
     }
     // Default: rows
     return out.set(p.basePos.x, p.baseY + Math.sin(t * 0.6 + p.floatSeed) * 0.7, p.basePos.z)
@@ -482,9 +505,9 @@ export default function PrimeRealmProjectsOrbit({
       {/* Solar Orbit Guides when in solar mode */}
       {layoutMode === "solar" && (
         <group rotation={[Math.PI / 2, 0, 0]}>
-          {[14, 19.5, 25, 30.5, 36, 41.5, 47, 52.5, 58, 63.5, 69, 74.5, 80].map((r, ri) => (
+          {[18, 24.5, 31, 37.5, 44, 50.5, 57, 63.5, 70, 76.5, 83, 89.5, 96].map((r, ri) => (
             <mesh key={ri}>
-              <ringGeometry args={[r - 0.12, r + 0.12, 64]} />
+              <ringGeometry args={[r - 0.14, r + 0.14, 64]} />
               <meshBasicMaterial color="#ffb703" transparent opacity={0.32} side={THREE.DoubleSide} depthWrite={false} />
             </mesh>
           ))}
@@ -495,12 +518,12 @@ export default function PrimeRealmProjectsOrbit({
       {layoutMode === "rings" && (
         <group>
           {[0, 1, 2].map((ringNum) => {
-            const ringR = 16 + ringNum * 14
-            const ringY = (ringNum - 1) * 10
+            const ringR = 24 + ringNum * 18
+            const ringY = (ringNum - 1) * 12
             const ringColor = ringNum === 0 ? "#4fd6ff" : ringNum === 1 ? "#ffb703" : "#ff6ad5"
             return (
               <mesh key={ringNum} position={[0, ringY, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[ringR - 0.15, ringR + 0.15, 64]} />
+                <ringGeometry args={[ringR - 0.18, ringR + 0.18, 64]} />
                 <meshBasicMaterial color={ringColor} transparent opacity={0.35} side={THREE.DoubleSide} depthWrite={false} />
               </mesh>
             )

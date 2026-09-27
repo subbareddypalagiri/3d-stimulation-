@@ -138,8 +138,33 @@ function App() {
     dist: 150
   })
 
+  const flyToPrimeRealm = () => {
+    if (cameraControlRef.current) {
+      const monumentCenter = new THREE.Vector3(0, 180000000 + 4 * 650000, 680000000)
+      // Exact front-facing perspective from Claude HTML: radius=85, theta=0.5, phi=1.25
+      const offset = new THREE.Vector3(
+        38.673 * 650000,
+        26.802 * 650000,
+        70.793 * 650000
+      )
+      const camPos = monumentCenter.clone().add(offset)
+      setGalaxyCenter([0, 180000000, 680000000])
+      cameraControlRef.current.setLookAt(
+        camPos.x, camPos.y, camPos.z,
+        monumentCenter.x, monumentCenter.y, monumentCenter.z,
+        true
+      )
+    }
+  }
+
   const flyTo = (absPosition, radius, distanceMultiplier = 1.0) => {
     if (cameraControlRef.current) {
+      // If targeting Prime Cosmic Realm, use exact front-facing Claude perspective
+      if (absPosition[0] === 0 && absPosition[1] === 180000000 && absPosition[2] === 680000000) {
+        flyToPrimeRealm()
+        return
+      }
+
       const target = new THREE.Vector3(...absPosition)
       const offsetDist = Math.max(radius * 1.5 * distanceMultiplier, 3.5)
       const offset = new THREE.Vector3(offsetDist * 0.7, offsetDist * 0.35, offsetDist * 0.8)
@@ -248,8 +273,8 @@ function App() {
           azimuthRotateSpeed={mouseSensitivity.rotate}
           polarRotateSpeed={mouseSensitivity.rotate}
           truckSpeed={mouseSensitivity.rotate}
-          dollySpeed={mouseSensitivity.scroll}
-          dollyToCursor={true}
+          dollySpeed={0}
+          dollyToCursor={false}
           infinityDolly={true}
         />
 
@@ -399,7 +424,7 @@ function App() {
 
         <button
           onClick={() => {
-            flyTo([0, 180000000, 680000000], 85 * 650000, 0.42)
+            flyToPrimeRealm()
           }}
           style={{
             background: "linear-gradient(135deg, rgba(255, 183, 3, 0.4), rgba(255, 45, 85, 0.4))",
@@ -1152,7 +1177,7 @@ function App() {
 
             <button
               onClick={() => {
-                flyTo([0, 180000000, 680000000], 85 * 650000, 0.42)
+                flyToPrimeRealm()
               }}
               style={{
                 width: "100%",
@@ -1179,8 +1204,8 @@ function App() {
                 const isTopRow = idx < 7
                 const rowIndex = isTopRow ? idx : idx - 7
                 const rowCount = isTopRow ? 7 : PRIME_PROJECTS.length - 7
-                const x = (rowIndex - (rowCount - 1) / 2) * 13
-                const baseY = isTopRow ? 15 / 2 : -15 / 2
+                const x = (rowIndex - (rowCount - 1) / 2) * 22.0
+                const baseY = isTopRow ? 22.0 / 2 : -22.0 / 2
                 const worldPos = [x * 650000, 180000000 + baseY * 650000, 680000000]
                 const glowHex = "#" + new THREE.Color(p.colorC).getHexString()
 
@@ -1576,8 +1601,8 @@ function App() {
                   const isTopRow = idx < 7
                   const rowIndex = isTopRow ? idx : idx - 7
                   const rowCount = isTopRow ? 7 : PRIME_PROJECTS.length - 7
-                  const x = (rowIndex - (rowCount - 1) / 2) * 13
-                  const baseY = isTopRow ? 15 / 2 : -15 / 2
+                  const x = (rowIndex - (rowCount - 1) / 2) * 22.0
+                  const baseY = isTopRow ? 22.0 / 2 : -22.0 / 2
                   const worldPos = [x * 650000, 180000000 + baseY * 650000, 680000000]
                   flyTo(worldPos, 4.0 * 650000 * 2.8, 0.45)
                 }
