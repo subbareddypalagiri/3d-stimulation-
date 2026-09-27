@@ -62,9 +62,19 @@ export default function Planet({
             onClick([worldPos.x, worldPos.y, worldPos.z], radius)
           }
         }}
-        onPointerOver={(e) => document.body.style.cursor = 'pointer'}
-        onPointerOut={(e) => document.body.style.cursor = 'auto'}
+        onPointerOver={(e) => {
+          e.stopPropagation()
+          document.body.style.cursor = 'pointer'
+        }}
+        onPointerOut={(e) => {
+          document.body.style.cursor = 'auto'
+        }}
       >
+        {/* Invisible expanded hit target for effortless clicking from any angle or distance */}
+        <mesh>
+          <sphereGeometry args={[Math.max(radius * 3.2, 4.0), 16, 16]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
         <mesh ref={planetRef} castShadow receiveShadow>
           <sphereGeometry args={[radius, 48, 48]} />
           <meshPhysicalMaterial

@@ -299,9 +299,9 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
       const node = nodes[si + 1]
       const label = makeTextSprite(skillList[si], skillColors[si % skillColors.length], 1.0)
       const dir = node.clone().normalize()
-      label.position.copy(node).addScaledVector(dir, 12)
-      label.position.y += 12
-      skillSprites.push({ sprite: label, name: skillList[si] })
+      const p = node.clone().addScaledVector(dir, 12)
+      p.y += 12
+      skillSprites.push({ sprite: label, name: skillList[si], pos: [p.x, p.y, p.z] })
     }
 
     // "SKILLS" rendered as 3D stardust letters floating above web
@@ -483,6 +483,8 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
     const bobY = Math.sin(t * 0.7) * 8
     if (titleGroupRef.current) {
       titleGroupRef.current.position.y = bobY
+      // Keep titles facing the viewer so they are never backwards/mirrored!
+      titleGroupRef.current.quaternion.copy(camera.quaternion)
     }
 
     const fd = webData.fireData
@@ -515,9 +517,9 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
   })
 
   return (
-    <group position={position} scale={[scale, scale, scale]} raycast={() => null}>
+    <group position={position} scale={[scale, scale, scale]}>
       {/* Root rotating Cosmic Skill Web */}
-      <group ref={groupRef} raycast={() => null}>
+      <group ref={groupRef}>
         {/* Organic Cosmic Web Filaments */}
         <points geometry={webData.filGeo} material={webData.filMat} raycast={() => null} />
 
@@ -527,21 +529,76 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
         {/* Volumetric Glow Halos */}
         <points geometry={webData.haloGeo} material={webData.haloMat} raycast={() => null} />
 
-        {/* Radiant Central Core */}
-        <points geometry={webData.coreGeo} material={webData.coreMat} raycast={() => null} />
+        {/* Radiant Central Core with Interactive Click Target */}
+        <group
+          onClick={(e) => {
+            e.stopPropagation()
+            if (flyTo) flyTo(position, 12000, 0.4)
+          }}
+          onPointerOver={(e) => {
+            e.stopPropagation()
+            document.body.style.cursor = 'pointer'
+          }}
+          onPointerOut={(e) => {
+            document.body.style.cursor = 'auto'
+          }}
+        >
+          <points geometry={webData.coreGeo} material={webData.coreMat} />
+          <mesh>
+            <sphereGeometry args={[75, 16, 16]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+          </mesh>
+        </group>
 
         {/* Stardust Dust Points along Filaments */}
         <points geometry={webData.dustGeo} material={webData.dustMat} raycast={() => null} />
 
-        {/* 25 Skill Labels on Node Hubs */}
-        {webData.skillSprites.map(({ sprite, name }, idx) => (
-          <primitive key={idx} object={sprite} raycast={() => null} />
+        {/* 25 Skill Labels on Node Hubs (Interactive & Click to Auto-Fly right up to the Skill) */}
+        {webData.skillSprites.map(({ sprite, name, pos: nodePos }, idx) => (
+          <group
+            key={idx}
+            position={nodePos}
+            onClick={(e) => {
+              e.stopPropagation()
+              if (flyTo) {
+                const worldPos = new THREE.Vector3()
+                e.object.getWorldPosition(worldPos)
+                flyTo([worldPos.x, worldPos.y, worldPos.z], 180 * scale, 0.25)
+              }
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation()
+              document.body.style.cursor = 'pointer'
+            }}
+            onPointerOut={(e) => {
+              document.body.style.cursor = 'auto'
+            }}
+          >
+            <primitive object={sprite} />
+            <mesh position={[0, 0, 0]}>
+              <sphereGeometry args={[22, 12, 12]} />
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+            </mesh>
+          </group>
         ))}
 
         {/* Floating 3D Stardust Word Titles: "SUBBAREDDY PALAGIRI" & "SKILLS" */}
-        <group ref={titleGroupRef} raycast={() => null}>
-          <points geometry={webData.subbaGeo} material={webData.subbaMat} raycast={() => null} />
-          <points geometry={webData.lettersGeo} material={webData.lettersMat} raycast={() => null} />
+        <group
+          ref={titleGroupRef}
+          onClick={(e) => {
+            e.stopPropagation()
+            if (flyTo) flyTo(position, 12000, 0.35)
+          }}
+          onPointerOver={(e) => {
+            e.stopPropagation()
+            document.body.style.cursor = 'pointer'
+          }}
+          onPointerOut={(e) => {
+            document.body.style.cursor = 'auto'
+          }}
+        >
+          <points geometry={webData.subbaGeo} material={webData.subbaMat} />
+          <points geometry={webData.lettersGeo} material={webData.lettersMat} />
         </group>
 
         {/* Living Fire Particles rising from the title letters */}

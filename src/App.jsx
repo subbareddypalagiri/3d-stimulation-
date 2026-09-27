@@ -24,6 +24,7 @@ import RelativisticBlackHole from "./RelativisticBlackHole"
 import PlanesAndSatellitesHubs, { SATELLITE_HUBS } from "./PlanesAndSatellitesHubs"
 import CosmicSkillWeb from "./CosmicSkillWeb"
 import { SOL_PLANETS } from "./SolarSystem"
+import CosmicFlightNavigator from "./CosmicFlightNavigator"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -220,6 +221,9 @@ function App() {
 
         {/* Real-time Interstellar Flight Engine (Traverse gaps between solar systems) */}
         <InterstellarNavigator cameraControlRef={cameraControlRef} flyTo={flyTo} />
+
+        {/* 360° Free of Motion Scroll Navigator (Fly towards mouse look direction to any planet or star) */}
+        <CosmicFlightNavigator cameraControlRef={cameraControlRef} />
 
         <EffectComposer disableNormalPass>
           <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.5} intensity={1.2} mipmapBlur />
