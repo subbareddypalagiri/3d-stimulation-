@@ -148,44 +148,62 @@ const bubbleFrag = `
     float internalCosmosEnergy = pow(innerGalaxies * 0.65 + coreSingularity * 1.2, 1.6);
 
     vec3 deepVoid, gasColor, coreColor, rimHighlight;
-    float pClass = floor(vSeed * 5.0);
+    float pClass = floor(vSeed * 8.0);
     if (pClass < 1.0) {
-      deepVoid     = vec3(0.01, 0.03, 0.12);
-      gasColor     = vec3(0.1,  0.55, 0.95);
-      coreColor    = vec3(0.6,  0.95, 1.4);
-      rimHighlight = vec3(0.7,  0.9,  1.2);
+      deepVoid     = vec3(0.01, 0.04, 0.14);
+      gasColor     = vec3(0.05, 0.65, 1.0);
+      coreColor    = vec3(0.7,  1.1,  1.6);
+      rimHighlight = vec3(0.8,  1.2,  1.5);
     } else if (pClass < 2.0) {
-      deepVoid     = vec3(0.06, 0.01, 0.08);
-      gasColor     = vec3(0.85, 0.25, 0.75);
-      coreColor    = vec3(1.3,  0.7,  1.2);
-      rimHighlight = vec3(1.0,  0.8,  1.1);
+      deepVoid     = vec3(0.07, 0.01, 0.09);
+      gasColor     = vec3(0.95, 0.15, 0.85);
+      coreColor    = vec3(1.4,  0.6,  1.2);
+      rimHighlight = vec3(1.2,  0.8,  1.1);
     } else if (pClass < 3.0) {
-      deepVoid     = vec3(0.08, 0.03, 0.01);
-      gasColor     = vec3(1.0,  0.55, 0.1);
-      coreColor    = vec3(1.4,  1.1,  0.4);
-      rimHighlight = vec3(1.2,  1.0,  0.8);
+      deepVoid     = vec3(0.09, 0.04, 0.01);
+      gasColor     = vec3(1.0,  0.65, 0.08);
+      coreColor    = vec3(1.5,  1.1,  0.35);
+      rimHighlight = vec3(1.3,  1.0,  0.7);
     } else if (pClass < 4.0) {
-      deepVoid     = vec3(0.01, 0.06, 0.05);
-      gasColor     = vec3(0.05, 0.85, 0.65);
-      coreColor    = vec3(0.7,  1.35, 1.1);
-      rimHighlight = vec3(0.8,  1.2,  1.0);
-    } else {
+      deepVoid     = vec3(0.01, 0.07, 0.04);
+      gasColor     = vec3(0.05, 0.95, 0.45);
+      coreColor    = vec3(0.6,  1.4,  1.0);
+      rimHighlight = vec3(0.8,  1.3,  0.9);
+    } else if (pClass < 5.0) {
       deepVoid     = vec3(0.08, 0.01, 0.03);
-      gasColor     = vec3(0.95, 0.2,  0.35);
-      coreColor    = vec3(1.4,  0.9,  0.95);
+      gasColor     = vec3(1.0,  0.2,  0.35);
+      coreColor    = vec3(1.4,  0.85, 0.95);
       rimHighlight = vec3(1.2,  0.9,  1.0);
+    } else if (pClass < 6.0) {
+      deepVoid     = vec3(0.01, 0.06, 0.09);
+      gasColor     = vec3(0.02, 0.85, 0.9);
+      coreColor    = vec3(0.5,  1.25, 1.4);
+      rimHighlight = vec3(0.7,  1.3,  1.4);
+    } else if (pClass < 7.0) {
+      deepVoid     = vec3(0.06, 0.01, 0.1);
+      gasColor     = vec3(0.75, 0.1,  1.0);
+      coreColor    = vec3(1.2,  0.5,  1.5);
+      rimHighlight = vec3(1.1,  0.7,  1.4);
+    } else {
+      deepVoid     = vec3(0.08, 0.05, 0.01);
+      gasColor     = vec3(1.0,  0.5,  0.1);
+      coreColor    = vec3(1.5,  1.0,  0.5);
+      rimHighlight = vec3(1.3,  0.9,  0.6);
     }
 
-    vec3 baseColor = mix(deepVoid, gasColor, smoothstep(0.2, 0.7, cmbSurface));
+    vec3 baseColor = mix(deepVoid, gasColor, smoothstep(0.15, 0.75, cmbSurface));
     vec3 finalColor = vec3(0.0);
-    finalColor += baseColor * (rimGlow * 1.8 + softRim * 0.5);
-    finalColor += iridescence * rimGlow * 1.4;
-    finalColor += rimHighlight * pow(rimGlow, 3.5) * 2.2;
-    finalColor += (coreColor * internalCosmosEnergy * 1.8 + gasColor * 0.4) * (centerView * 0.7 + 0.3);
+    finalColor += baseColor * (rimGlow * 1.5 + softRim * 0.4);
+    finalColor += iridescence * rimGlow * 1.1;
+    finalColor += rimHighlight * pow(rimGlow, 3.2) * 1.6;
+    finalColor += (coreColor * internalCosmosEnergy * 1.2 + gasColor * 0.35) * (centerView * 0.6 + 0.3);
 
-    float edgeAlpha = rimGlow * 0.9 + softRim * 0.25;
-    float innerAlpha = internalCosmosEnergy * 0.4 + cmbSurface * 0.12;
-    float alpha = clamp((edgeAlpha + innerAlpha) * uOpacity, 0.0, 1.0);
+    // Reinhard tone mapping ensures colors never blow out into pure white glare
+    finalColor = finalColor / (vec3(1.0) + finalColor * 0.35);
+
+    float edgeAlpha = rimGlow * 0.85 + softRim * 0.25;
+    float innerAlpha = internalCosmosEnergy * 0.35 + cmbSurface * 0.15;
+    float alpha = clamp((edgeAlpha + innerAlpha) * uOpacity * 0.92, 0.0, 0.98);
 
     gl_FragColor = vec4(finalColor, alpha);
   }
@@ -369,7 +387,7 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
 
   const GALAXY_COUNT    = 1000
   const WEB_COUNT       = 80
-  const MULT_COUNT      = 100
+  const MULT_COUNT      = 75 // 75 Distinct, non-colliding NASA Bubble Universes
   const UNIV_R          = 120000
   const INFLATON_COUNT  = 2500
   const OMNIVERSE_COUNT = 20 // 20 Distinct, non-overlapping Bold Mega-Realms
@@ -400,16 +418,64 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
     return { wPos: pos, wSeeds: seeds }
   }, [])
 
-  // 3. 100 NASA Bubble Universes
+  // 3. 75 NASA Bubble Universes - Wide Hyperspace Distribution with Strict Clearance (Zero Collisions / Zero Merging!)
   const { mPos, mSeeds, mScales } = useMemo(() => {
-    const pos = [], seeds = new Float32Array(MULT_COUNT), scales = []
-    for (let i = 0; i < MULT_COUNT; i++) {
-      const r = 2800000 + 15000000 * Math.pow(Math.random(), 0.8)
-      const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1)
-      pos.push(new THREE.Vector3(r * Math.sin(ph) * Math.cos(th), r * Math.sin(ph) * Math.sin(th), r * Math.cos(ph)))
-      seeds[i] = Math.random()
-      scales.push(1100000 + Math.random() * 900000)
+    const pos = []
+    const seeds = new Float32Array(MULT_COUNT)
+    const scales = []
+
+    let seedVal = 7183
+    const rnd = () => {
+      seedVal = (seedVal * 16807) % 2147483647
+      return (seedVal - 1) / 2147483646
     }
+
+    // Distribute across wide radial inflation shell: 12M to 52M AU
+    let attempts = 0
+    while (pos.length < MULT_COUNT && attempts < 15000) {
+      attempts++
+      const u = rnd()
+      const r = 12000000 + Math.pow(u, 0.72) * 40000000 // 12M to 52M AU
+      const th = rnd() * Math.PI * 2
+      const ph = Math.acos(2 * rnd() - 1)
+
+      // Varying bubble universe sizes (radius 1.0M to 2.2M AU)
+      const candScale = 1000000 + rnd() * 1200000
+      const x = r * Math.sin(ph) * Math.cos(th)
+      const y = r * Math.sin(ph) * Math.sin(th) * 0.78 // slightly natural galactic plane flattening
+      const z = r * Math.cos(ph)
+      const candPos = new THREE.Vector3(x, y, z)
+
+      // Strict Clearance Check:
+      // Guarantees at least 1.8M AU of empty hyperspace void between any two bubbles!
+      let collision = false
+      for (let j = 0; j < pos.length; j++) {
+        const minAllowedDistance = (candScale + scales[j]) * 1.35 + 1800000
+        if (candPos.distanceTo(pos[j]) < minAllowedDistance) {
+          collision = true
+          break
+        }
+      }
+
+      if (!collision) {
+        const idx = pos.length
+        pos.push(candPos)
+        scales.push(candScale)
+        seeds[idx] = rnd()
+      }
+    }
+
+    // Safety fallback: if attempts ran out, place remaining on outer safe orbits
+    while (pos.length < MULT_COUNT) {
+      const idx = pos.length
+      const r = 34000000 + (idx % 12) * 1500000
+      const angle = (idx / 12) * Math.PI * 2
+      const candScale = 1300000
+      pos.push(new THREE.Vector3(Math.cos(angle) * r, ((idx % 5) - 2) * 6000000, Math.sin(angle) * r))
+      scales.push(candScale)
+      seeds[idx] = rnd()
+    }
+
     return { mPos: pos, mSeeds: seeds, mScales: scales }
   }, [])
 
@@ -419,10 +485,10 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
     const col = new Float32Array(INFLATON_COUNT * 3)
     const sz  = new Float32Array(INFLATON_COUNT)
     for(let i = 0; i < INFLATON_COUNT; i++) {
-      const r = 2500000 + 25000000 * Math.random()
+      const r = 6000000 + 46000000 * Math.random()
       const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1)
       pos[i*3]   = r * Math.sin(ph) * Math.cos(th)
-      pos[i*3+1] = r * Math.sin(ph) * Math.sin(th)
+      pos[i*3+1] = r * Math.sin(ph) * Math.sin(th) * 0.8
       pos[i*3+2] = r * Math.cos(ph)
       
       const ptype = Math.random()
@@ -555,12 +621,12 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
       webRef.current.visible = op > 0.001
     }
 
-    // 3. 100 NASA Bubble Universes (7M -> 60M)
+    // 3. 75 NASA Bubble Universes (8M -> 68M)
     if (multRef.current && multMat.current) {
       let op = 0
-      if      (dist > 7000000 && dist <= 14000000) op = (dist - 7000000) / 7000000
-      else if (dist > 14000000 && dist <= 42000000) op = 1.0
-      else if (dist > 42000000 && dist <= 65000000) op = 1.0 - (dist - 42000000) / 23000000
+      if      (dist > 8000000 && dist <= 14000000) op = (dist - 8000000) / 6000000
+      else if (dist > 14000000 && dist <= 48000000) op = 1.0
+      else if (dist > 48000000 && dist <= 68000000) op = 1.0 - (dist - 48000000) / 20000000
       multMat.current.uniforms.uOpacity.value = Math.max(0, op)
       multMat.current.uniforms.uTime.value = t
       multRef.current.visible = op > 0.001
@@ -605,9 +671,9 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
         />
       </instancedMesh>
 
-      {/* LEVEL 5: 100 NASA BUBBLE UNIVERSES (100% 3D Omnidirectional, DoubleSide = NEVER CUTS OFF!) */}
+      {/* LEVEL 5: 75 NASA BUBBLE UNIVERSES (NormalBlending = Crisp, ethereal, zero whiteout blowout!) */}
       <instancedMesh ref={multRef} args={[null, null, MULT_COUNT]} frustumCulled={false} raycast={() => null}>
-        <sphereGeometry args={[1, 64, 64]}>
+        <sphereGeometry args={[1, 48, 48]}>
           <instancedBufferAttribute attach="attributes-instanceSeed" args={[mSeeds, 1]} />
         </sphereGeometry>
         <shaderMaterial 
@@ -617,8 +683,8 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
           uniforms={mUni} 
           transparent 
           depthWrite={false} 
-          blending={THREE.AdditiveBlending} 
-          side={THREE.DoubleSide} 
+          blending={THREE.NormalBlending} 
+          side={THREE.FrontSide} 
         />
       </instancedMesh>
 

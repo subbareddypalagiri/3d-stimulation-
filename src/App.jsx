@@ -61,7 +61,7 @@ function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
       progress = 4
     } else if (dist > 12000000 && dist <= 60000000) {
       level = "LEVEL 5: THE NASA MULTIVERSE"
-      desc = "100 Eternal Inflation Bubble Universes"
+      desc = "75 Eternal Inflation Bubble Universes (Hyperspace Void Spacing)"
       color = "#ff44aa"
       progress = 5
     } else if (dist > 60000000 && dist <= 220000000) {
@@ -574,7 +574,7 @@ function App() {
               🌌 Galaxy View
             </button>
             <button
-              onClick={() => flyTo([0, 35000000, 95000000], 95000000)}
+              onClick={() => flyTo([0, 9000000, 26000000], 26000000)}
               style={{
                 background: "rgba(255, 68, 170, 0.18)",
                 border: "1px solid rgba(255, 68, 170, 0.6)",
