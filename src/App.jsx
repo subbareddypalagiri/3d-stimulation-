@@ -23,6 +23,7 @@ import RelativisticBlackHoleGateway from "./RelativisticBlackHoleGateway"
 import RelativisticBlackHole from "./RelativisticBlackHole"
 import PlanesAndSatellitesHubs, { SATELLITE_HUBS } from "./PlanesAndSatellitesHubs"
 import CosmicSkillWeb from "./CosmicSkillWeb"
+import { SOL_PLANETS } from "./SolarSystem"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -114,10 +115,11 @@ function App() {
     dist: 150
   })
 
-  const flyTo = (absPosition, radius) => {
+  const flyTo = (absPosition, radius, distanceMultiplier = 1.0) => {
     if (cameraControlRef.current) {
       const target = new THREE.Vector3(...absPosition)
-      const offset = new THREE.Vector3(radius * 3.5, radius * 2.0, radius * 3.5)
+      const offsetDist = Math.max(radius * 1.5 * distanceMultiplier, 3.5)
+      const offset = new THREE.Vector3(offsetDist * 0.7, offsetDist * 0.35, offsetDist * 0.8)
       const cameraPos = target.clone().add(offset)
       setGalaxyCenter(absPosition)
       cameraControlRef.current.setLookAt(
@@ -208,12 +210,12 @@ function App() {
           ref={cameraControlRef} 
           makeDefault 
           maxDistance={65000000000} 
-          minDistance={2}
+          minDistance={0.5}
           smoothTime={0.25}
           dollySpeed={1.0}
           truckSpeed={1.0}
           dollyToCursor={true}
-          infinityDolly={false}
+          infinityDolly={true}
         />
 
         {/* Real-time Interstellar Flight Engine (Traverse gaps between solar systems) */}
@@ -321,7 +323,7 @@ function App() {
 
         <button
           onClick={() => {
-            flyTo([110000, 32000 + 4000, -180000 + 16000], 18000)
+            flyTo([110000, 32000, -180000], 12000, 0.45)
           }}
           style={{
             background: "linear-gradient(135deg, rgba(0, 240, 255, 0.4), rgba(180, 50, 255, 0.4))",
@@ -634,7 +636,7 @@ function App() {
               🎬 Video Portal
             </button>
             <button
-              onClick={() => flyTo([110000, 32000 + 4000, -180000 + 16000], 18000)}
+              onClick={() => flyTo([110000, 32000, -180000], 12000, 0.45)}
               style={{
                 background: "linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(180, 50, 255, 0.3))",
                 border: "1px solid #00f0ff",
@@ -651,6 +653,39 @@ function App() {
             >
               🕸️ Skill Web
             </button>
+          </div>
+
+          {/* 9 Planets Quick Warp List */}
+          <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+            <b style={{ color: "#38bdf8", fontSize: 10, letterSpacing: "0.06em" }}>WARP CLOSE-UP TO 9 PLANETS (SOL SYSTEM):</b>
+            <div style={{ marginTop: 5, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, maxHeight: 110, overflowY: "auto" }}>
+              {SOL_PLANETS.map((planet) => (
+                <button
+                  key={planet.name}
+                  onClick={() => {
+                    flyTo(planet.pos, Math.max(planet.radius * 2.2, 1.6), 0.6)
+                  }}
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: `1px solid ${planet.color}77`,
+                    color: planet.color,
+                    padding: "4px 5px",
+                    borderRadius: 6,
+                    fontSize: 9,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    textAlign: "center",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    transition: "all 0.2s ease"
+                  }}
+                  title={`Fly directly up-close to ${planet.name}`}
+                >
+                  {planet.symbol} {planet.name}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Black Holes Warp List */}

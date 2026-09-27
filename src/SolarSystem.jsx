@@ -15,6 +15,18 @@ const AVAILABLE_TEXTURES = [
   { color: '/textures/neptune.jpg' }
 ]
 
+export const SOL_PLANETS = [
+  { name: 'Mercury', symbol: '☿', pos: [15, 0, 0], radius: 0.38, color: '#b5b5b5' },
+  { name: 'Venus', symbol: '♀', pos: [22, 0, 0], radius: 0.95, color: '#e3bb76' },
+  { name: 'Earth', symbol: '🌍', pos: [30, 0, 0], radius: 1.0, color: '#38bdf8' },
+  { name: 'Mars', symbol: '♂', pos: [40, 0, 0], radius: 0.53, color: '#ef4444' },
+  { name: 'Jupiter', symbol: '♃', pos: [65, 0, 0], radius: 2.8, color: '#f59e0b' },
+  { name: 'Saturn', symbol: '♄', pos: [95, 0, 0], radius: 2.4, color: '#fbbf24' },
+  { name: 'Uranus', symbol: '♅', pos: [125, 0, 0], radius: 1.2, color: '#67e8f9' },
+  { name: 'Neptune', symbol: '♆', pos: [155, 0, 0], radius: 1.1, color: '#3b82f6' },
+  { name: 'Pluto', symbol: '♇', pos: [175, 0, 0], radius: 0.18, color: '#cbd5e1' }
+]
+
 export default function SolarSystem({ 
   id = 0,
   position = [0, 0, 0], 
@@ -22,7 +34,8 @@ export default function SolarSystem({
   speedMultiplier = 1,
   scale = 1,
   planetCount = 6, 
-  onSelectSystem 
+  onSelectSystem,
+  onSelectPlanet
 }) {
   const [showPlanets, setShowPlanets] = useState(id === 0)
   const systemPos = useMemo(() => new THREE.Vector3(...position), [position])
@@ -139,6 +152,7 @@ export default function SolarSystem({
           {...planet}
           orbitSpeed={planet.orbitSpeed * speedMultiplier}
           rotationSpeed={planet.rotationSpeed * speedMultiplier}
+          onClick={onSelectPlanet}
         />
       ))}
     </group>

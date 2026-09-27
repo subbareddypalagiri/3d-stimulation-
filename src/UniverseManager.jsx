@@ -101,6 +101,9 @@ export default function UniverseManager({ flyTo, onActiveSystemChange }) {
             setActiveSystemId(system.id)
             if (flyTo) flyTo(pos, scale * 4)
           }} 
+          onSelectPlanet={(planetWorldPos, planetRadius) => {
+            if (flyTo) flyTo(planetWorldPos, Math.max(planetRadius, 1.2), 0.7)
+          }}
         />
       ))}
     </group>

@@ -52,7 +52,15 @@ export default function Planet({
         position={position} 
         onClick={(e) => {
           e.stopPropagation()
-          if (onClick) onClick(position, radius)
+          if (onClick) {
+            const worldPos = new THREE.Vector3()
+            if (planetRef.current) {
+              planetRef.current.getWorldPosition(worldPos)
+            } else {
+              e.object.getWorldPosition(worldPos)
+            }
+            onClick([worldPos.x, worldPos.y, worldPos.z], radius)
+          }
         }}
         onPointerOver={(e) => document.body.style.cursor = 'pointer'}
         onPointerOut={(e) => document.body.style.cursor = 'auto'}
