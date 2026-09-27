@@ -25,6 +25,7 @@ import PlanesAndSatellitesHubs, { SATELLITE_HUBS } from "./PlanesAndSatellitesHu
 import CosmicSkillWeb from "./CosmicSkillWeb"
 import { SOL_PLANETS } from "./SolarSystem"
 import CosmicFlightNavigator from "./CosmicFlightNavigator"
+import PrimeRealmProjectsOrbit, { PRIME_PROJECTS } from "./PrimeRealmProjectsOrbit"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -108,6 +109,8 @@ function App() {
   })
   const [showMonument, setShowMonument] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [primeLayoutMode, setPrimeLayoutMode] = useState("rows")
+  const [activePrimePlanet, setActivePrimePlanet] = useState(null)
   const [telemetry, setTelemetry] = useState({
     level: "LEVEL 1: STELLAR NEIGHBORHOOD",
     desc: "Sol & 24 Neighboring Star Systems",
@@ -198,6 +201,16 @@ function App() {
             position={[110000, 32000, -180000]}
             scale={50}
             flyTo={flyTo}
+          />
+
+          {/* Level 7: Prime Cosmic Realm - 3D Projects Orbit Showcase */}
+          <PrimeRealmProjectsOrbit
+            position={[0, 180000000, 680000000]}
+            scale={650000}
+            flyTo={flyTo}
+            layoutMode={primeLayoutMode}
+            onSelectPlanet={(planet) => setActivePrimePlanet(planet)}
+            activePlanet={activePrimePlanet}
           />
         </Suspense>
 
@@ -358,6 +371,41 @@ function App() {
         >
           <span style={{ fontSize: 16 }}>🕸️</span>
           <span>Cosmic Skill Web</span>
+        </button>
+
+        <button
+          onClick={() => {
+            flyTo([0, 180000000, 680000000], 85 * 650000, 0.42)
+          }}
+          style={{
+            background: "linear-gradient(135deg, rgba(255, 183, 3, 0.4), rgba(255, 45, 85, 0.4))",
+            backdropFilter: "blur(16px)",
+            border: "1.5px solid #ffb703",
+            color: "#ffe066",
+            padding: "8px 16px",
+            borderRadius: 24,
+            fontSize: 12,
+            fontWeight: 800,
+            letterSpacing: "0.03em",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            boxShadow: "0 0 20px rgba(255, 183, 3, 0.6)",
+            transition: "all 0.25s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.05)"
+            e.currentTarget.style.boxShadow = "0 0 30px rgba(255, 183, 3, 0.9)"
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)"
+            e.currentTarget.style.boxShadow = "0 0 20px rgba(255, 183, 3, 0.6)"
+          }}
+          title="Fly directly to 13 Projects Orbit in the Prime Cosmic Realm"
+        >
+          <span style={{ fontSize: 16 }}>🪐</span>
+          <span>Prime Realm Projects</span>
         </button>
 
         {!isMenuOpen && (
@@ -823,6 +871,82 @@ function App() {
               ))}
             </div>
           </div>
+
+          {/* Level 7: 13 Project Planets Orbit in Prime Cosmic Realm */}
+          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+              <b style={{ color: "#ffe066", fontSize: 10, letterSpacing: "0.06em" }}>🪐 PRIME REALM: 13 PROJECT PLANETS ORBIT:</b>
+              <span style={{ fontSize: 9, color: "#94a3b8" }}>Level 7</span>
+            </div>
+
+            <button
+              onClick={() => {
+                flyTo([0, 180000000, 680000000], 85 * 650000, 0.42)
+              }}
+              style={{
+                width: "100%",
+                marginBottom: 6,
+                background: "linear-gradient(135deg, rgba(255, 183, 3, 0.3), rgba(255, 45, 85, 0.3))",
+                border: "1px solid #ffb703",
+                color: "#ffe066",
+                padding: "6px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 800,
+                cursor: "pointer",
+                textAlign: "center",
+                boxShadow: "0 0 12px rgba(255, 183, 3, 0.4)",
+                transition: "all 0.2s ease"
+              }}
+              title="Warp directly to 13 Projects Orbit with 3D Voxel Monument"
+            >
+              🪐 Warp to All 13 Projects Orbit
+            </button>
+
+            <div style={{ marginTop: 5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 130, overflowY: "auto" }}>
+              {PRIME_PROJECTS.map((p, idx) => {
+                const isTopRow = idx < 7
+                const rowIndex = isTopRow ? idx : idx - 7
+                const rowCount = isTopRow ? 7 : PRIME_PROJECTS.length - 7
+                const x = (rowIndex - (rowCount - 1) / 2) * 13
+                const baseY = isTopRow ? 15 / 2 : -15 / 2
+                const worldPos = [x * 650000, 180000000 + baseY * 650000, 680000000]
+                const glowHex = "#" + new THREE.Color(p.colorC).getHexString()
+
+                return (
+                  <button
+                    key={p.name}
+                    onClick={() => {
+                      setActivePrimePlanet(p)
+                      flyTo(worldPos, 4.0 * 650000 * 2.8, 0.45)
+                    }}
+                    style={{
+                      background: "rgba(255,255,255,0.06)",
+                      border: `1px solid ${glowHex}77`,
+                      color: glowHex,
+                      padding: "5px 6px",
+                      borderRadius: 6,
+                      fontSize: 9,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      transition: "all 0.2s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 5
+                    }}
+                    title={`Fly to ${p.name} (${p.style})`}
+                  >
+                    <span style={{ fontSize: 10 }}>🪐</span>
+                    <span>{p.name}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         </div>
       )}
 
@@ -998,6 +1122,208 @@ function App() {
               isFullscreen={false}
               onClose={() => setIsBlackHoleModalOpen(false)}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Prime Cosmic Realm (Level 7) - 6 Layout Modes Switcher */}
+      {!isMenuOpen && (telemetry.progress === 7 || activePrimePlanet !== null) && (
+        <div
+          style={{
+            position: "fixed",
+            top: 75,
+            right: 22,
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+            fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+            zIndex: 95
+          }}
+        >
+          <div style={{
+            color: "#ffb703",
+            fontSize: 10,
+            fontWeight: 800,
+            letterSpacing: "0.08em",
+            textAlign: "right",
+            marginBottom: 2,
+            textShadow: "0 0 10px rgba(255, 183, 3, 0.6)"
+          }}>
+            🪐 13 PROJECTS ORBIT
+          </div>
+          {[
+            { mode: "rows", label: "1 · ROWS" },
+            { mode: "solar", label: "2 · SOLAR" },
+            { mode: "shuffle", label: "3 · SHUFFLE" },
+            { mode: "spiral", label: "4 · SPIRAL" },
+            { mode: "rings", label: "5 · RINGS" },
+            { mode: "vn", label: "6 · V/N" }
+          ].map(({ mode, label }) => {
+            const isActive = primeLayoutMode === mode
+            return (
+              <button
+                key={mode}
+                onClick={() => setPrimeLayoutMode(mode)}
+                style={{
+                  background: isActive ? "rgba(255,183,3,0.22)" : "rgba(10,12,20,0.85)",
+                  border: `1.5px solid ${isActive ? "#ffb703" : "rgba(124,136,166,0.35)"}`,
+                  color: isActive ? "#ffb703" : "#9aa5c4",
+                  fontSize: 11,
+                  fontWeight: isActive ? 800 : 600,
+                  letterSpacing: "0.05em",
+                  padding: "7px 14px",
+                  borderRadius: 7,
+                  cursor: "pointer",
+                  backdropFilter: "blur(6px)",
+                  transition: "all .2s ease",
+                  textAlign: "right",
+                  fontFamily: "inherit",
+                  boxShadow: isActive ? "0 0 15px rgba(255,183,3,0.4)" : "none"
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = "#ffe066"
+                    e.currentTarget.style.borderColor = "rgba(255,183,3,0.5)"
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = "#9aa5c4"
+                    e.currentTarget.style.borderColor = "rgba(124,136,166,0.35)"
+                  }
+                }}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Active Prime Planet Project Card HUD */}
+      {activePrimePlanet && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 28,
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "rgba(5, 10, 25, 0.94)",
+            border: "1.5px solid #ffb703",
+            borderRadius: 16,
+            padding: "16px 22px",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.85), 0 0 30px rgba(255, 183, 3, 0.35)",
+            backdropFilter: "blur(20px)",
+            color: "#e2e8f0",
+            fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+            zIndex: 96,
+            minWidth: 320,
+            maxWidth: 480,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 18 }}>🪐</span>
+              <b style={{ fontSize: 14, color: "#ffe066", letterSpacing: "0.06em" }}>
+                {activePrimePlanet.name}
+              </b>
+            </div>
+            <button
+              onClick={() => setActivePrimePlanet(null)}
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                border: "none",
+                color: "#94a3b8",
+                padding: "2px 8px",
+                borderRadius: 8,
+                cursor: "pointer",
+                fontSize: 12
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div style={{ fontSize: 11, color: "#cbd5e1", lineHeight: 1.5 }}>
+            <b>Classification:</b> {activePrimePlanet.style.toUpperCase()} PLANETARY BODY<br />
+            <b>Atmosphere:</b> Procedural resonance & volumetric glow<br />
+            <b>Rings:</b> {activePrimePlanet.ring ? "Active planetary accretion disk" : "None"}
+          </div>
+
+          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+            {activePrimePlanet.url && activePrimePlanet.url !== "#" ? (
+              <a
+                href={activePrimePlanet.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1,
+                  background: "linear-gradient(135deg, #ffb703, #ff6a00)",
+                  color: "#050506",
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 800,
+                  textDecoration: "none",
+                  textAlign: "center",
+                  boxShadow: "0 0 15px rgba(255, 183, 3, 0.6)",
+                  transition: "all 0.2s ease"
+                }}
+              >
+                🚀 Open Project ↗
+              </a>
+            ) : (
+              <a
+                href="https://github.com/subbareddypalagiri"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1,
+                  background: "linear-gradient(135deg, #ffb703, #ff6a00)",
+                  color: "#050506",
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 800,
+                  textDecoration: "none",
+                  textAlign: "center",
+                  boxShadow: "0 0 15px rgba(255, 183, 3, 0.6)",
+                  transition: "all 0.2s ease"
+                }}
+              >
+                🐙 View on GitHub ↗
+              </a>
+            )}
+
+            <button
+              onClick={() => {
+                const idx = PRIME_PROJECTS.findIndex(p => p.name === activePrimePlanet.name)
+                if (idx !== -1) {
+                  const isTopRow = idx < 7
+                  const rowIndex = isTopRow ? idx : idx - 7
+                  const rowCount = isTopRow ? 7 : PRIME_PROJECTS.length - 7
+                  const x = (rowIndex - (rowCount - 1) / 2) * 13
+                  const baseY = isTopRow ? 15 / 2 : -15 / 2
+                  const worldPos = [x * 650000, 180000000 + baseY * 650000, 680000000]
+                  flyTo(worldPos, 4.0 * 650000 * 2.8, 0.45)
+                }
+              }}
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                border: "1px solid rgba(255, 255, 255, 0.25)",
+                color: "#e2e8f0",
+                padding: "8px 12px",
+                borderRadius: 8,
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: "pointer"
+              }}
+            >
+              🔭 Focus
+            </button>
           </div>
         </div>
       )}
