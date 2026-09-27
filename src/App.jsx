@@ -21,6 +21,7 @@ import EmuInTheSky from "./EmuInTheSky"
 import AlienNebulaRealm from "./AlienNebulaRealm"
 import RelativisticBlackHoleGateway from "./RelativisticBlackHoleGateway"
 import RelativisticBlackHole from "./RelativisticBlackHole"
+import PlanesAndSatellitesHubs, { SATELLITE_HUBS } from "./PlanesAndSatellitesHubs"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -184,6 +185,9 @@ function App() {
             }}
             flyTo={flyTo}
           />
+
+          {/* 10 Planetary Satellite & Plane Networks Across Diverse Cosmic Sectors */}
+          <PlanesAndSatellitesHubs flyTo={flyTo} />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -684,6 +688,37 @@ function App() {
                   title={realm.name}
                 >
                   🔮 {realm.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 10 Satellite & Plane Orbital Networks Warp List */}
+          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+            <b style={{ color: "#38bdf8", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 SATELLITE & PLANE NETWORKS:</b>
+            <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
+              {SATELLITE_HUBS.map((hub) => (
+                <button
+                  key={hub.id}
+                  onClick={() => flyTo(hub.pos, hub.scale * 12)}
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: `1px solid ${hub.colors.routes}66`,
+                    color: hub.colors.routes,
+                    padding: "4px 6px",
+                    borderRadius: 6,
+                    fontSize: 9,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    transition: "all 0.2s ease"
+                  }}
+                  title={`${hub.name} (${hub.sector})`}
+                >
+                  🛰️ {hub.name}
                 </button>
               ))}
             </div>
