@@ -173,8 +173,8 @@ function App() {
     if (cameraControlRef.current) {
       setGalaxyCenter([110000, 32000, -180000])
       cameraControlRef.current.setLookAt(
-        110000 + 4200, 32000 + 2400, -180000 + 6800,
-        110000, 32000, -180000,
+        110000, 32000 + 3200, -180000 + 24000,
+        110000, 32000 + 1200, -180000,
         true
       )
     }

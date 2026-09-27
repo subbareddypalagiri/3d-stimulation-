@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react"
+import React, { useMemo, useRef, useEffect } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
 
@@ -74,6 +74,43 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
   const groupRef = useRef()
   const fireRef = useRef()
   const titleGroupRef = useRef()
+
+  // Interactive 3D mouse drag rotation state
+  const isDragging = useRef(false)
+  const prevPointer = useRef({ x: 0, y: 0 })
+  const rotationVelocity = useRef({ x: 0, y: 0 })
+  const userRotation = useRef({ x: 0.1, y: 0 })
+
+  useEffect(() => {
+    const handlePointerMove = (e) => {
+      if (!isDragging.current) return
+      const dx = e.clientX - prevPointer.current.x
+      const dy = e.clientY - prevPointer.current.y
+      prevPointer.current = { x: e.clientX, y: e.clientY }
+
+      userRotation.current.y += dx * 0.005
+      userRotation.current.x = THREE.MathUtils.clamp(
+        userRotation.current.x + dy * 0.004,
+        -0.85,
+        0.85
+      )
+      rotationVelocity.current = { x: dy * 0.004, y: dx * 0.005 }
+    }
+
+    const handlePointerUp = () => {
+      if (isDragging.current) {
+        isDragging.current = false
+        document.body.style.cursor = "auto"
+      }
+    }
+
+    window.addEventListener("pointermove", handlePointerMove)
+    window.addEventListener("pointerup", handlePointerUp)
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove)
+      window.removeEventListener("pointerup", handlePointerUp)
+    }
+  }, [])
 
   // Generate all 3D geometries, particle clouds, and skill nodes
   const webData = useMemo(() => {
@@ -472,18 +509,27 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
     }
   }, [])
 
-  // Animation frame loop: slow cosmic rotation, floating title bob, living fire rise
-  useFrame(({ clock, camera }) => {
+  // Animation frame loop: direct interactive 3D rotation, floating billboard title bob, living fire rise
+  useFrame(({ clock, camera }, delta) => {
     const t = clock.elapsedTime
+    const dt = Math.min(delta, 0.1)
 
+    // Interactive 3D rotation with natural physical momentum & slow cosmic drift
     if (groupRef.current) {
-      groupRef.current.rotation.y = t * 0.025
+      if (!isDragging.current) {
+        userRotation.current.y += rotationVelocity.current.y + 0.0012
+        userRotation.current.x += rotationVelocity.current.x
+        rotationVelocity.current.x *= Math.pow(0.92, dt * 60)
+        rotationVelocity.current.y *= Math.pow(0.92, dt * 60)
+      }
+      groupRef.current.rotation.y = userRotation.current.y
+      groupRef.current.rotation.x = userRotation.current.x
     }
 
     const bobY = Math.sin(t * 0.7) * 8
     if (titleGroupRef.current) {
       titleGroupRef.current.position.y = bobY
-      // Keep titles facing the viewer so they are never backwards/mirrored!
+      // Sibling to groupRef, so it always faces camera in world space and is NEVER mirrored or backwards!
       titleGroupRef.current.quaternion.copy(camera.quaternion)
     }
 
@@ -518,8 +564,27 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
 
   return (
     <group position={position} scale={[scale, scale, scale]}>
-      {/* Root rotating Cosmic Skill Web */}
+      {/* 1. Root interactive mouse-rotatable Cosmic Skill Web */}
       <group ref={groupRef}>
+        {/* Interactive 3D Rotation Grab Sphere: Drag anywhere on Skill Web to freely rotate */}
+        <mesh
+          onPointerDown={(e) => {
+            e.stopPropagation()
+            isDragging.current = true
+            prevPointer.current = { x: e.clientX, y: e.clientY }
+            document.body.style.cursor = "grabbing"
+          }}
+          onPointerOver={() => {
+            if (!isDragging.current) document.body.style.cursor = "grab"
+          }}
+          onPointerOut={() => {
+            if (!isDragging.current) document.body.style.cursor = "auto"
+          }}
+        >
+          <sphereGeometry args={[290, 24, 24]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
+
         {/* Organic Cosmic Web Filaments */}
         <points geometry={webData.filGeo} material={webData.filMat} raycast={() => null} />
 
@@ -537,10 +602,10 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
           }}
           onPointerOver={(e) => {
             e.stopPropagation()
-            document.body.style.cursor = 'pointer'
+            document.body.style.cursor = "pointer"
           }}
-          onPointerOut={(e) => {
-            document.body.style.cursor = 'auto'
+          onPointerOut={() => {
+            document.body.style.cursor = "auto"
           }}
         >
           <points geometry={webData.coreGeo} material={webData.coreMat} />
@@ -568,10 +633,10 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
             }}
             onPointerOver={(e) => {
               e.stopPropagation()
-              document.body.style.cursor = 'pointer'
+              document.body.style.cursor = "pointer"
             }}
-            onPointerOut={(e) => {
-              document.body.style.cursor = 'auto'
+            onPointerOut={() => {
+              document.body.style.cursor = "auto"
             }}
           >
             <primitive object={sprite} />
@@ -581,25 +646,26 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
             </mesh>
           </group>
         ))}
+      </group>
 
-        {/* Floating 3D Stardust Word Titles: "SUBBAREDDY PALAGIRI" & "SKILLS" */}
-        <group
-          ref={titleGroupRef}
-          onClick={(e) => {
-            e.stopPropagation()
-            if (flyTo) flyTo(position, 12000, 0.35)
-          }}
-          onPointerOver={(e) => {
-            e.stopPropagation()
-            document.body.style.cursor = 'pointer'
-          }}
-          onPointerOut={(e) => {
-            document.body.style.cursor = 'auto'
-          }}
-        >
-          <points geometry={webData.subbaGeo} material={webData.subbaMat} />
-          <points geometry={webData.lettersGeo} material={webData.lettersMat} />
-        </group>
+      {/* 2. Floating 3D Stardust Word Titles: "SUBBAREDDY PALAGIRI" & "SKILLS" */}
+      {/* Sibling to groupRef, so it ALWAYS faces the viewer and is NEVER mirrored/backwards! */}
+      <group
+        ref={titleGroupRef}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (flyTo) flyTo(position, 12000, 0.35)
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation()
+          document.body.style.cursor = "pointer"
+        }}
+        onPointerOut={() => {
+          document.body.style.cursor = "auto"
+        }}
+      >
+        <points geometry={webData.subbaGeo} material={webData.subbaMat} />
+        <points geometry={webData.lettersGeo} material={webData.lettersMat} />
 
         {/* Living Fire Particles rising from the title letters */}
         <points

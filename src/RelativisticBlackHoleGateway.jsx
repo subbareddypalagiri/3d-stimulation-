@@ -219,9 +219,10 @@ export default function RelativisticBlackHoleGateway({
       matRef.current.uniforms.uTime.value = t
     }
 
-    const camDist = camera.position.length()
+    const distToM87 = camera.position.distanceTo(new THREE.Vector3(...position))
     if (groupRef.current) {
-      groupRef.current.visible = camDist >= 260000 && camDist <= 35000000
+      // Only visible when user is in the vicinity of M87 (<= 140,000 AU), never blocks Skill Web or other regions!
+      groupRef.current.visible = distToM87 <= 140000
     }
   })
 
@@ -245,11 +246,11 @@ export default function RelativisticBlackHoleGateway({
         />
       </mesh>
 
-      {/* Holographic 3D Tag */}
+      {/* Holographic 3D Tag - Ultra sleek & compact */}
       <Html
-        position={[0, radius * 10.0, 0]}
+        position={[0, radius * 3.5, 0]}
         center
-        distanceFactor={700000}
+        distanceFactor={85000}
         pointerEvents="none"
         style={{ pointerEvents: "none" }}
       >
@@ -260,24 +261,25 @@ export default function RelativisticBlackHoleGateway({
           }}
           style={{
             pointerEvents: "auto",
-            background: "rgba(5, 10, 30, 0.9)",
-            border: "2px solid #ff7700",
-            boxShadow: "0 0 35px rgba(255, 120, 20, 0.8), inset 0 0 20px rgba(255, 100, 0, 0.3)",
-            padding: "12px 22px",
-            borderRadius: 14,
-            backdropFilter: "blur(16px)",
+            background: "rgba(5, 10, 30, 0.92)",
+            border: "1.5px solid #ff7700",
+            boxShadow: "0 0 20px rgba(255, 120, 20, 0.5), inset 0 0 10px rgba(255, 100, 0, 0.2)",
+            padding: "6px 14px",
+            borderRadius: 10,
+            backdropFilter: "blur(12px)",
             color: "#ffffff",
             fontFamily: "system-ui, sans-serif",
-            fontSize: 14,
+            fontSize: 11,
             whiteSpace: "nowrap",
             cursor: "pointer",
             textAlign: "center",
             transform: "scale(1)",
             transition: "transform 0.2s ease, border-color 0.2s ease",
-            userSelect: "none"
+            userSelect: "none",
+            maxWidth: 280
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.08)"
+            e.currentTarget.style.transform = "scale(1.05)"
             e.currentTarget.style.borderColor = "#ffcc44"
           }}
           onMouseLeave={(e) => {
@@ -286,30 +288,30 @@ export default function RelativisticBlackHoleGateway({
           }}
           title="Click to interact with WebGPU Raymarched Relativistic Black Hole"
         >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
             <span style={{
-              width: 10,
-              height: 10,
+              width: 7,
+              height: 7,
               borderRadius: "50%",
               background: "#ff7700",
-              boxShadow: "0 0 12px #ff7700"
+              boxShadow: "0 0 8px #ff7700"
             }} />
-            <b style={{ color: "#ffaa44", letterSpacing: 1.2, fontSize: 14 }}>
-              🌀 M87: RELATIVISTIC RAYMARCHED BLACK HOLE
+            <b style={{ color: "#ffaa44", letterSpacing: 0.8, fontSize: 11 }}>
+              🌀 M87: RELATIVISTIC BLACK HOLE
             </b>
           </div>
-          <div style={{ fontSize: 11, color: "#cbd5e1", marginTop: 4 }}>
-            Past Milky Way • Einstein Null Geodesic Raymarching
+          <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 2 }}>
+            Past Milky Way • Einstein Geodesics
           </div>
           <div style={{
-            marginTop: 6,
+            marginTop: 4,
             display: "inline-block",
             background: "rgba(255, 120, 20, 0.25)",
             border: "1px solid rgba(255, 120, 20, 0.6)",
             color: "#ffcc66",
-            padding: "3px 10px",
-            borderRadius: 6,
-            fontSize: 10,
+            padding: "2px 8px",
+            borderRadius: 5,
+            fontSize: 8.5,
             fontWeight: 800
           }}>
             [ ✦ ENTER WEBGPU SIMULATION ✦ ]
