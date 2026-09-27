@@ -243,7 +243,8 @@ function SingleSatelliteHub({ hub, originalScene, flyTo }) {
         position={[0, hub.scale * 2.2, 0]}
         center
         distanceFactor={hub.scale * 75}
-        style={{ pointerEvents: "auto" }}
+        pointerEvents="none"
+        style={{ pointerEvents: "none" }}
       >
         <div
           onClick={(e) => {
@@ -251,6 +252,7 @@ function SingleSatelliteHub({ hub, originalScene, flyTo }) {
             if (flyTo) flyTo(hub.pos, hub.scale * 12)
           }}
           style={{
+            pointerEvents: "auto",
             background: "rgba(5, 12, 28, 0.88)",
             border: `1.5px solid ${hub.colors.routes}`,
             boxShadow: `0 0 20px ${hub.colors.glow}66`,

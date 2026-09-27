@@ -22,6 +22,7 @@ import AlienNebulaRealm from "./AlienNebulaRealm"
 import RelativisticBlackHoleGateway from "./RelativisticBlackHoleGateway"
 import RelativisticBlackHole from "./RelativisticBlackHole"
 import PlanesAndSatellitesHubs, { SATELLITE_HUBS } from "./PlanesAndSatellitesHubs"
+import CosmicSkillWeb from "./CosmicSkillWeb"
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -188,6 +189,13 @@ function App() {
 
           {/* 10 Planetary Satellite & Plane Networks Across Diverse Cosmic Sectors */}
           <PlanesAndSatellitesHubs flyTo={flyTo} />
+
+          {/* Level 3: Subbareddy 3D Cosmic Skill Web (Placed outside Milky Way) */}
+          <CosmicSkillWeb
+            position={[110000, 32000, -180000]}
+            scale={50}
+            flyTo={flyTo}
+          />
         </Suspense>
 
         {/* Deep cosmic starfield */}
@@ -195,15 +203,15 @@ function App() {
           <Stars radius={15000} depth={500} count={3000} factor={8} saturation={1} fade speed={0.5} />
         </group>
         
-        {/* Ultra-Slow, Deep & Gradual Planetarium Camera Controls */}
+        {/* Responsive, Smooth & Natural 3D Planetarium Camera Controls */}
         <CameraControls 
           ref={cameraControlRef} 
           makeDefault 
           maxDistance={65000000000} 
           minDistance={2}
-          smoothTime={0.4}
-          dollySpeed={0.035}
-          truckSpeed={0.4}
+          smoothTime={0.25}
+          dollySpeed={1.0}
+          truckSpeed={1.0}
           dollyToCursor={true}
           infinityDolly={false}
         />
@@ -309,6 +317,41 @@ function App() {
         >
           <span style={{ fontSize: 16 }}>🌀</span>
           <span>Post-Milky Way Black Hole</span>
+        </button>
+
+        <button
+          onClick={() => {
+            flyTo([110000, 32000 + 4000, -180000 + 16000], 18000)
+          }}
+          style={{
+            background: "linear-gradient(135deg, rgba(0, 240, 255, 0.4), rgba(180, 50, 255, 0.4))",
+            backdropFilter: "blur(16px)",
+            border: "1.5px solid #00f0ff",
+            color: "#ffffff",
+            padding: "8px 16px",
+            borderRadius: 24,
+            fontSize: 12,
+            fontWeight: 800,
+            letterSpacing: "0.03em",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            boxShadow: "0 0 20px rgba(0, 240, 255, 0.6)",
+            transition: "all 0.25s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.05)"
+            e.currentTarget.style.boxShadow = "0 0 30px rgba(0, 240, 255, 0.9)"
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)"
+            e.currentTarget.style.boxShadow = "0 0 20px rgba(0, 240, 255, 0.6)"
+          }}
+          title="Fly directly to Subbareddy 3D Cosmic Skill Web outside the Milky Way"
+        >
+          <span style={{ fontSize: 16 }}>🕸️</span>
+          <span>Cosmic Skill Web</span>
         </button>
 
         {!isMenuOpen && (
@@ -589,6 +632,24 @@ function App() {
               }}
             >
               🎬 Video Portal
+            </button>
+            <button
+              onClick={() => flyTo([110000, 32000 + 4000, -180000 + 16000], 18000)}
+              style={{
+                background: "linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(180, 50, 255, 0.3))",
+                border: "1px solid #00f0ff",
+                color: "#ffffff",
+                padding: "6px 8px",
+                borderRadius: 6,
+                fontSize: 10,
+                fontWeight: 800,
+                cursor: "pointer",
+                boxShadow: "0 0 10px rgba(0, 240, 255, 0.4)",
+                transition: "all 0.2s ease"
+              }}
+              title="Warp directly to Subbareddy 3D Cosmic Skill Web outside the Milky Way"
+            >
+              🕸️ Skill Web
             </button>
           </div>
 

@@ -157,11 +157,13 @@ export default function CosmicAudio({ currentDistance = 150 }) {
       zIndex: 200,
       display: "flex",
       alignItems: "center",
-      gap: 12
+      gap: 12,
+      pointerEvents: "none"
     }}>
       <button
         onClick={initAndPlayAudio}
         style={{
+          pointerEvents: "auto",
           background: isPlaying 
             ? "linear-gradient(135deg, rgba(0, 119, 255, 0.9), rgba(0, 216, 255, 0.9))" 
             : "rgba(15, 20, 35, 0.85)",

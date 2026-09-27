@@ -250,7 +250,8 @@ export default function RelativisticBlackHoleGateway({
         position={[0, radius * 10.0, 0]}
         center
         distanceFactor={700000}
-        style={{ pointerEvents: "auto" }}
+        pointerEvents="none"
+        style={{ pointerEvents: "none" }}
       >
         <div
           onClick={(e) => {
@@ -258,6 +259,7 @@ export default function RelativisticBlackHoleGateway({
             if (onOpenSimulation) onOpenSimulation()
           }}
           style={{
+            pointerEvents: "auto",
             background: "rgba(5, 10, 30, 0.9)",
             border: "2px solid #ff7700",
             boxShadow: "0 0 35px rgba(255, 120, 20, 0.8), inset 0 0 20px rgba(255, 100, 0, 0.3)",
