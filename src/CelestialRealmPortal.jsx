@@ -3,39 +3,27 @@ import React, { useState, useEffect, useCallback, useRef } from "react"
 const CELESTIAL_PARTS = [
   {
     id: "hands",
-    title: "THE GENESIS",
-    name: "Luminhands",
-    badge: "ORIGIN MATRIX",
-    desc: "Original creation hands • Primordial continuous bioluminescent filaments",
-    icon: "🖐️",
+    title: "Helping Hands",
+    icon: "✋",
     url: "/hands.html",
     accentColor: "#00d8ff",
-    glowColor: "rgba(0, 216, 255, 0.5)",
-    tag: "PART 1"
+    glowColor: "rgba(0, 216, 255, 0.5)"
   },
   {
     id: "unix-1",
     title: "UNIX-1",
-    name: "Solitary Entity",
-    badge: "SOLITARY CONSCIOUSNESS",
-    desc: "Continuous root cascades • Piercing ruby red eyes • Sovereign monolith",
-    icon: "🧘",
+    icon: null,
     url: "/unix-1.html",
     accentColor: "#ff0055",
-    glowColor: "rgba(255, 0, 85, 0.5)",
-    tag: "PART 2"
+    glowColor: "rgba(255, 0, 85, 0.5)"
   },
   {
     id: "commanders",
-    title: "UNIX - COMMANDERS",
-    name: "Cardinal Council",
-    badge: "4-FIGURE SQUAD",
-    desc: "North, South, East, West cardinal circle formation facing inward",
-    icon: "🛡️",
+    title: "UNIX COMMANDERS",
+    icon: null,
     url: "/commanders.html",
     accentColor: "#a855f7",
-    glowColor: "rgba(168, 85, 247, 0.5)",
-    tag: "PART 3"
+    glowColor: "rgba(168, 85, 247, 0.5)"
   }
 ]
 
@@ -79,8 +67,8 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "h
   }, [activePartId])
 
   // Continuous Scroll Storyteller Engine:
-  // Scroll Down (wheel down) advances: Hands -> UNIX-1 -> Commanders
-  // Scroll Up (wheel up) reverses: Commanders -> UNIX-1 -> Hands -> Return to Cosmos!
+  // Scroll Down (wheel down) advances: Helping Hands -> UNIX-1 -> UNIX COMMANDERS
+  // Scroll Up (wheel up) reverses: UNIX COMMANDERS -> UNIX-1 -> Helping Hands -> Return to Space!
   const handleScrollDelta = useCallback((deltaY) => {
     if (isExitingRef.current) return
     const now = Date.now()
@@ -100,7 +88,7 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "h
         lastScrollTimeRef.current = now
         switchPart(partOrder[currentIndex - 1])
       } else if (currentIndex === 0) {
-        // At Stage 1: Genesis -> Scrolling up returns to solar system!
+        // At Stage 1: Helping Hands -> Scrolling up returns to space!
         lastScrollTimeRef.current = now
         handleExit()
       }
@@ -203,7 +191,7 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "h
         />
       </div>
 
-      {/* Top Glassmorphic HUD Header */}
+      {/* Top Glassmorphic Minimal HUD Header */}
       <div
         style={{
           position: "relative",
@@ -211,51 +199,30 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "h
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "16px 28px",
-          background: "linear-gradient(to bottom, rgba(5, 5, 18, 0.92) 0%, rgba(5, 5, 18, 0.6) 70%, transparent 100%)",
+          padding: "14px 28px",
+          background: "linear-gradient(to bottom, rgba(5, 5, 18, 0.9) 0%, rgba(5, 5, 18, 0.4) 70%, transparent 100%)",
           backdropFilter: "blur(18px)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)"
+          borderBottom: "1px solid rgba(255, 255, 255, 0.06)"
         }}
       >
-        {/* Brand & Realm Title */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        {/* Minimal Glowing Indicator */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{
-              width: 14,
-              height: 14,
+              width: 10,
+              height: 10,
               borderRadius: "50%",
               background: currentPart.accentColor,
-              boxShadow: `0 0 16px ${currentPart.accentColor}, 0 0 32px ${currentPart.glowColor}`,
+              boxShadow: `0 0 12px ${currentPart.accentColor}, 0 0 24px ${currentPart.glowColor}`,
               transition: "all 0.3s ease"
             }}
           />
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ color: "#ffffff", fontWeight: 800, fontSize: 13, letterSpacing: "0.12em" }}>
-                🌌 CELESTIAL REALM
-              </span>
-              <span
-                style={{
-                  background: "rgba(255, 255, 255, 0.08)",
-                  border: `1px solid ${currentPart.accentColor}66`,
-                  color: currentPart.accentColor,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  padding: "2px 8px",
-                  borderRadius: 12,
-                  letterSpacing: "0.08em"
-                }}
-              >
-                {currentPart.badge}
-              </span>
-            </div>
-            <div style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: 11, marginTop: 2 }}>
-              {currentPart.desc}
-            </div>
-          </div>
+          <span style={{ color: "#ffffff", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em" }}>
+            🌌 CELESTIAL
+          </span>
         </div>
 
-        {/* 3-Part Navigation Switcher (Hands / UNIX-1 / Commanders) */}
+        {/* The 3 Clean Tabs: [✋ Helping Hands] [UNIX-1] [UNIX COMMANDERS] */}
         <div
           style={{
             display: "flex",
@@ -268,7 +235,7 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "h
             boxShadow: "0 8px 32px rgba(0, 0, 0, 0.6)"
           }}
         >
-          {CELESTIAL_PARTS.map((part, index) => {
+          {CELESTIAL_PARTS.map((part) => {
             const isActive = part.id === activePartId
             return (
               <button
@@ -277,8 +244,8 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "h
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 8,
-                  padding: "8px 16px",
+                  gap: 6,
+                  padding: "8px 18px",
                   borderRadius: 24,
                   background: isActive
                     ? `linear-gradient(135deg, ${part.accentColor}33, ${part.accentColor}11)`
@@ -305,150 +272,93 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "h
                   }
                 }}
               >
-                <span style={{ fontSize: 14 }}>{part.icon}</span>
+                {part.icon && <span style={{ fontSize: 13 }}>{part.icon}</span>}
                 <span>{part.title}</span>
-                <span
-                  style={{
-                    fontSize: 9,
-                    padding: "1px 5px",
-                    borderRadius: 8,
-                    background: isActive ? part.accentColor : "rgba(255, 255, 255, 0.12)",
-                    color: isActive ? "#000000" : "#ffffff",
-                    fontWeight: 700
-                  }}
-                >
-                  {index + 1}
-                </span>
               </button>
             )
           })}
         </div>
 
-        {/* Action Controls & Return Button */}
+        {/* Minimal Return Button */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {/* Reload / Re-reveal */}
-          <button
-            onClick={() => setIframeKey((k) => k + 1)}
-            style={{
-              background: "rgba(255, 255, 255, 0.08)",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
-              color: "#ffffff",
-              padding: "7px 12px",
-              borderRadius: 8,
-              fontSize: 11,
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "all 0.2s ease"
-            }}
-            title="Replay Reveal Animation"
-          >
-            🔄 Reset
-          </button>
-
-          {/* Return to Cosmos */}
           <button
             onClick={handleExit}
             style={{
-              background: "linear-gradient(135deg, rgba(0, 216, 255, 0.35), rgba(168, 85, 247, 0.35))",
-              border: "1.5px solid #00d8ff",
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
               color: "#ffffff",
-              padding: "8px 18px",
-              borderRadius: 8,
-              fontSize: 12,
-              fontWeight: 800,
+              padding: "7px 16px",
+              borderRadius: 20,
+              fontSize: 11,
+              fontWeight: 700,
               cursor: "pointer",
-              boxShadow: "0 0 20px rgba(0, 216, 255, 0.5)",
               transition: "all 0.2s ease",
               display: "flex",
               alignItems: "center",
               gap: 6
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.04)"
-              e.currentTarget.style.boxShadow = "0 0 28px rgba(0, 216, 255, 0.8)"
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.18)"
+              e.currentTarget.style.borderColor = "#00d8ff"
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)"
-              e.currentTarget.style.boxShadow = "0 0 20px rgba(0, 216, 255, 0.5)"
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)"
+              e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.2)"
             }}
           >
-            <span>🌌</span>
-            <span>Return to Cosmos (Esc)</span>
+            <span>✕</span>
+            <span>Return (Esc)</span>
           </button>
         </div>
       </div>
 
-      {/* Bottom Floating Telemetry & Keyboard Hint Bar */}
+      {/* Sleek Floating Bottom Indicator */}
       <div
         style={{
           position: "relative",
           zIndex: 20,
-          padding: "16px 32px",
-          background: "linear-gradient(to top, rgba(5, 5, 18, 0.92) 0%, rgba(5, 5, 18, 0.5) 60%, transparent 100%)",
+          padding: "12px 24px",
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
-          backdropFilter: "blur(12px)",
-          borderTop: "1px solid rgba(255, 255, 255, 0.06)"
+          pointerEvents: "none"
         }}
       >
-        {/* Continuous Scroll Story Progress & Controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              background: "rgba(255, 255, 255, 0.06)",
-              padding: "4px 14px",
-              borderRadius: 20,
-              border: "1px solid rgba(255, 255, 255, 0.12)"
-            }}
-          >
-            <span style={{ fontSize: 10, color: "#38bdf8", fontWeight: 800, letterSpacing: "0.05em" }}>COSMIC CONTINUUM:</span>
-            {CELESTIAL_PARTS.map((p, idx) => {
-              const isPActive = p.id === activePartId
-              return (
-                <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  {idx > 0 && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 10 }}>▾</span>}
-                  <span
-                    onClick={() => switchPart(p.id)}
-                    style={{
-                      fontSize: 10,
-                      fontWeight: isPActive ? 800 : 500,
-                      color: isPActive ? p.accentColor : "rgba(255,255,255,0.45)",
-                      cursor: "pointer",
-                      textShadow: isPActive ? `0 0 10px ${p.accentColor}` : "none",
-                      transition: "all 0.2s ease"
-                    }}
-                  >
-                    {idx + 1}. {p.title}
-                  </span>
-                </div>
-              )
-            })}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            background: "rgba(8, 8, 20, 0.75)",
+            backdropFilter: "blur(14px)",
+            padding: "6px 18px",
+            borderRadius: 30,
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            color: "rgba(255, 255, 255, 0.7)",
+            fontSize: 11,
+            pointerEvents: "auto"
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {partOrder.map((id) => (
+              <div
+                key={id}
+                onClick={() => switchPart(id)}
+                style={{
+                  width: id === activePartId ? 18 : 6,
+                  height: 6,
+                  borderRadius: 3,
+                  background: id === activePartId ? currentPart.accentColor : "rgba(255, 255, 255, 0.25)",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  boxShadow: id === activePartId ? `0 0 8px ${currentPart.accentColor}` : "none"
+                }}
+              />
+            ))}
           </div>
-
-          <div style={{ color: "rgba(255, 255, 255, 0.75)", fontSize: 11, display: "flex", alignItems: "center", gap: 10 }}>
-            <span>📜 <b>Scroll ▾</b>: Deeper</span>
-            <span style={{ color: "rgba(255, 255, 255, 0.25)" }}>|</span>
-            <span><b>Scroll ▴</b>: Return to Cosmos</span>
-            <span style={{ color: "rgba(255, 255, 255, 0.25)" }}>|</span>
-            <span>🖱️ <b>Drag</b> to Orbit</span>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span
-            style={{
-              fontSize: 10,
-              color: currentPart.accentColor,
-              fontFamily: "monospace",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase"
-            }}
-          >
-            ENGINE: THREE.JS WEBGPU TSL • 60-120 FPS NATIVE
+          <span style={{ color: "rgba(255, 255, 255, 0.3)" }}>|</span>
+          <span style={{ fontSize: 10, letterSpacing: "0.03em" }}>
+            Scroll ▾ Next • Scroll ▴ Back
           </span>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Stars, CameraControls, Environment } from "@react-three/drei"
 import { EffectComposer, Bloom } from "@react-three/postprocessing"
-import { Suspense, useRef, useState } from "react"
+import { Suspense, useRef, useState, useEffect } from "react"
 import * as THREE from "three"
 import "./App.css"
 import UniverseManager from "./UniverseManager"
@@ -140,6 +140,20 @@ function App() {
     progress: 1,
     dist: 150
   })
+
+  // Natural scroll into Celestial Realm at Level 9 Horizon of Infinity
+  useEffect(() => {
+    const handleGlobalWheel = (e) => {
+      if (telemetry.progress === 9 && !isCelestialPortalOpen && !isPortalOpen && !isBlackHoleModalOpen) {
+        if (e.deltaY > 60) {
+          setCelestialInitialPart("hands")
+          setIsCelestialPortalOpen(true)
+        }
+      }
+    }
+    window.addEventListener("wheel", handleGlobalWheel, { passive: true })
+    return () => window.removeEventListener("wheel", handleGlobalWheel)
+  }, [telemetry.progress, isCelestialPortalOpen, isPortalOpen, isBlackHoleModalOpen])
 
   const flyToPrimeRealm = () => {
     if (cameraControlRef.current) {
@@ -907,89 +921,6 @@ function App() {
             </div>
           </div>
 
-          {/* Celestial Bioluminescent Realm Warps */}
-          <div style={{
-            background: "linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(0, 216, 255, 0.18))",
-            border: "1.5px solid rgba(168, 85, 247, 0.5)",
-            borderRadius: 10,
-            padding: "10px 12px",
-            marginBottom: 10,
-            boxShadow: "0 0 15px rgba(168, 85, 247, 0.2)"
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <b style={{ color: "#c084fc", fontSize: 10, letterSpacing: "0.04em" }}>🌌 CELESTIAL REALM PORTALS:</b>
-              <span style={{ fontSize: 9, color: "#38bdf8", fontWeight: 700 }}>3 Parts</span>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5 }}>
-              <button
-                onClick={() => {
-                  setCelestialInitialPart("hands")
-                  setIsCelestialPortalOpen(true)
-                  setIsMenuOpen(false)
-                }}
-                style={{
-                  background: "rgba(0, 216, 255, 0.18)",
-                  border: "1px solid #00d8ff",
-                  color: "#ffffff",
-                  padding: "6px 4px",
-                  borderRadius: 6,
-                  fontSize: 9.5,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  textAlign: "center",
-                  transition: "all 0.2s ease"
-                }}
-                title="Part 1: The Genesis (Luminhands)"
-              >
-                🖐️ Hands
-              </button>
-              <button
-                onClick={() => {
-                  setCelestialInitialPart("unix-1")
-                  setIsCelestialPortalOpen(true)
-                  setIsMenuOpen(false)
-                }}
-                style={{
-                  background: "rgba(255, 0, 85, 0.18)",
-                  border: "1px solid #ff0055",
-                  color: "#ffffff",
-                  padding: "6px 4px",
-                  borderRadius: 6,
-                  fontSize: 9.5,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  textAlign: "center",
-                  transition: "all 0.2s ease"
-                }}
-                title="Part 2: UNIX-1 Entity"
-              >
-                🧘 UNIX-1
-              </button>
-              <button
-                onClick={() => {
-                  setCelestialInitialPart("commanders")
-                  setIsCelestialPortalOpen(true)
-                  setIsMenuOpen(false)
-                }}
-                style={{
-                  background: "rgba(168, 85, 247, 0.18)",
-                  border: "1px solid #a855f7",
-                  color: "#ffffff",
-                  padding: "6px 4px",
-                  borderRadius: 6,
-                  fontSize: 9.5,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  textAlign: "center",
-                  transition: "all 0.2s ease"
-                }}
-                title="Part 3: UNIX - Commanders"
-              >
-                🛡️ Commanders
-              </button>
-            </div>
-          </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
             <button
               onClick={() => flyTo([0, 20, 45], 25)}
@@ -1417,6 +1348,87 @@ function App() {
               })}
             </div>
           </div>
+
+          {/* Ultimate Destination: Celestial Realm (Level 9 / Beyond Infinity) */}
+          <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <b style={{ color: "#c084fc", fontSize: 10, letterSpacing: "0.05em" }}>🌌 CELESTIAL REALM:</b>
+              <span style={{ fontSize: 9, color: "#38bdf8", fontWeight: 700 }}>Final Horizon</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1.2fr", gap: 5 }}>
+              <button
+                onClick={() => {
+                  setCelestialInitialPart("hands")
+                  setIsCelestialPortalOpen(true)
+                  setIsMenuOpen(false)
+                }}
+                style={{
+                  background: "rgba(0, 216, 255, 0.18)",
+                  border: "1px solid #00d8ff",
+                  color: "#ffffff",
+                  padding: "6px 4px",
+                  borderRadius: 6,
+                  fontSize: 9.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  textAlign: "center",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 4
+                }}
+                title="Helping Hands"
+              >
+                <span>✋</span>
+                <span>Helping Hands</span>
+              </button>
+              <button
+                onClick={() => {
+                  setCelestialInitialPart("unix-1")
+                  setIsCelestialPortalOpen(true)
+                  setIsMenuOpen(false)
+                }}
+                style={{
+                  background: "rgba(255, 0, 85, 0.18)",
+                  border: "1px solid #ff0055",
+                  color: "#ffffff",
+                  padding: "6px 4px",
+                  borderRadius: 6,
+                  fontSize: 9.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  textAlign: "center",
+                  transition: "all 0.2s ease"
+                }}
+                title="UNIX-1"
+              >
+                UNIX-1
+              </button>
+              <button
+                onClick={() => {
+                  setCelestialInitialPart("commanders")
+                  setIsCelestialPortalOpen(true)
+                  setIsMenuOpen(false)
+                }}
+                style={{
+                  background: "rgba(168, 85, 247, 0.18)",
+                  border: "1px solid #a855f7",
+                  color: "#ffffff",
+                  padding: "6px 4px",
+                  borderRadius: 6,
+                  fontSize: 9.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  textAlign: "center",
+                  transition: "all 0.2s ease"
+                }}
+                title="UNIX COMMANDERS"
+              >
+                UNIX COMMANDERS
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1432,16 +1444,17 @@ function App() {
         }} 
       />
 
-      {/* Interactive Celestial Realm Portal (The Genesis Hands, UNIX-1 Entity, UNIX - Commanders) */}
+      {/* Interactive Celestial Realm Portal (Helping Hands, UNIX-1, UNIX COMMANDERS) */}
       <CelestialRealmPortal
         isOpen={isCelestialPortalOpen}
         initialPart={celestialInitialPart}
         onClose={() => setIsCelestialPortalOpen(false)}
       />
 
-      {/* Natural Space Scroll Prompt when Passing Pluto (170 - 480 AU) */}
-      {telemetry.progress === 1 && telemetry.dist >= 170 && telemetry.dist <= 480 && !isCelestialPortalOpen && (
-        <div
+      {/* Natural Space Scroll Prompt at Final Horizon: Level 9 Cosmic Singularity */}
+      {telemetry.progress === 9 && !isCelestialPortalOpen && (
+        <button
+          type="button"
           onClick={() => {
             setCelestialInitialPart("hands")
             setIsCelestialPortalOpen(true)
@@ -1451,43 +1464,45 @@ function App() {
             bottom: 30,
             left: "50%",
             transform: "translateX(-50%)",
-            background: "linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(0, 216, 255, 0.35))",
+            background: "linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(0, 216, 255, 0.4))",
             backdropFilter: "blur(20px)",
-            border: "1.5px solid rgba(168, 85, 247, 0.7)",
-            boxShadow: "0 0 30px rgba(168, 85, 247, 0.6), 0 0 50px rgba(0, 216, 255, 0.4)",
+            border: "1.5px solid rgba(168, 85, 247, 0.8)",
+            boxShadow: "0 0 35px rgba(168, 85, 247, 0.7), 0 0 60px rgba(0, 216, 255, 0.5)",
             borderRadius: 30,
-            padding: "10px 22px",
+            padding: "10px 24px",
             color: "#ffffff",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             gap: 12,
             zIndex: 100,
+            outline: "none",
+            fontFamily: "inherit",
             transition: "all 0.3s ease"
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = "translateX(-50%) scale(1.05)"
-            e.currentTarget.style.boxShadow = "0 0 40px rgba(168, 85, 247, 0.9), 0 0 60px rgba(0, 216, 255, 0.6)"
+            e.currentTarget.style.boxShadow = "0 0 45px rgba(168, 85, 247, 0.95), 0 0 70px rgba(0, 216, 255, 0.7)"
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "translateX(-50%) scale(1)"
-            e.currentTarget.style.boxShadow = "0 0 30px rgba(168, 85, 247, 0.6), 0 0 50px rgba(0, 216, 255, 0.4)"
+            e.currentTarget.style.boxShadow = "0 0 35px rgba(168, 85, 247, 0.7), 0 0 60px rgba(0, 216, 255, 0.5)"
           }}
-          title="Enter 3-Stage Celestial Story: Genesis Hands -> UNIX-1 -> Commanders"
+          title="Descend into Celestial Realm: Helping Hands -> UNIX-1 -> UNIX COMMANDERS"
         >
           <span style={{ fontSize: 18 }}>🌌</span>
           <div>
             <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", color: "#38bdf8" }}>
-              CELESTIAL HORIZON IN SIGHT
+              THE HORIZON OF INFINITY • CELESTIAL REALM
             </div>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>
-              Click to descend into Stage 1: The Genesis Hands
+              Final Horizon of the Cosmos • Descend into Helping Hands
             </div>
           </div>
-          <span style={{ fontSize: 11, background: "rgba(255,255,255,0.18)", padding: "4px 12px", borderRadius: 14, fontWeight: 800, color: "#ffffff" }}>
+          <span style={{ fontSize: 11, background: "rgba(255,255,255,0.2)", padding: "4px 12px", borderRadius: 14, fontWeight: 800, color: "#ffffff" }}>
             Enter ▾
           </span>
-        </div>
+        </button>
       )}
 
       {/* Live Floating Observation Window When Past the Milky Way (Level 3+) */}
