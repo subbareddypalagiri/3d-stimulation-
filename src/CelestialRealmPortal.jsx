@@ -39,11 +39,14 @@ const CELESTIAL_PARTS = [
   }
 ]
 
-export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "commanders" }) {
+export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "hands" }) {
   const [activePartId, setActivePartId] = useState(initialPart)
   const [whiteFlash, setWhiteFlash] = useState(false)
   const [iframeKey, setIframeKey] = useState(0)
   const isExitingRef = useRef(false)
+  const lastScrollTimeRef = useRef(0)
+
+  const partOrder = ["hands", "unix-1", "commanders"]
 
   // Sync initial part when opened
   useEffect(() => {
@@ -55,7 +58,7 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "c
     } else {
       setWhiteFlash(false)
     }
-  }, [isOpen])
+  }, [isOpen, initialPart])
 
   const handleExit = useCallback(() => {
     if (isExitingRef.current) return
@@ -65,17 +68,69 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "c
       isExitingRef.current = false
       setWhiteFlash(false)
       if (onClose) onClose()
-    }, 250)
+    }, 280)
   }, [onClose])
 
-  const switchPart = (id) => {
+  const switchPart = useCallback((id) => {
     if (id === activePartId) return
     setWhiteFlash(true)
     setActivePartId(id)
     setTimeout(() => setWhiteFlash(false), 300)
-  }
+  }, [activePartId])
 
-  // Keyboard navigation: 1, 2, 3 to switch tabs, Escape to exit
+  // Continuous Scroll Storyteller Engine:
+  // Scroll Down (wheel down) advances: Hands -> UNIX-1 -> Commanders
+  // Scroll Up (wheel up) reverses: Commanders -> UNIX-1 -> Hands -> Return to Cosmos!
+  const handleScrollDelta = useCallback((deltaY) => {
+    if (isExitingRef.current) return
+    const now = Date.now()
+    if (now - lastScrollTimeRef.current < 550) return // smooth debounce between stages
+
+    if (deltaY > 30) {
+      // Advance to next stage
+      const currentIndex = partOrder.indexOf(activePartId)
+      if (currentIndex < partOrder.length - 1) {
+        lastScrollTimeRef.current = now
+        switchPart(partOrder[currentIndex + 1])
+      }
+    } else if (deltaY < -30) {
+      // Reverse to previous stage or return to space
+      const currentIndex = partOrder.indexOf(activePartId)
+      if (currentIndex > 0) {
+        lastScrollTimeRef.current = now
+        switchPart(partOrder[currentIndex - 1])
+      } else if (currentIndex === 0) {
+        // At Stage 1: Genesis -> Scrolling up returns to solar system!
+        lastScrollTimeRef.current = now
+        handleExit()
+      }
+    }
+  }, [activePartId, switchPart, handleExit])
+
+  // Listen to wheel events on both the window and messages posted from iframe
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleWheel = (e) => {
+      handleScrollDelta(e.deltaY)
+    }
+
+    const handleMessage = (e) => {
+      if (e.data && e.data.type === "CELESTIAL_SCROLL") {
+        handleScrollDelta(e.data.deltaY)
+      }
+    }
+
+    window.addEventListener("wheel", handleWheel, { passive: true })
+    window.addEventListener("message", handleMessage)
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel)
+      window.removeEventListener("message", handleMessage)
+    }
+  }, [isOpen, handleScrollDelta])
+
+  // Keyboard navigation: 1, 2, 3 to switch tabs, Escape/Backspace to exit
   useEffect(() => {
     if (!isOpen) return
 
@@ -88,12 +143,16 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "c
         switchPart("unix-1")
       } else if (e.key === "3") {
         switchPart("commanders")
+      } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        handleScrollDelta(50)
+      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        handleScrollDelta(-50)
       }
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isOpen, handleExit, activePartId])
+  }, [isOpen, handleExit, switchPart, handleScrollDelta])
 
   if (!isOpen) return null
 
@@ -333,12 +392,50 @@ export default function CelestialRealmPortal({ isOpen, onClose, initialPart = "c
           borderTop: "1px solid rgba(255, 255, 255, 0.06)"
         }}
       >
-        <div style={{ color: "rgba(255, 255, 255, 0.75)", fontSize: 11, display: "flex", alignItems: "center", gap: 12 }}>
-          <span>🖱️ <b>Drag</b> to rotate 3D view</span>
-          <span style={{ color: "rgba(255, 255, 255, 0.25)" }}>|</span>
-          <span>🔍 <b>Scroll</b> to zoom</span>
-          <span style={{ color: "rgba(255, 255, 255, 0.25)" }}>|</span>
-          <span>⌨️ Press <b>1, 2, 3</b> to switch between Genesis, UNIX-1, and Commanders</span>
+        {/* Continuous Scroll Story Progress & Controls */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              background: "rgba(255, 255, 255, 0.06)",
+              padding: "4px 14px",
+              borderRadius: 20,
+              border: "1px solid rgba(255, 255, 255, 0.12)"
+            }}
+          >
+            <span style={{ fontSize: 10, color: "#38bdf8", fontWeight: 800, letterSpacing: "0.05em" }}>COSMIC CONTINUUM:</span>
+            {CELESTIAL_PARTS.map((p, idx) => {
+              const isPActive = p.id === activePartId
+              return (
+                <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  {idx > 0 && <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 10 }}>▾</span>}
+                  <span
+                    onClick={() => switchPart(p.id)}
+                    style={{
+                      fontSize: 10,
+                      fontWeight: isPActive ? 800 : 500,
+                      color: isPActive ? p.accentColor : "rgba(255,255,255,0.45)",
+                      cursor: "pointer",
+                      textShadow: isPActive ? `0 0 10px ${p.accentColor}` : "none",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    {idx + 1}. {p.title}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+
+          <div style={{ color: "rgba(255, 255, 255, 0.75)", fontSize: 11, display: "flex", alignItems: "center", gap: 10 }}>
+            <span>📜 <b>Scroll ▾</b>: Deeper</span>
+            <span style={{ color: "rgba(255, 255, 255, 0.25)" }}>|</span>
+            <span><b>Scroll ▴</b>: Return to Cosmos</span>
+            <span style={{ color: "rgba(255, 255, 255, 0.25)" }}>|</span>
+            <span>🖱️ <b>Drag</b> to Orbit</span>
+          </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

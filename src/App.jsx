@@ -103,7 +103,7 @@ function App() {
   const [galaxyCenter, setGalaxyCenter] = useState([0, 0, 0])
   const [isPortalOpen, setIsPortalOpen] = useState(false)
   const [isCelestialPortalOpen, setIsCelestialPortalOpen] = useState(false)
-  const [celestialInitialPart, setCelestialInitialPart] = useState("commanders")
+  const [celestialInitialPart, setCelestialInitialPart] = useState("hands")
   const [isBlackHoleModalOpen, setIsBlackHoleModalOpen] = useState(false)
   const [isPIPClosed, setIsPIPClosed] = useState(false)
   const [blackHoleTarget, setBlackHoleTarget] = useState({
@@ -376,7 +376,7 @@ function App() {
       <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 8, zIndex: 100, flexWrap: "wrap", justifyContent: "flex-end", maxWidth: "calc(100vw - 460px)" }}>
         <button
           onClick={() => {
-            setCelestialInitialPart("commanders")
+            setCelestialInitialPart("hands")
             setIsCelestialPortalOpen(true)
           }}
           style={{
@@ -1438,6 +1438,57 @@ function App() {
         initialPart={celestialInitialPart}
         onClose={() => setIsCelestialPortalOpen(false)}
       />
+
+      {/* Natural Space Scroll Prompt when Passing Pluto (170 - 480 AU) */}
+      {telemetry.progress === 1 && telemetry.dist >= 170 && telemetry.dist <= 480 && !isCelestialPortalOpen && (
+        <div
+          onClick={() => {
+            setCelestialInitialPart("hands")
+            setIsCelestialPortalOpen(true)
+          }}
+          style={{
+            position: "absolute",
+            bottom: 30,
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(0, 216, 255, 0.35))",
+            backdropFilter: "blur(20px)",
+            border: "1.5px solid rgba(168, 85, 247, 0.7)",
+            boxShadow: "0 0 30px rgba(168, 85, 247, 0.6), 0 0 50px rgba(0, 216, 255, 0.4)",
+            borderRadius: 30,
+            padding: "10px 22px",
+            color: "#ffffff",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            zIndex: 100,
+            transition: "all 0.3s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateX(-50%) scale(1.05)"
+            e.currentTarget.style.boxShadow = "0 0 40px rgba(168, 85, 247, 0.9), 0 0 60px rgba(0, 216, 255, 0.6)"
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateX(-50%) scale(1)"
+            e.currentTarget.style.boxShadow = "0 0 30px rgba(168, 85, 247, 0.6), 0 0 50px rgba(0, 216, 255, 0.4)"
+          }}
+          title="Enter 3-Stage Celestial Story: Genesis Hands -> UNIX-1 -> Commanders"
+        >
+          <span style={{ fontSize: 18 }}>🌌</span>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", color: "#38bdf8" }}>
+              CELESTIAL HORIZON IN SIGHT
+            </div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>
+              Click to descend into Stage 1: The Genesis Hands
+            </div>
+          </div>
+          <span style={{ fontSize: 11, background: "rgba(255,255,255,0.18)", padding: "4px 12px", borderRadius: 14, fontWeight: 800, color: "#ffffff" }}>
+            Enter ▾
+          </span>
+        </div>
+      )}
 
       {/* Live Floating Observation Window When Past the Milky Way (Level 3+) */}
       {telemetry.progress >= 3 && !isBlackHoleModalOpen && !isPortalOpen && !isCelestialPortalOpen && !isPIPClosed && (
