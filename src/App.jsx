@@ -16,6 +16,7 @@ import MultiverseFinalSkyPano from "./MultiverseFinalSkyPano"
 import { TEN_COSMIC_SPHERES } from "./cosmicSpheresData"
 import CosmicSingularityDot from "./CosmicSingularityDot"
 import ScrollVideoPortal from "./ScrollVideoPortal"
+import CelestialRealmPortal from "./CelestialRealmPortal"
 import NameMonument from "./NameMonument"
 import EmuInTheSky from "./EmuInTheSky"
 import AlienNebulaRealm from "./AlienNebulaRealm"
@@ -101,6 +102,8 @@ function App() {
   const cameraControlRef = useRef()
   const [galaxyCenter, setGalaxyCenter] = useState([0, 0, 0])
   const [isPortalOpen, setIsPortalOpen] = useState(false)
+  const [isCelestialPortalOpen, setIsCelestialPortalOpen] = useState(false)
+  const [celestialInitialPart, setCelestialInitialPart] = useState("commanders")
   const [isBlackHoleModalOpen, setIsBlackHoleModalOpen] = useState(false)
   const [isPIPClosed, setIsPIPClosed] = useState(false)
   const [blackHoleTarget, setBlackHoleTarget] = useState({
@@ -370,7 +373,43 @@ function App() {
       </div>
 
       {/* Top Right Header Controls & Direct Black Hole Warp Button */}
-      <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 10, zIndex: 100 }}>
+      <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 8, zIndex: 100, flexWrap: "wrap", justifyContent: "flex-end", maxWidth: "calc(100vw - 460px)" }}>
+        <button
+          onClick={() => {
+            setCelestialInitialPart("commanders")
+            setIsCelestialPortalOpen(true)
+          }}
+          style={{
+            background: "linear-gradient(135deg, rgba(168, 85, 247, 0.5), rgba(0, 216, 255, 0.5))",
+            backdropFilter: "blur(16px)",
+            border: "1.5px solid #a855f7",
+            color: "#ffffff",
+            padding: "8px 16px",
+            borderRadius: 24,
+            fontSize: 12,
+            fontWeight: 800,
+            letterSpacing: "0.03em",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            boxShadow: "0 0 22px rgba(168, 85, 247, 0.6), 0 0 40px rgba(0, 216, 255, 0.3)",
+            transition: "all 0.25s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.05)"
+            e.currentTarget.style.boxShadow = "0 0 32px rgba(168, 85, 247, 0.9), 0 0 50px rgba(0, 216, 255, 0.6)"
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)"
+            e.currentTarget.style.boxShadow = "0 0 22px rgba(168, 85, 247, 0.6), 0 0 40px rgba(0, 216, 255, 0.3)"
+          }}
+          title="Open 3D Bioluminescent Celestial Realm: Hands, UNIX-1, and Commanders"
+        >
+          <span style={{ fontSize: 16 }}>🌌</span>
+          <span>Celestial Realm</span>
+        </button>
+
         <button
           onClick={() => {
             flyTo([150000, 60000, -520000], 65000)
@@ -868,6 +907,89 @@ function App() {
             </div>
           </div>
 
+          {/* Celestial Bioluminescent Realm Warps */}
+          <div style={{
+            background: "linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(0, 216, 255, 0.18))",
+            border: "1.5px solid rgba(168, 85, 247, 0.5)",
+            borderRadius: 10,
+            padding: "10px 12px",
+            marginBottom: 10,
+            boxShadow: "0 0 15px rgba(168, 85, 247, 0.2)"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <b style={{ color: "#c084fc", fontSize: 10, letterSpacing: "0.04em" }}>🌌 CELESTIAL REALM PORTALS:</b>
+              <span style={{ fontSize: 9, color: "#38bdf8", fontWeight: 700 }}>3 Parts</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5 }}>
+              <button
+                onClick={() => {
+                  setCelestialInitialPart("hands")
+                  setIsCelestialPortalOpen(true)
+                  setIsMenuOpen(false)
+                }}
+                style={{
+                  background: "rgba(0, 216, 255, 0.18)",
+                  border: "1px solid #00d8ff",
+                  color: "#ffffff",
+                  padding: "6px 4px",
+                  borderRadius: 6,
+                  fontSize: 9.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  textAlign: "center",
+                  transition: "all 0.2s ease"
+                }}
+                title="Part 1: The Genesis (Luminhands)"
+              >
+                🖐️ Hands
+              </button>
+              <button
+                onClick={() => {
+                  setCelestialInitialPart("unix-1")
+                  setIsCelestialPortalOpen(true)
+                  setIsMenuOpen(false)
+                }}
+                style={{
+                  background: "rgba(255, 0, 85, 0.18)",
+                  border: "1px solid #ff0055",
+                  color: "#ffffff",
+                  padding: "6px 4px",
+                  borderRadius: 6,
+                  fontSize: 9.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  textAlign: "center",
+                  transition: "all 0.2s ease"
+                }}
+                title="Part 2: UNIX-1 Entity"
+              >
+                🧘 UNIX-1
+              </button>
+              <button
+                onClick={() => {
+                  setCelestialInitialPart("commanders")
+                  setIsCelestialPortalOpen(true)
+                  setIsMenuOpen(false)
+                }}
+                style={{
+                  background: "rgba(168, 85, 247, 0.18)",
+                  border: "1px solid #a855f7",
+                  color: "#ffffff",
+                  padding: "6px 4px",
+                  borderRadius: 6,
+                  fontSize: 9.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  textAlign: "center",
+                  transition: "all 0.2s ease"
+                }}
+                title="Part 3: UNIX - Commanders"
+              >
+                🛡️ Commanders
+              </button>
+            </div>
+          </div>
+
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
             <button
               onClick={() => flyTo([0, 20, 45], 25)}
@@ -1310,8 +1432,15 @@ function App() {
         }} 
       />
 
+      {/* Interactive Celestial Realm Portal (The Genesis Hands, UNIX-1 Entity, UNIX - Commanders) */}
+      <CelestialRealmPortal
+        isOpen={isCelestialPortalOpen}
+        initialPart={celestialInitialPart}
+        onClose={() => setIsCelestialPortalOpen(false)}
+      />
+
       {/* Live Floating Observation Window When Past the Milky Way (Level 3+) */}
-      {telemetry.progress >= 3 && !isBlackHoleModalOpen && !isPortalOpen && !isPIPClosed && (
+      {telemetry.progress >= 3 && !isBlackHoleModalOpen && !isPortalOpen && !isCelestialPortalOpen && !isPIPClosed && (
         <div
           style={{
             position: "absolute",
