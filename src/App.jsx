@@ -27,6 +27,30 @@ import CosmicSkillWeb from "./CosmicSkillWeb"
 import { SOL_PLANETS } from "./SolarSystem"
 import CosmicFlightNavigator from "./CosmicFlightNavigator"
 import PrimeRealmProjectsOrbit, { PRIME_PROJECTS } from "./PrimeRealmProjectsOrbit"
+import {
+  IconRocket,
+  IconRadar,
+  IconBolt,
+  IconDatabase,
+  IconAnalytics,
+  IconGear,
+  IconCelestial,
+  IconBlackHole,
+  IconMonument,
+  IconSkills,
+  IconProjects,
+  IconCompass,
+  IconClose,
+  IconExternalLink,
+  IconTarget,
+  IconSatellite,
+  IconGlobe,
+  IconEye,
+  IconCheck,
+  MiniTacticalRadar,
+  OBSIDIAN_TOKENS
+} from "./ObsidianStealthUI"
+
 
 // Live tracker for the 6 Cosmic Scales (Throttled to eliminate GC garbage collection stutters)
 function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
@@ -335,95 +359,117 @@ function App() {
       {/* Interactive Ethereal Cosmic Soundscape (Web Audio Synthesizer) */}
       <CosmicAudio currentDistance={telemetry.dist} />
       
-      {/* Top Left: Live Cosmic Scale Telemetry HUD */}
+      {/* Top Left: Obsidian Stealth Tactical Telemetry HUD */}
       <div style={{ 
         position: "absolute", 
         top: 20, 
         left: 20, 
-        color: "white", 
-        fontFamily: "system-ui, -apple-system, sans-serif", 
-        background: "rgba(5, 10, 25, 0.8)", 
-        padding: "16px 24px", 
+        color: "#f8fafc", 
+        fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace", 
+        background: "rgba(10, 12, 18, 0.90)", 
+        padding: "12px 18px", 
         borderRadius: 14, 
         backdropFilter: "blur(20px)", 
-        border: `1px solid ${telemetry.color}55`,
-        boxShadow: `0 8px 32px rgba(0,0,0,0.6), 0 0 20px ${telemetry.color}33`,
-        maxWidth: 420,
+        border: "1px solid rgba(245, 180, 50, 0.32)",
+        boxShadow: "0 14px 35px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px rgba(245, 180, 50, 0.12)",
+        maxWidth: 340,
         pointerEvents: "none",
-        transition: "all 0.3s ease"
+        transition: "all 0.3s ease",
+        zIndex: 90,
+        display: "flex",
+        alignItems: "center",
+        gap: 14
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-          <span style={{ 
-            display: "inline-block", 
-            width: 10, 
-            height: 10, 
-            borderRadius: "50%", 
-            background: telemetry.color,
-            boxShadow: `0 0 10px ${telemetry.color}`
-          }} />
-          <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: "1px", color: telemetry.color }}>
-            {telemetry.level}
-          </span>
-        </div>
-        
-        <div style={{ fontSize: 14, color: "#ffffff", fontWeight: 600, marginBottom: 4 }}>
-          {telemetry.desc}
-        </div>
+        {/* Animated Tactical Radar Scanner */}
+        <MiniTacticalRadar size={46} pingColor="#f5b032" />
 
-        <div style={{ fontSize: 11, color: "#8899aa", marginTop: 4, display: "flex", justifyContent: "space-between" }}>
-          <span>Scale: Level {telemetry.progress} of 9</span>
-          <span>Distance: {telemetry.dist.toLocaleString()} AU/units</span>
-        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+            <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: "0.08em", color: "#f5b032" }}>
+              TACTICAL TELEMETRY
+            </span>
+            <span style={{ fontSize: 8.5, color: "#10b981", fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 6px #10b981" }} />
+              LOCK
+            </span>
+          </div>
 
-        {/* 9-Level Progress Bar */}
-        <div style={{ width: "100%", height: 3, background: "rgba(255,255,255,0.15)", borderRadius: 2, marginTop: 10, overflow: "hidden" }}>
-          <div style={{ 
-            width: `${(telemetry.progress / 9) * 100}%`, 
-            height: "100%", 
-            background: telemetry.color,
-            transition: "width 0.4s ease, background 0.4s ease"
-          }} />
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#ffffff", letterSpacing: "0.03em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            LVL {telemetry.progress} · {telemetry.level.replace(/LEVEL \d+:\s*/, "")}
+          </div>
+
+          <div style={{ fontSize: 9.5, color: "#94a3b8", marginTop: 2, display: "flex", justifyContent: "space-between" }}>
+            <span>RANGE:</span>
+            <span style={{ color: "#e2e8f0", fontWeight: 700 }}>{telemetry.dist.toLocaleString()} AU</span>
+          </div>
+
+          {/* Sleek 2px Golden-Amber Progress Bar */}
+          <div style={{ width: "100%", height: 2.5, background: "rgba(255,255,255,0.12)", borderRadius: 2, marginTop: 7, overflow: "hidden" }}>
+            <div style={{ 
+              width: `${(telemetry.progress / 9) * 100}%`, 
+              height: "100%", 
+              background: "linear-gradient(90deg, #f5b032, #ff8400)",
+              boxShadow: "0 0 8px #f5b032",
+              transition: "width 0.4s ease"
+            }} />
+          </div>
         </div>
       </div>
 
-      {/* Top Right Header Controls & Direct Black Hole Warp Button */}
-      <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 8, zIndex: 100, flexWrap: "wrap", justifyContent: "flex-end", maxWidth: "calc(100vw - 460px)" }}>
+      {/* Top Right: Obsidian Stealth Aerospace Navigation Dock */}
+      <div style={{ 
+        position: "absolute", 
+        top: 20, 
+        right: 20, 
+        display: "flex", 
+        alignItems: "center", 
+        gap: 6, 
+        zIndex: 100,
+        background: "rgba(10, 12, 18, 0.90)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(245, 180, 50, 0.32)",
+        borderRadius: 30,
+        padding: "4px 8px",
+        boxShadow: "0 14px 35px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 18px rgba(245, 180, 50, 0.12)",
+        fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+      }}>
+        {/* 1. Celestial Realm (Active Highlighted Gold Pill) */}
         <button
           onClick={() => {
             setCelestialInitialPart("hands")
             setIsCelestialPortalOpen(true)
           }}
           style={{
-            background: "linear-gradient(135deg, rgba(168, 85, 247, 0.5), rgba(0, 216, 255, 0.5))",
-            backdropFilter: "blur(16px)",
-            border: "1.5px solid #a855f7",
-            color: "#ffffff",
-            padding: "8px 16px",
-            borderRadius: 24,
-            fontSize: 12,
+            background: "rgba(245, 176, 50, 0.18)",
+            border: "1px solid rgba(245, 176, 50, 0.5)",
+            color: "#f5b032",
+            padding: "6px 12px",
+            borderRadius: 20,
+            fontSize: 11,
             fontWeight: 800,
-            letterSpacing: "0.03em",
+            letterSpacing: "0.04em",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            gap: 8,
-            boxShadow: "0 0 22px rgba(168, 85, 247, 0.6), 0 0 40px rgba(0, 216, 255, 0.3)",
-            transition: "all 0.25s ease"
+            gap: 6,
+            boxShadow: "0 0 12px rgba(245, 176, 50, 0.25)",
+            transition: "all 0.2s ease"
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.05)"
-            e.currentTarget.style.boxShadow = "0 0 32px rgba(168, 85, 247, 0.9), 0 0 50px rgba(0, 216, 255, 0.6)"
+            e.currentTarget.style.transform = "translateY(-1px)"
+            e.currentTarget.style.boxShadow = "0 0 18px rgba(245, 176, 50, 0.5)"
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)"
-            e.currentTarget.style.boxShadow = "0 0 22px rgba(168, 85, 247, 0.6), 0 0 40px rgba(0, 216, 255, 0.3)"
+            e.currentTarget.style.transform = "translateY(0)"
+            e.currentTarget.style.boxShadow = "0 0 12px rgba(245, 176, 50, 0.25)"
           }}
-          title="Open 3D Bioluminescent Celestial Realm: Hands, UNIX-1, and Commanders"
+          title="Open Celestial Realm (Helping Hands, UNIX-1, UNIX COMMANDERS)"
         >
-          <span style={{ fontSize: 16 }}>🌌</span>
-          <span>Celestial Realm</span>
+          <IconCelestial size={15} color="#f5b032" />
+          <span>CELESTIAL</span>
         </button>
 
+        {/* 2. M87 Black Hole */}
         <button
           onClick={() => {
             flyTo([150000, 60000, -520000], 65000)
@@ -433,208 +479,200 @@ function App() {
             })
           }}
           style={{
-            background: "linear-gradient(135deg, rgba(255, 110, 0, 0.45), rgba(255, 0, 80, 0.45))",
-            backdropFilter: "blur(16px)",
-            border: "1.5px solid #ff7700",
-            color: "#ffcc66",
-            padding: "8px 16px",
-            borderRadius: 24,
-            fontSize: 12,
-            fontWeight: 800,
-            letterSpacing: "0.03em",
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            color: "#e2e8f0",
+            padding: "6px 10px",
+            borderRadius: 20,
+            fontSize: 11,
+            fontWeight: 700,
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            gap: 8,
-            boxShadow: "0 0 20px rgba(255, 110, 0, 0.6)",
-            transition: "all 0.25s ease"
+            gap: 5,
+            transition: "all 0.2s ease"
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.05)"
-            e.currentTarget.style.boxShadow = "0 0 30px rgba(255, 120, 20, 0.9)"
+            e.currentTarget.style.background = "rgba(251, 146, 60, 0.15)"
+            e.currentTarget.style.borderColor = "rgba(251, 146, 60, 0.5)"
+            e.currentTarget.style.color = "#fb923c"
+            e.currentTarget.style.transform = "translateY(-1px)"
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)"
-            e.currentTarget.style.boxShadow = "0 0 20px rgba(255, 110, 0, 0.6)"
+            e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)"
+            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
+            e.currentTarget.style.color = "#e2e8f0"
+            e.currentTarget.style.transform = "translateY(0)"
           }}
-          title="Fly directly to the WebGPU Relativistic Black Hole past the Milky Way"
+          title="Fly to M87 Relativistic Black Hole"
         >
-          <span style={{ fontSize: 16 }}>🌀</span>
-          <span>Post-Milky Way Black Hole</span>
+          <IconBlackHole size={15} />
+          <span>M87</span>
         </button>
 
+        {/* 3. Name Monument */}
         <button
-          onClick={() => {
-            flyToNameMonument()
-          }}
+          onClick={flyToNameMonument}
           style={{
-            background: "linear-gradient(135deg, rgba(139, 92, 246, 0.45), rgba(94, 234, 212, 0.45))",
-            backdropFilter: "blur(16px)",
-            border: "1.5px solid #a78bfa",
-            color: "#e0e7ff",
-            padding: "8px 16px",
-            borderRadius: 24,
-            fontSize: 12,
-            fontWeight: 800,
-            letterSpacing: "0.03em",
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            color: "#e2e8f0",
+            padding: "6px 10px",
+            borderRadius: 20,
+            fontSize: 11,
+            fontWeight: 700,
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            gap: 8,
-            boxShadow: "0 0 20px rgba(167, 139, 250, 0.6)",
-            transition: "all 0.25s ease"
+            gap: 5,
+            transition: "all 0.2s ease"
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.05)"
-            e.currentTarget.style.boxShadow = "0 0 30px rgba(167, 139, 250, 0.9)"
+            e.currentTarget.style.background = "rgba(45, 212, 191, 0.15)"
+            e.currentTarget.style.borderColor = "rgba(45, 212, 191, 0.5)"
+            e.currentTarget.style.color = "#2dd4bf"
+            e.currentTarget.style.transform = "translateY(-1px)"
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)"
-            e.currentTarget.style.boxShadow = "0 0 20px rgba(167, 139, 250, 0.6)"
+            e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)"
+            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
+            e.currentTarget.style.color = "#e2e8f0"
+            e.currentTarget.style.transform = "translateY(0)"
           }}
-          title="Fly directly to 3D Subbareddy Palagiri Celestial Monument"
+          title="Fly to 3D Subbareddy Palagiri Monument"
         >
-          <span style={{ fontSize: 16 }}>👑</span>
-          <span>Name Monument</span>
+          <IconMonument size={15} />
+          <span>SUBBAREDDY</span>
         </button>
 
+        {/* 4. Cosmic Skill Web */}
         <button
-          onClick={() => {
-            flyToSkillWeb()
-          }}
+          onClick={flyToSkillWeb}
           style={{
-            background: "linear-gradient(135deg, rgba(0, 240, 255, 0.4), rgba(180, 50, 255, 0.4))",
-            backdropFilter: "blur(16px)",
-            border: "1.5px solid #00f0ff",
-            color: "#ffffff",
-            padding: "8px 16px",
-            borderRadius: 24,
-            fontSize: 12,
-            fontWeight: 800,
-            letterSpacing: "0.03em",
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            color: "#e2e8f0",
+            padding: "6px 10px",
+            borderRadius: 20,
+            fontSize: 11,
+            fontWeight: 700,
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            gap: 8,
-            boxShadow: "0 0 20px rgba(0, 240, 255, 0.6)",
-            transition: "all 0.25s ease"
+            gap: 5,
+            transition: "all 0.2s ease"
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.05)"
-            e.currentTarget.style.boxShadow = "0 0 30px rgba(0, 240, 255, 0.9)"
+            e.currentTarget.style.background = "rgba(56, 189, 248, 0.15)"
+            e.currentTarget.style.borderColor = "rgba(56, 189, 248, 0.5)"
+            e.currentTarget.style.color = "#38bdf8"
+            e.currentTarget.style.transform = "translateY(-1px)"
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)"
-            e.currentTarget.style.boxShadow = "0 0 20px rgba(0, 240, 255, 0.6)"
+            e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)"
+            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
+            e.currentTarget.style.color = "#e2e8f0"
+            e.currentTarget.style.transform = "translateY(0)"
           }}
-          title="Fly directly to Subbareddy 3D Cosmic Skill Web outside the Milky Way"
+          title="Fly to 3D Cosmic Skill Web"
         >
-          <span style={{ fontSize: 16 }}>🕸️</span>
-          <span>Cosmic Skill Web</span>
+          <IconSkills size={15} />
+          <span>SKILLS</span>
         </button>
 
+        {/* 5. Prime Realm Projects */}
         <button
-          onClick={() => {
-            flyToPrimeRealm()
-          }}
+          onClick={flyToPrimeRealm}
           style={{
-            background: "linear-gradient(135deg, rgba(255, 183, 3, 0.4), rgba(255, 45, 85, 0.4))",
-            backdropFilter: "blur(16px)",
-            border: "1.5px solid #ffb703",
-            color: "#ffe066",
-            padding: "8px 16px",
-            borderRadius: 24,
-            fontSize: 12,
-            fontWeight: 800,
-            letterSpacing: "0.03em",
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            color: "#e2e8f0",
+            padding: "6px 10px",
+            borderRadius: 20,
+            fontSize: 11,
+            fontWeight: 700,
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            gap: 8,
-            boxShadow: "0 0 20px rgba(255, 183, 3, 0.6)",
-            transition: "all 0.25s ease"
+            gap: 5,
+            transition: "all 0.2s ease"
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.05)"
-            e.currentTarget.style.boxShadow = "0 0 30px rgba(255, 183, 3, 0.9)"
+            e.currentTarget.style.background = "rgba(251, 191, 36, 0.15)"
+            e.currentTarget.style.borderColor = "rgba(251, 191, 36, 0.5)"
+            e.currentTarget.style.color = "#fbbf24"
+            e.currentTarget.style.transform = "translateY(-1px)"
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)"
-            e.currentTarget.style.boxShadow = "0 0 20px rgba(255, 183, 3, 0.6)"
+            e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)"
+            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
+            e.currentTarget.style.color = "#e2e8f0"
+            e.currentTarget.style.transform = "translateY(0)"
           }}
-          title="Fly directly to 13 Projects Orbit in the Prime Cosmic Realm"
+          title="Fly to 13 Projects Orbit"
         >
-          <span style={{ fontSize: 16 }}>🪐</span>
-          <span>Prime Realm Projects</span>
+          <IconProjects size={15} />
+          <span>PROJECTS</span>
         </button>
 
+        {/* 6. Flight Speed Selector */}
         <button
           onClick={() => setIsSpeedModalOpen(!isSpeedModalOpen)}
           style={{
-            background: isSpeedModalOpen
-              ? "linear-gradient(135deg, rgba(0, 216, 255, 0.35), rgba(56, 189, 248, 0.35))"
-              : "rgba(5, 10, 25, 0.82)",
-            backdropFilter: "blur(16px)",
-            border: `1.5px solid ${isSpeedModalOpen ? "#38bdf8" : "rgba(56, 189, 248, 0.5)"}`,
-            color: isSpeedModalOpen ? "#ffffff" : "#38bdf8",
-            padding: "8px 14px",
-            borderRadius: 24,
-            fontSize: 12,
+            background: isSpeedModalOpen ? "rgba(245, 176, 50, 0.2)" : "rgba(255, 255, 255, 0.05)",
+            border: `1px solid ${isSpeedModalOpen ? "rgba(245, 176, 50, 0.6)" : "rgba(255, 255, 255, 0.12)"}`,
+            color: isSpeedModalOpen ? "#f5b032" : "#94a3b8",
+            padding: "6px 9px",
+            borderRadius: 20,
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            transition: "all 0.2s ease"
+          }}
+          title="Adjust Flight Speed"
+        >
+          <IconRocket size={14} />
+          <span>{mouseSensitivity.scroll.toFixed(1)}x</span>
+        </button>
+
+        {/* 7. Tactical Cosmic Warp Drawer */}
+        <button
+          onClick={() => setIsMenuOpen(true)}
+          style={{
+            background: isMenuOpen ? "rgba(245, 176, 50, 0.25)" : "rgba(245, 176, 50, 0.12)",
+            border: "1px solid rgba(245, 176, 50, 0.4)",
+            color: "#f5b032",
+            padding: "6px 12px",
+            borderRadius: 20,
+            fontSize: 11,
             fontWeight: 800,
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             gap: 6,
-            boxShadow: isSpeedModalOpen
-              ? "0 0 25px rgba(56, 189, 248, 0.7)"
-              : "0 4px 15px rgba(0, 216, 255, 0.2)",
-            transition: "all 0.25s ease"
+            transition: "all 0.2s ease"
           }}
-          title="Adjust Mouse Scroll & Look Flight Speed"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(245, 176, 50, 0.25)"
+            e.currentTarget.style.boxShadow = "0 0 15px rgba(245, 176, 50, 0.4)"
+            e.currentTarget.style.transform = "translateY(-1px)"
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = isMenuOpen ? "rgba(245, 176, 50, 0.25)" : "rgba(245, 176, 50, 0.12)"
+            e.currentTarget.style.boxShadow = "none"
+            e.currentTarget.style.transform = "translateY(0)"
+          }}
+          title="Open Tactical Flight Controls & Cosmic Warps"
         >
-          <span style={{ fontSize: 14 }}>🖱️</span>
-          <span>Speed: {mouseSensitivity.scroll.toFixed(1)}x ▾</span>
+          <IconCompass size={15} color="#f5b032" />
+          <span>WARP ▾</span>
         </button>
-
-        {!isMenuOpen && (
-          <button
-            onClick={() => setIsMenuOpen(true)}
-            style={{
-              background: "rgba(5, 10, 25, 0.82)",
-              backdropFilter: "blur(16px)",
-              border: "1px solid rgba(0, 216, 255, 0.5)",
-              color: "#00d8ff",
-              padding: "8px 16px",
-              borderRadius: 24,
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: "0.03em",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              boxShadow: "0 4px 20px rgba(0, 216, 255, 0.25)",
-              transition: "all 0.25s ease"
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(0, 216, 255, 0.2)"
-              e.currentTarget.style.boxShadow = "0 0 25px rgba(0, 216, 255, 0.5)"
-              e.currentTarget.style.transform = "scale(1.04)"
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(5, 10, 25, 0.82)"
-              e.currentTarget.style.boxShadow = "0 4px 20px rgba(0, 216, 255, 0.25)"
-              e.currentTarget.style.transform = "scale(1)"
-            }}
-            title="Open Flight Controls & Cosmic Warps"
-          >
-            <span style={{ fontSize: 14 }}>🛸</span>
-            <span>Controls & Warps ▾</span>
-          </button>
-        )}
       </div>
 
-      {/* Quick Mouse Sensitivity Adjustment Popover */}
+      {/* Quick Mouse Sensitivity Adjustment Popover - Obsidian Stealth Theme */}
       {isSpeedModalOpen && (
         <div
           style={{
@@ -642,14 +680,15 @@ function App() {
             top: 72,
             right: isMenuOpen ? 410 : 20,
             width: 320,
-            background: "rgba(5, 10, 25, 0.95)",
-            border: "1.5px solid #38bdf8",
-            borderRadius: 16,
+            background: "rgba(10, 12, 18, 0.94)",
+            border: "1px solid rgba(245, 180, 50, 0.32)",
+            borderRadius: 14,
             padding: "16px 18px",
-            backdropFilter: "blur(24px)",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.85), 0 0 30px rgba(56, 189, 248, 0.35)",
+            backdropFilter: "blur(24px) saturate(180%)",
+            WebkitBackdropFilter: "blur(24px) saturate(180%)",
+            boxShadow: "0 18px 45px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 20px rgba(245, 180, 50, 0.1)",
             color: "#e2e8f0",
-            fontFamily: "system-ui, -apple-system, sans-serif",
+            fontFamily: OBSIDIAN_TOKENS.fontMono,
             zIndex: 110,
             display: "flex",
             flexDirection: "column",
@@ -658,35 +697,48 @@ function App() {
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 16 }}>🖱️</span>
-              <b style={{ color: "#38bdf8", fontSize: 13 }}>Mouse & Flight Speed</b>
+              <IconGear size={15} color="#f5b032" />
+              <b style={{ color: "#ffffff", fontSize: 11, letterSpacing: "0.06em" }}>VELOCITY CALIBRATION</b>
             </div>
             <button
               onClick={() => setIsSpeedModalOpen(false)}
               style={{
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "none",
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
                 color: "#94a3b8",
-                padding: "2px 8px",
-                borderRadius: 8,
+                padding: "3px 8px",
+                borderRadius: 6,
                 cursor: "pointer",
-                fontSize: 11
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                fontSize: 10,
+                transition: "all 0.2s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#f5b032"
+                e.currentTarget.style.borderColor = "rgba(245, 180, 50, 0.4)"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#94a3b8"
+                e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
               }}
             >
-              ✕ Done
+              <IconClose size={10} />
+              <span>DONE</span>
             </button>
           </div>
 
           {/* Quick Presets */}
           <div>
-            <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 6, fontWeight: 700, letterSpacing: "0.04em" }}>
-              SPEED PRESETS:
+            <div style={{ fontSize: 9.5, color: "rgba(245, 180, 50, 0.8)", marginBottom: 6, fontWeight: 700, letterSpacing: "0.08em" }}>
+              PRESET PROFILES:
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5 }}>
               {[
-                { label: "🐢 Smooth", scroll: 0.35, rotate: 0.4 },
-                { label: "👌 Balanced", scroll: 0.6, rotate: 0.6 },
-                { label: "⚡ Fast", scroll: 1.2, rotate: 1.0 }
+                { label: "SMOOTH", scroll: 0.35, rotate: 0.4, icon: <IconCompass size={11} /> },
+                { label: "BALANCED", scroll: 0.6, rotate: 0.6, icon: <IconRocket size={11} /> },
+                { label: "WARP", scroll: 1.2, rotate: 1.0, icon: <IconBolt size={11} /> }
               ].map((p) => {
                 const isSelected = Math.abs(mouseSensitivity.scroll - p.scroll) < 0.05
                 return (
@@ -694,18 +746,25 @@ function App() {
                     key={p.label}
                     onClick={() => updateSensitivity({ scroll: p.scroll, rotate: p.rotate })}
                     style={{
-                      background: isSelected ? "rgba(56, 189, 248, 0.3)" : "rgba(255, 255, 255, 0.06)",
-                      border: `1px solid ${isSelected ? "#38bdf8" : "rgba(255, 255, 255, 0.15)"}`,
-                      color: isSelected ? "#38bdf8" : "#cbd5e1",
-                      padding: "5px 6px",
+                      background: isSelected ? "rgba(245, 180, 50, 0.22)" : "rgba(255, 255, 255, 0.04)",
+                      border: `1px solid ${isSelected ? "#f5b032" : "rgba(255, 255, 255, 0.1)"}`,
+                      color: isSelected ? "#f5b032" : "#cbd5e1",
+                      padding: "6px 6px",
                       borderRadius: 8,
-                      fontSize: 10,
-                      fontWeight: 700,
+                      fontSize: 9,
+                      fontWeight: 800,
+                      letterSpacing: "0.04em",
                       cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 4,
+                      boxShadow: isSelected ? "0 0 10px rgba(245, 180, 50, 0.3)" : "none",
                       transition: "all 0.2s ease"
                     }}
                   >
-                    {p.label}
+                    {p.icon}
+                    <span>{p.label}</span>
                   </button>
                 )
               })}
@@ -714,9 +773,9 @@ function App() {
 
           {/* Slider 1: Scroll Flight Speed */}
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
-              <span>🚀 Scroll Flight Speed:</span>
-              <b style={{ color: "#38bdf8" }}>{mouseSensitivity.scroll.toFixed(2)}x</b>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, marginBottom: 4 }}>
+              <span style={{ color: "#cbd5e1" }}>FLIGHT CRUISE VELOCITY:</span>
+              <b style={{ color: "#f5b032" }}>{mouseSensitivity.scroll.toFixed(2)}x</b>
             </div>
             <input
               type="range"
@@ -729,22 +788,22 @@ function App() {
               }}
               style={{
                 width: "100%",
-                accentColor: "#38bdf8",
+                accentColor: "#f5b032",
                 cursor: "pointer"
               }}
             />
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#64748b" }}>
-              <span>0.1x (Fine)</span>
-              <span>1.0x (Standard)</span>
-              <span>2.5x (Speed)</span>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 8.5, color: "#64748b" }}>
+              <span>0.1x (FINE)</span>
+              <span>1.0x (STD)</span>
+              <span>2.5x (HYPER)</span>
             </div>
           </div>
 
           {/* Slider 2: Mouse Look / Drag Rotation Speed */}
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
-              <span>🔄 Look & Drag Speed:</span>
-              <b style={{ color: "#38bdf8" }}>{mouseSensitivity.rotate.toFixed(2)}x</b>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, marginBottom: 4 }}>
+              <span style={{ color: "#cbd5e1" }}>ATTITUDE / LOOK SLEW:</span>
+              <b style={{ color: "#f5b032" }}>{mouseSensitivity.rotate.toFixed(2)}x</b>
             </div>
             <input
               type="range"
@@ -757,14 +816,14 @@ function App() {
               }}
               style={{
                 width: "100%",
-                accentColor: "#38bdf8",
+                accentColor: "#f5b032",
                 cursor: "pointer"
               }}
             />
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#64748b" }}>
-              <span>0.1x (Gentle)</span>
-              <span>1.0x (Standard)</span>
-              <span>2.0x (Swift)</span>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 8.5, color: "#64748b" }}>
+              <span>0.1x (GENTLE)</span>
+              <span>1.0x (STD)</span>
+              <span>2.0x (FAST)</span>
             </div>
           </div>
         </div>
@@ -778,16 +837,17 @@ function App() {
           width: 380,
           maxHeight: "88vh",
           overflowY: "auto",
-          color: "#aabbcc",
-          fontFamily: "system-ui, -apple-system, sans-serif",
-          background: "rgba(5, 10, 25, 0.9)",
-          padding: "14px 18px",
-          borderRadius: 16,
-          backdropFilter: "blur(20px)",
-          border: "1px solid rgba(0, 216, 255, 0.35)",
+          color: "#cbd5e1",
+          fontFamily: OBSIDIAN_TOKENS.fontMono,
+          background: "rgba(10, 12, 18, 0.94)",
+          padding: "16px 18px",
+          borderRadius: 14,
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          border: "1px solid rgba(245, 180, 50, 0.32)",
           fontSize: 11,
           lineHeight: 1.5,
-          boxShadow: "0 12px 40px rgba(0,0,0,0.8), 0 0 25px rgba(0, 216, 255, 0.15)",
+          boxShadow: "0 18px 45px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 24px rgba(245, 180, 50, 0.1)",
           zIndex: 100
         }}>
           {/* Header with Close / Minimize Button */}
@@ -797,66 +857,70 @@ function App() {
             alignItems: "center",
             marginBottom: 10,
             paddingBottom: 8,
-            borderBottom: "1px solid rgba(255,255,255,0.12)"
+            borderBottom: "1px solid rgba(245, 180, 50, 0.2)"
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 16 }}>🛸</span>
-              <b style={{ color: "#ffffff", fontSize: 12, letterSpacing: "0.02em" }}>Flight Controls & Warps</b>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <IconCompass size={16} color="#f5b032" />
+              <b style={{ color: "#ffffff", fontSize: 11, letterSpacing: "0.06em" }}>WARP MATRIX // FLIGHT COMPUTER</b>
             </div>
             <button
               onClick={() => setIsMenuOpen(false)}
               style={{
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                color: "#e2e8f0",
-                padding: "3px 10px",
-                borderRadius: 12,
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                color: "#94a3b8",
+                padding: "3px 8px",
+                borderRadius: 6,
                 fontSize: 10,
-                fontWeight: 600,
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
                 transition: "all 0.2s ease"
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255, 75, 75, 0.3)"
-                e.currentTarget.style.borderColor = "rgba(255, 75, 75, 0.6)"
-                e.currentTarget.style.color = "#ffffff"
+                e.currentTarget.style.color = "#f5b032"
+                e.currentTarget.style.borderColor = "rgba(245, 180, 50, 0.4)"
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)"
-                e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.2)"
-                e.currentTarget.style.color = "#e2e8f0"
+                e.currentTarget.style.color = "#94a3b8"
+                e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
               }}
               title="Close menu"
             >
-              ✕ Close
+              <IconClose size={10} />
+              <span>CLOSE</span>
             </button>
           </div>
 
-          <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 8, lineHeight: 1.4 }}>
-            • <b>Scroll:</b> Continuous zoom & fly past systems<br />
-            • <b>W/S/A/D:</b> Cruise void gaps | <b>Shift:</b> Warp boost<br />
-            • <b>Drag:</b> 360° Look | <b>Click Star:</b> Fly to system
+          <div style={{ fontSize: 9.5, color: "#94a3b8", marginBottom: 10, lineHeight: 1.5, background: "rgba(0,0,0,0.3)", padding: "6px 10px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.05)" }}>
+            • <b style={{ color: "#f5b032" }}>Scroll:</b> Continuous zoom & fly past systems<br />
+            • <b style={{ color: "#f5b032" }}>W/S/A/D:</b> Cruise void gaps | <b style={{ color: "#f5b032" }}>Shift:</b> Warp boost<br />
+            • <b style={{ color: "#f5b032" }}>Drag:</b> 360° Attitude Look | <b style={{ color: "#f5b032" }}>Click:</b> Target fly to system
           </div>
 
           {/* Mouse & Flight Sensitivity Controls inside Menu */}
           <div style={{
-            background: "rgba(56, 189, 248, 0.08)",
-            border: "1px solid rgba(56, 189, 248, 0.25)",
-            borderRadius: 10,
-            padding: "10px 12px",
+            background: "rgba(245, 180, 50, 0.05)",
+            border: "1px solid rgba(245, 180, 50, 0.2)",
+            borderRadius: 8,
+            padding: "8px 10px",
             marginBottom: 10
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <b style={{ color: "#38bdf8", fontSize: 10, letterSpacing: "0.04em" }}>🖱️ MOUSE & FLIGHT SPEED ADJUST:</b>
-              <span style={{ fontSize: 9, color: "#94a3b8" }}>{mouseSensitivity.scroll.toFixed(2)}x</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <IconGear size={12} color="#f5b032" />
+                <b style={{ color: "#f5b032", fontSize: 9.5, letterSpacing: "0.06em" }}>VELOCITY SENSITIVITY:</b>
+              </div>
+              <span style={{ fontSize: 9, color: "#f5b032", fontWeight: 700 }}>{mouseSensitivity.scroll.toFixed(2)}x</span>
             </div>
 
             {/* Presets */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, marginBottom: 8 }}>
               {[
-                { label: "🐢 Smooth (0.35x)", scroll: 0.35, rotate: 0.4 },
-                { label: "👌 Balanced (0.6x)", scroll: 0.6, rotate: 0.6 },
-                { label: "⚡ Fast (1.2x)", scroll: 1.2, rotate: 1.0 }
+                { label: "SMOOTH (0.35x)", scroll: 0.35, rotate: 0.4 },
+                { label: "BALANCED (0.6x)", scroll: 0.6, rotate: 0.6 },
+                { label: "WARP (1.2x)", scroll: 1.2, rotate: 1.0 }
               ].map((p) => {
                 const isSelected = Math.abs(mouseSensitivity.scroll - p.scroll) < 0.05
                 return (
@@ -864,9 +928,9 @@ function App() {
                     key={p.label}
                     onClick={() => updateSensitivity({ scroll: p.scroll, rotate: p.rotate })}
                     style={{
-                      background: isSelected ? "rgba(56, 189, 248, 0.3)" : "rgba(255, 255, 255, 0.06)",
-                      border: `1px solid ${isSelected ? "#38bdf8" : "rgba(255, 255, 255, 0.15)"}`,
-                      color: isSelected ? "#38bdf8" : "#cbd5e1",
+                      background: isSelected ? "rgba(245, 180, 50, 0.22)" : "rgba(255, 255, 255, 0.04)",
+                      border: `1px solid ${isSelected ? "#f5b032" : "rgba(255, 255, 255, 0.1)"}`,
+                      color: isSelected ? "#f5b032" : "#cbd5e1",
                       padding: "4px 4px",
                       borderRadius: 6,
                       fontSize: 8.5,
@@ -884,9 +948,9 @@ function App() {
 
             {/* Scroll speed slider */}
             <div style={{ marginBottom: 6 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9.5, color: "#cbd5e1", marginBottom: 2 }}>
-                <span>🚀 Scroll Flight Speed:</span>
-                <b style={{ color: "#38bdf8" }}>{mouseSensitivity.scroll.toFixed(2)}x</b>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#cbd5e1", marginBottom: 2 }}>
+                <span>SCROLL VELOCITY:</span>
+                <b style={{ color: "#f5b032" }}>{mouseSensitivity.scroll.toFixed(2)}x</b>
               </div>
               <input
                 type="range"
@@ -897,15 +961,15 @@ function App() {
                 onChange={(e) => {
                   updateSensitivity({ ...mouseSensitivity, scroll: parseFloat(e.target.value) })
                 }}
-                style={{ width: "100%", accentColor: "#38bdf8", cursor: "pointer", height: 4 }}
+                style={{ width: "100%", accentColor: "#f5b032", cursor: "pointer", height: 4 }}
               />
             </div>
 
             {/* Rotation speed slider */}
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9.5, color: "#cbd5e1", marginBottom: 2 }}>
-                <span>🔄 Look & Drag Speed:</span>
-                <b style={{ color: "#38bdf8" }}>{mouseSensitivity.rotate.toFixed(2)}x</b>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#cbd5e1", marginBottom: 2 }}>
+                <span>ATTITUDE SLEW:</span>
+                <b style={{ color: "#f5b032" }}>{mouseSensitivity.rotate.toFixed(2)}x</b>
               </div>
               <input
                 type="range"
@@ -916,7 +980,7 @@ function App() {
                 onChange={(e) => {
                   updateSensitivity({ ...mouseSensitivity, rotate: parseFloat(e.target.value) })
                 }}
-                style={{ width: "100%", accentColor: "#38bdf8", cursor: "pointer", height: 4 }}
+                style={{ width: "100%", accentColor: "#f5b032", cursor: "pointer", height: 4 }}
               />
             </div>
           </div>
@@ -925,70 +989,86 @@ function App() {
             <button
               onClick={() => flyTo([0, 20, 45], 25)}
               style={{
-                background: "rgba(0, 216, 255, 0.18)",
-                border: "1px solid rgba(0, 216, 255, 0.6)",
-                color: "#00d8ff",
-                padding: "5px 8px",
-                borderRadius: 6,
-                fontSize: 10,
+                background: "rgba(245, 180, 50, 0.12)",
+                border: "1px solid rgba(245, 180, 50, 0.45)",
+                color: "#f5b032",
+                padding: "6px 8px",
+                borderRadius: 7,
+                fontSize: 9.5,
                 fontWeight: 700,
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
                 transition: "all 0.2s ease"
               }}
             >
-              🛸 Return to Sol (R)
+              <IconRocket size={12} color="#f5b032" />
+              <span>RETURN TO SOL (R)</span>
             </button>
             <button
               onClick={() => {
                 flyToNameMonument()
               }}
               style={{
-                background: "linear-gradient(135deg, rgba(94, 234, 212, 0.35), rgba(139, 92, 246, 0.35))",
+                background: "linear-gradient(135deg, rgba(94, 234, 212, 0.25), rgba(139, 92, 246, 0.25))",
                 border: "1px solid #5eead4",
                 color: "#5eead4",
-                padding: "5px 8px",
-                borderRadius: 6,
-                fontSize: 10,
+                padding: "6px 8px",
+                borderRadius: 7,
+                fontSize: 9.5,
                 fontWeight: 700,
                 cursor: "pointer",
-                boxShadow: "0 0 10px rgba(94, 234, 212, 0.4)",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                boxShadow: "0 0 10px rgba(94, 234, 212, 0.25)",
                 transition: "all 0.2s ease"
               }}
               title="Fly directly to 3D Subbareddy Palagiri Monument"
             >
-              👑 Name Monument
+              <IconMonument size={12} color="#5eead4" />
+              <span>NAME MONUMENT</span>
             </button>
             <button
               onClick={() => flyTo([0, 25000, 140000], 140000)}
               style={{
-                background: "rgba(170, 102, 255, 0.18)",
-                border: "1px solid rgba(170, 102, 255, 0.6)",
+                background: "rgba(170, 102, 255, 0.14)",
+                border: "1px solid rgba(170, 102, 255, 0.5)",
                 color: "#aa66ff",
-                padding: "5px 8px",
-                borderRadius: 6,
-                fontSize: 10,
+                padding: "6px 8px",
+                borderRadius: 7,
+                fontSize: 9.5,
                 fontWeight: 700,
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
                 transition: "all 0.2s ease"
               }}
             >
-              🌌 Galaxy View
+              <IconGlobe size={12} color="#aa66ff" />
+              <span>GALAXY VIEW</span>
             </button>
             <button
               onClick={() => flyTo([0, 9000000, 26000000], 26000000)}
               style={{
-                background: "rgba(255, 68, 170, 0.18)",
-                border: "1px solid rgba(255, 68, 170, 0.6)",
+                background: "rgba(255, 68, 170, 0.14)",
+                border: "1px solid rgba(255, 68, 170, 0.5)",
                 color: "#ff44aa",
-                padding: "5px 8px",
-                borderRadius: 6,
-                fontSize: 10,
+                padding: "6px 8px",
+                borderRadius: 7,
+                fontSize: 9.5,
                 fontWeight: 700,
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
                 transition: "all 0.2s ease"
               }}
             >
-              🫧 Multiverse
+              <IconCelestial size={12} color="#ff44aa" />
+              <span>MULTIVERSE</span>
             </button>
             <button
               onClick={() => {
@@ -997,18 +1077,22 @@ function App() {
                 }
               }}
               style={{
-                background: "rgba(0, 255, 255, 0.18)",
-                border: "1px solid rgba(0, 255, 255, 0.6)",
+                background: "rgba(0, 255, 255, 0.14)",
+                border: "1px solid rgba(0, 255, 255, 0.5)",
                 color: "#00ffff",
-                padding: "5px 8px",
-                borderRadius: 6,
-                fontSize: 10,
+                padding: "6px 8px",
+                borderRadius: 7,
+                fontSize: 9.5,
                 fontWeight: 700,
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
                 transition: "all 0.2s ease"
               }}
             >
-              🌌 10 Spheres
+              <IconRadar size={12} color="#00ffff" />
+              <span>10 SPHERES</span>
             </button>
             <button
               onClick={() => {
@@ -1017,36 +1101,44 @@ function App() {
                 }
               }}
               style={{
-                background: "rgba(255, 255, 255, 0.2)",
-                border: "1px solid rgba(255, 255, 255, 0.8)",
+                background: "rgba(255, 255, 255, 0.15)",
+                border: "1px solid rgba(255, 255, 255, 0.6)",
                 color: "#ffffff",
-                padding: "5px 8px",
-                borderRadius: 6,
-                fontSize: 10,
+                padding: "6px 8px",
+                borderRadius: 7,
+                fontSize: 9.5,
                 fontWeight: 800,
                 cursor: "pointer",
-                boxShadow: "0 0 10px rgba(255,255,255,0.4)"
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                boxShadow: "0 0 10px rgba(255,255,255,0.25)"
               }}
             >
-              ⚪ Singularity Dot
+              <IconTarget size={12} color="#ffffff" />
+              <span>SINGULARITY DOT</span>
             </button>
             <button
               onClick={() => flyTo([-35000, 4200, 48000], 18000)}
               style={{
-                background: "linear-gradient(135deg, rgba(0, 229, 255, 0.25), rgba(255, 136, 204, 0.25))",
+                background: "linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(255, 136, 204, 0.2))",
                 border: "1px solid #00e5ff",
                 color: "#00e5ff",
-                padding: "5px 8px",
-                borderRadius: 6,
-                fontSize: 10,
+                padding: "6px 8px",
+                borderRadius: 7,
+                fontSize: 9.5,
                 fontWeight: 700,
                 cursor: "pointer",
-                boxShadow: "0 0 10px rgba(0, 229, 255, 0.3)",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                boxShadow: "0 0 10px rgba(0, 229, 255, 0.2)",
                 transition: "all 0.2s ease"
               }}
               title="Warp to Emu in the Sky 3D Constellation"
             >
-              🦤 Emu in Sky
+              <IconEye size={12} color="#00e5ff" />
+              <span>EMU IN SKY</span>
             </button>
             <button
               onClick={() => {
@@ -1057,60 +1149,72 @@ function App() {
                 })
               }}
               style={{
-                background: "linear-gradient(135deg, rgba(255, 119, 0, 0.3), rgba(255, 40, 0, 0.2))",
+                background: "linear-gradient(135deg, rgba(255, 119, 0, 0.25), rgba(255, 40, 0, 0.15))",
                 border: "1px solid #ff8800",
                 color: "#ffaa44",
                 padding: "6px 8px",
-                borderRadius: 6,
-                fontSize: 10,
+                borderRadius: 7,
+                fontSize: 9.5,
                 fontWeight: 800,
                 cursor: "pointer",
-                boxShadow: "0 0 10px rgba(255, 120, 20, 0.35)",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                boxShadow: "0 0 10px rgba(255, 120, 20, 0.25)",
                 transition: "all 0.2s ease"
               }}
               title="Warp directly to M87 Relativistic Black Hole past Milky Way"
             >
-              🌀 M87 Black Hole
+              <IconBlackHole size={12} color="#ffaa44" />
+              <span>M87 BLACK HOLE</span>
             </button>
             <button
               onClick={() => setIsPortalOpen(true)}
               style={{
-                background: "linear-gradient(90deg, rgba(0, 216, 255, 0.3), rgba(255, 0, 234, 0.3))",
+                background: "linear-gradient(90deg, rgba(0, 216, 255, 0.25), rgba(255, 0, 234, 0.25))",
                 border: "1px solid #00d8ff",
                 color: "#00ffff",
                 padding: "6px 8px",
-                borderRadius: 6,
-                fontSize: 10,
+                borderRadius: 7,
+                fontSize: 9.5,
                 fontWeight: 800,
                 cursor: "pointer",
-                boxShadow: "0 0 10px rgba(0, 216, 255, 0.4)"
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                boxShadow: "0 0 10px rgba(0, 216, 255, 0.3)"
               }}
             >
-              🎬 Video Portal
+              <IconExternalLink size={12} color="#00ffff" />
+              <span>VIDEO PORTAL</span>
             </button>
             <button
               onClick={() => flyTo([110000, 32000, -180000], 12000, 0.45)}
               style={{
-                background: "linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(180, 50, 255, 0.3))",
+                background: "linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(180, 50, 255, 0.25))",
                 border: "1px solid #00f0ff",
                 color: "#ffffff",
                 padding: "6px 8px",
-                borderRadius: 6,
-                fontSize: 10,
+                borderRadius: 7,
+                fontSize: 9.5,
                 fontWeight: 800,
                 cursor: "pointer",
-                boxShadow: "0 0 10px rgba(0, 240, 255, 0.4)",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                boxShadow: "0 0 10px rgba(0, 240, 255, 0.3)",
                 transition: "all 0.2s ease"
               }}
               title="Warp directly to Subbareddy 3D Cosmic Skill Web outside the Milky Way"
             >
-              🕸️ Skill Web
+              <IconSkills size={12} color="#ffffff" />
+              <span>SKILL WEB</span>
             </button>
           </div>
 
           {/* 9 Planets Quick Warp List */}
-          <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-            <b style={{ color: "#38bdf8", fontSize: 10, letterSpacing: "0.06em" }}>WARP CLOSE-UP TO 9 PLANETS (SOL SYSTEM):</b>
+          <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(245,180,50,0.15)" }}>
+            <b style={{ color: "rgba(245,180,50,0.85)", fontSize: 9.5, letterSpacing: "0.08em" }}>SOL SYSTEM PLANETS:</b>
             <div style={{ marginTop: 5, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, maxHeight: 110, overflowY: "auto" }}>
               {SOL_PLANETS.map((planet) => (
                 <button
@@ -1119,10 +1223,10 @@ function App() {
                     flyTo(planet.pos, Math.max(planet.radius * 2.2, 1.6), 0.6)
                   }}
                   style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: `1px solid ${planet.color}77`,
+                    background: "rgba(255,255,255,0.04)",
+                    border: `1px solid ${planet.color}66`,
                     color: planet.color,
-                    padding: "4px 5px",
+                    padding: "4px 6px",
                     borderRadius: 6,
                     fontSize: 9,
                     fontWeight: 700,
@@ -1131,27 +1235,32 @@ function App() {
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
-                    transition: "all 0.2s ease"
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 4
                   }}
                   title={`Fly directly up-close to ${planet.name}`}
                 >
-                  {planet.symbol} {planet.name}
+                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: planet.color, display: "inline-block", flexShrink: 0 }} />
+                  <span>{planet.name}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Black Holes Warp List */}
-          <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-            <b style={{ color: "#00d8ff", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC BLACK HOLES:</b>
+          <div style={{ marginTop: 6, paddingTop: 8, borderTop: "1px solid rgba(245,180,50,0.15)" }}>
+            <b style={{ color: "rgba(245,180,50,0.85)", fontSize: 9.5, letterSpacing: "0.08em" }}>RELATIVISTIC BLACK HOLES (10):</b>
             <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
               {BLACK_HOLE_DATA.map((bh) => (
                 <button
                   key={bh.id}
                   onClick={() => flyTo(bh.pos, 40 * bh.scale)}
                   style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: `1px solid ${bh.color}55`,
+                    background: "rgba(255,255,255,0.04)",
+                    border: `1px solid ${bh.color}45`,
                     color: bh.color,
                     padding: "4px 6px",
                     borderRadius: 6,
@@ -1162,19 +1271,23 @@ function App() {
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
-                    transition: "all 0.2s ease"
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5
                   }}
                   title={`${bh.name} (${bh.level})`}
                 >
-                  🕳️ {bh.name}
+                  <IconBlackHole size={11} color={bh.color} />
+                  <span>{bh.name}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Realms Warp List */}
-          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-            <b style={{ color: "#ff44cc", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 COSMIC REALMS (GLB SPHERES):</b>
+          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(245,180,50,0.15)" }}>
+            <b style={{ color: "rgba(245,180,50,0.85)", fontSize: 9.5, letterSpacing: "0.08em" }}>COSMIC REALMS (10 GLB SPHERES):</b>
             <button
               onClick={() => {
                 if (cameraControlRef.current) {
@@ -1189,7 +1302,7 @@ function App() {
                 width: "100%",
                 marginTop: 5,
                 marginBottom: 6,
-                background: "linear-gradient(90deg, rgba(255, 0, 170, 0.3), rgba(0, 255, 255, 0.3))",
+                background: "linear-gradient(90deg, rgba(255, 0, 170, 0.22), rgba(0, 255, 255, 0.22))",
                 border: "1px solid #ff00aa",
                 color: "#ff88dd",
                 padding: "5px 8px",
@@ -1198,12 +1311,17 @@ function App() {
                 fontWeight: 800,
                 cursor: "pointer",
                 textAlign: "center",
-                boxShadow: "0 0 10px rgba(255, 0, 170, 0.3)",
+                boxShadow: "0 0 10px rgba(255, 0, 170, 0.25)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 5,
                 transition: "all 0.2s ease"
               }}
               title="Warp directly inside the 8K Alien Space Nebula Realm"
             >
-              🌌 Warp Inside 8K Alien Space Nebula Realm
+              <IconCelestial size={12} color="#ff88dd" />
+              <span>WARP INSIDE 8K ALIEN NEBULA REALM</span>
             </button>
             <div style={{ marginTop: 5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
               {TEN_COSMIC_SPHERES.map((realm) => (
@@ -1220,8 +1338,8 @@ function App() {
                     }
                   }}
                   style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: `1px solid ${realm.c1}77`,
+                    background: "rgba(255,255,255,0.04)",
+                    border: `1px solid ${realm.c1}66`,
                     color: realm.c1,
                     padding: "4px 6px",
                     borderRadius: 6,
@@ -1232,27 +1350,31 @@ function App() {
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
-                    transition: "all 0.2s ease"
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5
                   }}
                   title={realm.name}
                 >
-                  🔮 {realm.name}
+                  <IconCelestial size={11} color={realm.c1} />
+                  <span>{realm.name}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* 10 Satellite & Plane Orbital Networks Warp List */}
-          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-            <b style={{ color: "#38bdf8", fontSize: 10, letterSpacing: "0.06em" }}>WARP TO 10 SATELLITE & PLANE NETWORKS:</b>
+          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(245,180,50,0.15)" }}>
+            <b style={{ color: "rgba(245,180,50,0.85)", fontSize: 9.5, letterSpacing: "0.08em" }}>ORBITAL SATELLITE NETWORKS (10):</b>
             <div style={{ marginTop: 6, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 110, overflowY: "auto" }}>
               {SATELLITE_HUBS.map((hub) => (
                 <button
                   key={hub.id}
                   onClick={() => flyTo(hub.pos, hub.scale * 12)}
                   style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: `1px solid ${hub.colors.routes}66`,
+                    background: "rgba(255,255,255,0.04)",
+                    border: `1px solid ${hub.colors.routes}55`,
                     color: hub.colors.routes,
                     padding: "4px 6px",
                     borderRadius: 6,
@@ -1263,21 +1385,25 @@ function App() {
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
-                    transition: "all 0.2s ease"
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5
                   }}
                   title={`${hub.name} (${hub.sector})`}
                 >
-                  🛰️ {hub.name}
+                  <IconSatellite size={11} color={hub.colors.routes} />
+                  <span>{hub.name}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Level 7: 13 Project Planets Orbit in Prime Cosmic Realm */}
-          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(245,180,50,0.15)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-              <b style={{ color: "#ffe066", fontSize: 10, letterSpacing: "0.06em" }}>🪐 PRIME REALM: 13 PROJECT PLANETS ORBIT:</b>
-              <span style={{ fontSize: 9, color: "#94a3b8" }}>Level 7</span>
+              <b style={{ color: "#f5b032", fontSize: 9.5, letterSpacing: "0.08em" }}>PRIME REALM // 13 PROJECT PLANETS:</b>
+              <span style={{ fontSize: 8.5, color: "#94a3b8", fontWeight: 700 }}>LEVEL 7</span>
             </div>
 
             <button
@@ -1287,21 +1413,26 @@ function App() {
               style={{
                 width: "100%",
                 marginBottom: 6,
-                background: "linear-gradient(135deg, rgba(255, 183, 3, 0.3), rgba(255, 45, 85, 0.3))",
-                border: "1px solid #ffb703",
-                color: "#ffe066",
+                background: "linear-gradient(135deg, rgba(245, 180, 50, 0.22), rgba(255, 45, 85, 0.22))",
+                border: "1px solid #f5b032",
+                color: "#f5b032",
                 padding: "6px 8px",
                 borderRadius: 6,
-                fontSize: 10,
+                fontSize: 9.5,
                 fontWeight: 800,
                 cursor: "pointer",
                 textAlign: "center",
-                boxShadow: "0 0 12px rgba(255, 183, 3, 0.4)",
+                boxShadow: "0 0 12px rgba(245, 180, 50, 0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 5,
                 transition: "all 0.2s ease"
               }}
               title="Warp directly to 13 Projects Orbit with 3D Voxel Monument"
             >
-              🪐 Warp to All 13 Projects Orbit
+              <IconProjects size={12} color="#f5b032" />
+              <span>WARP TO ALL 13 PROJECTS ORBIT</span>
             </button>
 
             <div style={{ marginTop: 5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 130, overflowY: "auto" }}>
@@ -1322,8 +1453,8 @@ function App() {
                       flyTo(worldPos, 4.0 * 650000 * 2.8, 0.45)
                     }}
                     style={{
-                      background: "rgba(255,255,255,0.06)",
-                      border: `1px solid ${glowHex}77`,
+                      background: "rgba(255,255,255,0.04)",
+                      border: `1px solid ${glowHex}66`,
                       color: glowHex,
                       padding: "5px 6px",
                       borderRadius: 6,
@@ -1341,7 +1472,7 @@ function App() {
                     }}
                     title={`Fly to ${p.name} (${p.style})`}
                   >
-                    <span style={{ fontSize: 10 }}>🪐</span>
+                    <IconProjects size={11} color={glowHex} />
                     <span>{p.name}</span>
                   </button>
                 )
@@ -1350,10 +1481,10 @@ function App() {
           </div>
 
           {/* Ultimate Destination: Celestial Realm (Level 9 / Beyond Infinity) */}
-          <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+          <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid rgba(245,180,50,0.2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <b style={{ color: "#c084fc", fontSize: 10, letterSpacing: "0.05em" }}>🌌 CELESTIAL REALM:</b>
-              <span style={{ fontSize: 9, color: "#38bdf8", fontWeight: 700 }}>Final Horizon</span>
+              <b style={{ color: "#c084fc", fontSize: 9.5, letterSpacing: "0.08em" }}>CELESTIAL REALM // FINAL HORIZON:</b>
+              <span style={{ fontSize: 8.5, color: "#f5b032", fontWeight: 700 }}>LEVEL 9</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1.2fr", gap: 5 }}>
               <button
@@ -1363,12 +1494,12 @@ function App() {
                   setIsMenuOpen(false)
                 }}
                 style={{
-                  background: "rgba(0, 216, 255, 0.18)",
+                  background: "rgba(0, 216, 255, 0.15)",
                   border: "1px solid #00d8ff",
                   color: "#ffffff",
                   padding: "6px 4px",
                   borderRadius: 6,
-                  fontSize: 9.5,
+                  fontSize: 9,
                   fontWeight: 700,
                   cursor: "pointer",
                   textAlign: "center",
@@ -1380,8 +1511,8 @@ function App() {
                 }}
                 title="Helping Hands"
               >
-                <span>✋</span>
-                <span>Helping Hands</span>
+                <IconCelestial size={11} color="#00d8ff" />
+                <span>HANDS</span>
               </button>
               <button
                 onClick={() => {
@@ -1390,20 +1521,25 @@ function App() {
                   setIsMenuOpen(false)
                 }}
                 style={{
-                  background: "rgba(255, 0, 85, 0.18)",
+                  background: "rgba(255, 0, 85, 0.15)",
                   border: "1px solid #ff0055",
                   color: "#ffffff",
                   padding: "6px 4px",
                   borderRadius: 6,
-                  fontSize: 9.5,
+                  fontSize: 9,
                   fontWeight: 700,
                   cursor: "pointer",
                   textAlign: "center",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 4,
                   transition: "all 0.2s ease"
                 }}
                 title="UNIX-1"
               >
-                UNIX-1
+                <IconBolt size={11} color="#ff0055" />
+                <span>UNIX-1</span>
               </button>
               <button
                 onClick={() => {
@@ -1412,20 +1548,25 @@ function App() {
                   setIsMenuOpen(false)
                 }}
                 style={{
-                  background: "rgba(168, 85, 247, 0.18)",
+                  background: "rgba(168, 85, 247, 0.15)",
                   border: "1px solid #a855f7",
                   color: "#ffffff",
                   padding: "6px 4px",
                   borderRadius: 6,
-                  fontSize: 9.5,
+                  fontSize: 9,
                   fontWeight: 700,
                   cursor: "pointer",
                   textAlign: "center",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 4,
                   transition: "all 0.2s ease"
                 }}
                 title="UNIX COMMANDERS"
               >
-                UNIX COMMANDERS
+                <IconMonument size={11} color="#a855f7" />
+                <span>COMMAND</span>
               </button>
             </div>
           </div>
@@ -1464,10 +1605,10 @@ function App() {
             bottom: 30,
             left: "50%",
             transform: "translateX(-50%)",
-            background: "linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(0, 216, 255, 0.4))",
+            background: "rgba(10, 12, 18, 0.92)",
             backdropFilter: "blur(20px)",
-            border: "1.5px solid rgba(168, 85, 247, 0.8)",
-            boxShadow: "0 0 35px rgba(168, 85, 247, 0.7), 0 0 60px rgba(0, 216, 255, 0.5)",
+            border: "1px solid rgba(245, 180, 50, 0.45)",
+            boxShadow: "0 16px 40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 25px rgba(245, 180, 50, 0.25)",
             borderRadius: 30,
             padding: "10px 24px",
             color: "#ffffff",
@@ -1477,30 +1618,32 @@ function App() {
             gap: 12,
             zIndex: 100,
             outline: "none",
-            fontFamily: "inherit",
+            fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
             transition: "all 0.3s ease"
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateX(-50%) scale(1.05)"
-            e.currentTarget.style.boxShadow = "0 0 45px rgba(168, 85, 247, 0.95), 0 0 70px rgba(0, 216, 255, 0.7)"
+            e.currentTarget.style.transform = "translateX(-50%) scale(1.04)"
+            e.currentTarget.style.boxShadow = "0 18px 45px rgba(0, 0, 0, 0.95), 0 0 35px rgba(245, 180, 50, 0.5)"
+            e.currentTarget.style.borderColor = "rgba(245, 180, 50, 0.8)"
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "translateX(-50%) scale(1)"
-            e.currentTarget.style.boxShadow = "0 0 35px rgba(168, 85, 247, 0.7), 0 0 60px rgba(0, 216, 255, 0.5)"
+            e.currentTarget.style.boxShadow = "0 16px 40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 25px rgba(245, 180, 50, 0.25)"
+            e.currentTarget.style.borderColor = "rgba(245, 180, 50, 0.45)"
           }}
           title="Descend into Celestial Realm: Helping Hands -> UNIX-1 -> UNIX COMMANDERS"
         >
-          <span style={{ fontSize: 18 }}>🌌</span>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", color: "#38bdf8" }}>
+          <IconCelestial size={20} color="#f5b032" />
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", color: "#f5b032" }}>
               THE HORIZON OF INFINITY • CELESTIAL REALM
             </div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>
+            <div style={{ fontSize: 9.5, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>
               Final Horizon of the Cosmos • Descend into Helping Hands
             </div>
           </div>
-          <span style={{ fontSize: 11, background: "rgba(255,255,255,0.2)", padding: "4px 12px", borderRadius: 14, fontWeight: 800, color: "#ffffff" }}>
-            Enter ▾
+          <span style={{ fontSize: 10, background: "rgba(245, 180, 50, 0.15)", border: "1px solid rgba(245, 180, 50, 0.4)", padding: "4px 10px", borderRadius: 14, fontWeight: 800, color: "#f5b032" }}>
+            ENTER ▾
           </span>
         </button>
       )}
@@ -1708,31 +1851,34 @@ function App() {
                 key={mode}
                 onClick={() => setPrimeLayoutMode(mode)}
                 style={{
-                  background: isActive ? "rgba(255,183,3,0.22)" : "rgba(10,12,20,0.85)",
-                  border: `1.5px solid ${isActive ? "#ffb703" : "rgba(124,136,166,0.35)"}`,
-                  color: isActive ? "#ffb703" : "#9aa5c4",
-                  fontSize: 11,
+                  background: isActive ? "rgba(245, 180, 50, 0.22)" : "rgba(10, 12, 18, 0.88)",
+                  border: `1px solid ${isActive ? "#f5b032" : "rgba(245, 180, 50, 0.2)"}`,
+                  color: isActive ? "#f5b032" : "#94a3b8",
+                  fontSize: 10,
                   fontWeight: isActive ? 800 : 600,
-                  letterSpacing: "0.05em",
-                  padding: "7px 14px",
-                  borderRadius: 7,
+                  letterSpacing: "0.08em",
+                  padding: "6px 12px",
+                  borderRadius: 20,
                   cursor: "pointer",
-                  backdropFilter: "blur(6px)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
                   transition: "all .2s ease",
                   textAlign: "right",
-                  fontFamily: "inherit",
-                  boxShadow: isActive ? "0 0 15px rgba(255,183,3,0.4)" : "none"
+                  fontFamily: OBSIDIAN_TOKENS.fontMono,
+                  boxShadow: isActive ? "0 0 15px rgba(245, 180, 50, 0.35)" : "none"
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.color = "#ffe066"
-                    e.currentTarget.style.borderColor = "rgba(255,183,3,0.5)"
+                    e.currentTarget.style.color = "#f5b032"
+                    e.currentTarget.style.borderColor = "rgba(245, 180, 50, 0.45)"
+                    e.currentTarget.style.background = "rgba(245, 180, 50, 0.1)"
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.color = "#9aa5c4"
-                    e.currentTarget.style.borderColor = "rgba(124,136,166,0.35)"
+                    e.currentTarget.style.color = "#94a3b8"
+                    e.currentTarget.style.borderColor = "rgba(245, 180, 50, 0.2)"
+                    e.currentTarget.style.background = "rgba(10, 12, 18, 0.88)"
                   }
                 }}
               >
@@ -1743,80 +1889,178 @@ function App() {
         </div>
       )}
 
-      {/* Active Prime Planet Project Card HUD */}
+      {/* Active Prime Planet Project Card HUD - Obsidian Stealth Command Deck */}
       {activePrimePlanet && (
         <div
           style={{
             position: "fixed",
-            bottom: 28,
+            bottom: 26,
             left: "50%",
             transform: "translateX(-50%)",
-            background: "rgba(5, 10, 25, 0.94)",
-            border: "1.5px solid #ffb703",
-            borderRadius: 16,
-            padding: "16px 22px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.85), 0 0 30px rgba(255, 183, 3, 0.35)",
-            backdropFilter: "blur(20px)",
+            background: "rgba(10, 12, 18, 0.92)",
+            border: "1px solid rgba(245, 180, 50, 0.32)",
+            borderRadius: 14,
+            padding: "16px 20px",
+            boxShadow: "0 20px 45px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 24px rgba(245, 180, 50, 0.12)",
+            backdropFilter: "blur(24px) saturate(180%)",
+            WebkitBackdropFilter: "blur(24px) saturate(180%)",
             color: "#e2e8f0",
-            fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
+            fontFamily: OBSIDIAN_TOKENS.fontMono,
             zIndex: 96,
-            minWidth: 320,
+            minWidth: 380,
             maxWidth: 480,
             display: "flex",
             flexDirection: "column",
             gap: 10
           }}
         >
+          {/* Header Bar */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 18 }}>🪐</span>
-              <b style={{ fontSize: 14, color: "#ffe066", letterSpacing: "0.06em" }}>
-                {activePrimePlanet.name}
-              </b>
+              <div
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 6,
+                  background: "rgba(245, 180, 50, 0.14)",
+                  border: "1px solid rgba(245, 180, 50, 0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#f5b032"
+                }}
+              >
+                <IconProjects size={14} color="#f5b032" />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontSize: 9, color: "rgba(245, 180, 50, 0.75)", letterSpacing: "0.1em", fontWeight: 700 }}>
+                  PROJECT STATUS
+                </span>
+                <b style={{ fontSize: 13, color: "#ffffff", letterSpacing: "0.06em", fontWeight: 800 }}>
+                  {activePrimePlanet.name.toUpperCase()}
+                </b>
+              </div>
             </div>
-            <button
-              onClick={() => setActivePrimePlanet(null)}
-              style={{
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "none",
-                color: "#94a3b8",
-                padding: "2px 8px",
-                borderRadius: 8,
-                cursor: "pointer",
-                fontSize: 12
-              }}
-            >
-              ✕
-            </button>
+
+            {/* Indicator dots & Close */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f5b032", boxShadow: "0 0 6px #f5b032" }} />
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b", opacity: 0.8 }} />
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 6px #10b981" }} />
+              </div>
+              <button
+                onClick={() => setActivePrimePlanet(null)}
+                style={{
+                  background: "rgba(255, 255, 255, 0.06)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  color: "#94a3b8",
+                  padding: "4px",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.2s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#f5b032"
+                  e.currentTarget.style.borderColor = "rgba(245, 180, 50, 0.4)"
+                  e.currentTarget.style.background = "rgba(245, 180, 50, 0.15)"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#94a3b8"
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)"
+                }}
+                title="Dismiss Card"
+              >
+                <IconClose size={12} />
+              </button>
+            </div>
           </div>
 
-          <div style={{ fontSize: 11, color: "#cbd5e1", lineHeight: 1.5 }}>
-            <b>Classification:</b> {activePrimePlanet.style.toUpperCase()} PLANETARY BODY<br />
-            <b>Atmosphere:</b> Procedural resonance & volumetric glow<br />
-            <b>Rings:</b> {activePrimePlanet.ring ? "Active planetary accretion disk" : "None"}
+          {/* Thin Glowing Golden Line */}
+          <div
+            style={{
+              height: 2,
+              width: "100%",
+              background: "linear-gradient(90deg, #f5b032, #f59e0b 60%, rgba(245, 180, 50, 0.15))",
+              borderRadius: 2,
+              boxShadow: "0 0 8px rgba(245, 180, 50, 0.35)"
+            }}
+          />
+
+          {/* Monospace Specs Grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "6px 12px",
+              fontSize: 10,
+              background: "rgba(0, 0, 0, 0.35)",
+              border: "1px solid rgba(255, 255, 255, 0.05)",
+              borderRadius: 8,
+              padding: "8px 12px"
+            }}
+          >
+            <div>
+              <span style={{ color: "rgba(245, 180, 50, 0.7)", letterSpacing: "0.06em" }}>CLASS: </span>
+              <b style={{ color: "#ffffff" }}>{activePrimePlanet.style.toUpperCase()} PLANET</b>
+            </div>
+            <div>
+              <span style={{ color: "rgba(245, 180, 50, 0.7)", letterSpacing: "0.06em" }}>ATMOSPHERE: </span>
+              <b style={{ color: "#ffffff" }}>{activePrimePlanet.ring ? "ACCRETION RING" : "VOLUMETRIC"}</b>
+            </div>
+            <div>
+              <span style={{ color: "rgba(245, 180, 50, 0.7)", letterSpacing: "0.06em" }}>ORBIT LOCK: </span>
+              <span style={{ color: "#10b981", fontWeight: 700 }}>● ACTIVE 100%</span>
+            </div>
+            <div>
+              <span style={{ color: "rgba(245, 180, 50, 0.7)", letterSpacing: "0.06em" }}>SECTOR: </span>
+              <span style={{ color: "#94a3b8" }}>PRIME REALM-07</span>
+            </div>
           </div>
 
-          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+          {/* Action Buttons Row */}
+          <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
             {activePrimePlanet.url && activePrimePlanet.url !== "#" ? (
               <a
                 href={activePrimePlanet.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  flex: 1,
-                  background: "linear-gradient(135deg, #ffb703, #ff6a00)",
-                  color: "#050506",
+                  flex: 1.4,
+                  background: "linear-gradient(135deg, rgba(245, 180, 50, 0.22), rgba(245, 180, 50, 0.08))",
+                  border: "1px solid rgba(245, 180, 50, 0.55)",
+                  color: "#f5b032",
                   padding: "8px 14px",
                   borderRadius: 8,
                   fontSize: 11,
                   fontWeight: 800,
                   textDecoration: "none",
                   textAlign: "center",
-                  boxShadow: "0 0 15px rgba(255, 183, 3, 0.6)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  boxShadow: "0 0 14px rgba(245, 180, 50, 0.25)",
+                  letterSpacing: "0.05em",
                   transition: "all 0.2s ease"
                 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(245, 180, 50, 0.32)"
+                  e.currentTarget.style.boxShadow = "0 0 20px rgba(245, 180, 50, 0.5)"
+                  e.currentTarget.style.color = "#ffffff"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "linear-gradient(135deg, rgba(245, 180, 50, 0.22), rgba(245, 180, 50, 0.08))"
+                  e.currentTarget.style.boxShadow = "0 0 14px rgba(245, 180, 50, 0.25)"
+                  e.currentTarget.style.color = "#f5b032"
+                }}
               >
-                🚀 Open Project ↗
+                <IconExternalLink size={13} color="currentColor" />
+                <span>LAUNCH PROJECT ↗</span>
               </a>
             ) : (
               <a
@@ -1824,20 +2068,37 @@ function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  flex: 1,
-                  background: "linear-gradient(135deg, #ffb703, #ff6a00)",
-                  color: "#050506",
+                  flex: 1.4,
+                  background: "linear-gradient(135deg, rgba(245, 180, 50, 0.22), rgba(245, 180, 50, 0.08))",
+                  border: "1px solid rgba(245, 180, 50, 0.55)",
+                  color: "#f5b032",
                   padding: "8px 14px",
                   borderRadius: 8,
                   fontSize: 11,
                   fontWeight: 800,
                   textDecoration: "none",
                   textAlign: "center",
-                  boxShadow: "0 0 15px rgba(255, 183, 3, 0.6)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  boxShadow: "0 0 14px rgba(245, 180, 50, 0.25)",
+                  letterSpacing: "0.05em",
                   transition: "all 0.2s ease"
                 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(245, 180, 50, 0.32)"
+                  e.currentTarget.style.boxShadow = "0 0 20px rgba(245, 180, 50, 0.5)"
+                  e.currentTarget.style.color = "#ffffff"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "linear-gradient(135deg, rgba(245, 180, 50, 0.22), rgba(245, 180, 50, 0.08))"
+                  e.currentTarget.style.boxShadow = "0 0 14px rgba(245, 180, 50, 0.25)"
+                  e.currentTarget.style.color = "#f5b032"
+                }}
               >
-                🐙 View on GitHub ↗
+                <IconExternalLink size={13} color="currentColor" />
+                <span>VIEW ON GITHUB ↗</span>
               </a>
             )}
 
@@ -1855,17 +2116,30 @@ function App() {
                 }
               }}
               style={{
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "1px solid rgba(255, 255, 255, 0.25)",
-                color: "#e2e8f0",
-                padding: "8px 12px",
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                color: "#cbd5e1",
+                padding: "8px 14px",
                 borderRadius: 8,
                 fontSize: 11,
                 fontWeight: 700,
-                cursor: "pointer"
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                transition: "all 0.2s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)"
+                e.currentTarget.style.color = "#ffffff"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)"
+                e.currentTarget.style.color = "#cbd5e1"
               }}
             >
-              🔭 Focus
+              <IconTarget size={13} color="currentColor" />
+              <span>FOCUS TARGET</span>
             </button>
           </div>
         </div>
