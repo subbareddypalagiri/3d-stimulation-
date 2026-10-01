@@ -27,6 +27,7 @@ import CosmicSkillWeb from "./CosmicSkillWeb"
 import { SOL_PLANETS } from "./SolarSystem"
 import CosmicFlightNavigator from "./CosmicFlightNavigator"
 import PrimeRealmProjectsOrbit, { PRIME_PROJECTS } from "./PrimeRealmProjectsOrbit"
+import TopAchievementsRealm, { ACHIEVEMENTS_DATA } from "./TopAchievementsRealm"
 import {
   IconRocket,
   IconRadar,
@@ -47,6 +48,7 @@ import {
   IconGlobe,
   IconEye,
   IconCheck,
+  IconTrophy,
   MiniTacticalRadar,
   OBSIDIAN_TOKENS
 } from "./ObsidianStealthUI"
@@ -157,6 +159,7 @@ function App() {
 
   const [primeLayoutMode, setPrimeLayoutMode] = useState("rows")
   const [activePrimePlanet, setActivePrimePlanet] = useState(null)
+  const [activeAchievement, setActiveAchievement] = useState(null)
   const [telemetry, setTelemetry] = useState({
     level: "LEVEL 1: STELLAR NEIGHBORHOOD",
     desc: "Sol & 24 Neighboring Star Systems",
@@ -216,6 +219,22 @@ function App() {
       cameraControlRef.current.setLookAt(
         110000, 32000 + 3200, -180000 + 24000,
         110000, 32000 + 1200, -180000,
+        true
+      )
+    }
+  }
+
+  const flyToAchievements = (achievement = null) => {
+    if (achievement) {
+      setActiveAchievement(achievement)
+    }
+    if (cameraControlRef.current) {
+      setGalaxyCenter([-140000, 35000, 120000])
+      const targetPos = new THREE.Vector3(-140000, 35000, 120000)
+      const camPos = new THREE.Vector3(-140000 + 3200, 35000 + 2100, 120000 + 4400)
+      cameraControlRef.current.setLookAt(
+        camPos.x, camPos.y, camPos.z,
+        targetPos.x, targetPos.y, targetPos.z,
         true
       )
     }
@@ -318,6 +337,15 @@ function App() {
           <CosmicSkillWeb
             position={[110000, 32000, -180000]}
             scale={50}
+            flyTo={flyTo}
+          />
+
+          {/* Level 3: Top Achievements 3D Asteroid Belt & Molten Planet Realm */}
+          <TopAchievementsRealm
+            position={[-140000, 35000, 120000]}
+            scale={7.0}
+            onSelectAchievement={(item) => setActiveAchievement(item)}
+            activeAchievement={activeAchievement}
             flyTo={flyTo}
           />
 
@@ -590,7 +618,42 @@ function App() {
           <span>SKILLS</span>
         </button>
 
-        {/* 5. Prime Realm Projects */}
+        {/* 5. Top Achievements 3D Asteroid Realm */}
+        <button
+          onClick={() => flyToAchievements()}
+          style={{
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            color: "#e2e8f0",
+            padding: "6px 10px",
+            borderRadius: 20,
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            transition: "all 0.2s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(245, 180, 50, 0.15)"
+            e.currentTarget.style.borderColor = "rgba(245, 180, 50, 0.5)"
+            e.currentTarget.style.color = "#f5b032"
+            e.currentTarget.style.transform = "translateY(-1px)"
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)"
+            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
+            e.currentTarget.style.color = "#e2e8f0"
+            e.currentTarget.style.transform = "translateY(0)"
+          }}
+          title="Fly to 3D Top Achievements Asteroid Belt & Molten Planet"
+        >
+          <IconTrophy size={15} color="#f5b032" />
+          <span>ACHIEVEMENTS</span>
+        </button>
+
+        {/* 6. Prime Realm Projects */}
         <button
           onClick={flyToPrimeRealm}
           style={{
@@ -1220,6 +1283,31 @@ function App() {
               <IconSkills size={12} color="#ffffff" />
               <span>SKILL WEB</span>
             </button>
+            <button
+              onClick={() => {
+                flyToAchievements()
+                setIsMenuOpen(false)
+              }}
+              style={{
+                background: "linear-gradient(135deg, rgba(245, 180, 50, 0.25), rgba(255, 110, 36, 0.25))",
+                border: "1px solid #f5b032",
+                color: "#f5b032",
+                padding: "6px 8px",
+                borderRadius: 7,
+                fontSize: 9.5,
+                fontWeight: 800,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                boxShadow: "0 0 10px rgba(245, 180, 50, 0.3)",
+                transition: "all 0.2s ease"
+              }}
+              title="Warp directly to 3D Top Achievements Asteroid Belt & Molten Planet"
+            >
+              <IconTrophy size={12} color="#f5b032" />
+              <span>ACHIEVEMENTS</span>
+            </button>
           </div>
 
           {/* 9 Planets Quick Warp List */}
@@ -1404,6 +1492,78 @@ function App() {
                 >
                   <IconSatellite size={11} color={hub.colors.routes} />
                   <span>{hub.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Level 3: Top Achievements 3D Asteroid Realm */}
+          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "1px solid rgba(245,180,50,0.15)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+              <b style={{ color: "#f5b032", fontSize: 9.5, letterSpacing: "0.08em" }}>TOP ACHIEVEMENTS // ASTEROID REALM:</b>
+              <span style={{ fontSize: 8.5, color: "#94a3b8", fontWeight: 700 }}>LEVEL 3</span>
+            </div>
+
+            <button
+              onClick={() => {
+                flyToAchievements()
+                setIsMenuOpen(false)
+              }}
+              style={{
+                width: "100%",
+                marginBottom: 6,
+                background: "linear-gradient(135deg, rgba(245, 180, 50, 0.22), rgba(255, 110, 36, 0.22))",
+                border: "1px solid #f5b032",
+                color: "#f5b032",
+                padding: "6px 8px",
+                borderRadius: 6,
+                fontSize: 9.5,
+                fontWeight: 800,
+                cursor: "pointer",
+                textAlign: "center",
+                boxShadow: "0 0 12px rgba(245, 180, 50, 0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 5,
+                transition: "all 0.2s ease"
+              }}
+              title="Warp directly to 3D Asteroid Belt & Molten Planet Realm"
+            >
+              <IconTrophy size={12} color="#f5b032" />
+              <span>WARP TO 3D ACHIEVEMENTS REALM</span>
+            </button>
+
+            <div style={{ marginTop: 5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, maxHeight: 120, overflowY: "auto" }}>
+              {ACHIEVEMENTS_DATA.map((ach) => (
+                <button
+                  key={ach.id}
+                  onClick={() => {
+                    flyToAchievements(ach)
+                    setIsMenuOpen(false)
+                  }}
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: `1px solid ${ach.color}66`,
+                    color: ach.color,
+                    padding: "5px 6px",
+                    borderRadius: 6,
+                    fontSize: 9,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5
+                  }}
+                  title={ach.title}
+                >
+                  <IconTrophy size={11} color={ach.color} />
+                  <span>{ach.title}</span>
                 </button>
               ))}
             </div>
@@ -2150,6 +2310,216 @@ function App() {
             >
               <IconTarget size={13} color="currentColor" />
               <span>FOCUS TARGET</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Active Top Achievement Detail Card HUD - Obsidian Stealth Command Deck */}
+      {activeAchievement && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 26,
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "rgba(10, 12, 18, 0.94)",
+            border: `1px solid ${activeAchievement.color}55`,
+            borderRadius: 14,
+            padding: "18px 22px",
+            boxShadow: `0 24px 50px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 30px ${activeAchievement.color}25`,
+            backdropFilter: "blur(24px) saturate(180%)",
+            WebkitBackdropFilter: "blur(24px) saturate(180%)",
+            color: "#e2e8f0",
+            fontFamily: OBSIDIAN_TOKENS.fontMono,
+            zIndex: 97,
+            minWidth: 400,
+            maxWidth: 500,
+            display: "flex",
+            flexDirection: "column",
+            gap: 12
+          }}
+        >
+          {/* Header Bar */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 7,
+                  background: `${activeAchievement.color}1f`,
+                  border: `1px solid ${activeAchievement.color}66`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: activeAchievement.color,
+                  boxShadow: `0 0 10px ${activeAchievement.color}40`
+                }}
+              >
+                <IconTrophy size={16} color={activeAchievement.color} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 9, color: activeAchievement.color, letterSpacing: "0.12em", fontWeight: 800 }}>
+                    {activeAchievement.badge}
+                  </span>
+                  <span style={{ fontSize: 8.5, color: "#64748b" }}>•</span>
+                  <span style={{ fontSize: 9, color: "#94a3b8" }}>{activeAchievement.role}</span>
+                </div>
+                <b style={{ fontSize: 14, color: "#ffffff", letterSpacing: "0.04em", fontWeight: 800, marginTop: 1 }}>
+                  {activeAchievement.title}
+                </b>
+              </div>
+            </div>
+
+            {/* Status indicators & Close */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: activeAchievement.color, boxShadow: `0 0 6px ${activeAchievement.color}` }} />
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 6px #10b981" }} />
+              </div>
+              <button
+                onClick={() => setActiveAchievement(null)}
+                style={{
+                  background: "rgba(255, 255, 255, 0.06)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  color: "#94a3b8",
+                  padding: "4px",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.2s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#ffffff"
+                  e.currentTarget.style.borderColor = activeAchievement.color
+                  e.currentTarget.style.background = `${activeAchievement.color}25`
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#94a3b8"
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)"
+                }}
+                title="Dismiss Card"
+              >
+                <IconClose size={12} />
+              </button>
+            </div>
+          </div>
+
+          {/* Thin Glowing Color Accent Line */}
+          <div
+            style={{
+              height: 2,
+              width: "100%",
+              background: `linear-gradient(90deg, ${activeAchievement.color}, ${activeAchievement.color}88 60%, rgba(255,255,255,0.05))`,
+              borderRadius: 2,
+              boxShadow: `0 0 8px ${activeAchievement.color}55`
+            }}
+          />
+
+          {/* Description */}
+          <div style={{ fontSize: 11, color: "#cbd5e1", lineHeight: 1.5, background: "rgba(0, 0, 0, 0.28)", padding: "8px 12px", borderRadius: 8, border: "1px solid rgba(255, 255, 255, 0.04)" }}>
+            {activeAchievement.desc}
+          </div>
+
+          {/* Key Metrics Grid */}
+          {activeAchievement.metrics && (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "6px 12px",
+                fontSize: 10,
+                background: "rgba(0, 0, 0, 0.4)",
+                border: "1px solid rgba(255, 255, 255, 0.05)",
+                borderRadius: 8,
+                padding: "8px 12px"
+              }}
+            >
+              {activeAchievement.metrics.map((m, i) => (
+                <div key={i}>
+                  <span style={{ color: `${activeAchievement.color}cc`, letterSpacing: "0.06em", fontSize: 9 }}>{m.label}: </span>
+                  <b style={{ color: "#ffffff", fontSize: 9.5 }}>{m.val}</b>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Action Row */}
+          <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+            {activeAchievement.url && (
+              <a
+                href={activeAchievement.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1.3,
+                  background: `linear-gradient(135deg, ${activeAchievement.color}33, ${activeAchievement.color}11)`,
+                  border: `1px solid ${activeAchievement.color}77`,
+                  color: activeAchievement.color,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  fontSize: 11,
+                  fontWeight: 800,
+                  textDecoration: "none",
+                  textAlign: "center",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  boxShadow: `0 0 14px ${activeAchievement.color}33`,
+                  letterSpacing: "0.05em",
+                  transition: "all 0.2s ease"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = `${activeAchievement.color}44`
+                  e.currentTarget.style.color = "#ffffff"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = `linear-gradient(135deg, ${activeAchievement.color}33, ${activeAchievement.color}11)`
+                  e.currentTarget.style.color = activeAchievement.color
+                }}
+              >
+                <IconExternalLink size={13} color="currentColor" />
+                <span>VIEW VERIFICATION ↗</span>
+              </a>
+            )}
+
+            <button
+              onClick={() => {
+                flyToAchievements(activeAchievement)
+              }}
+              style={{
+                flex: 1,
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                color: "#cbd5e1",
+                padding: "8px 14px",
+                borderRadius: 8,
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                transition: "all 0.2s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)"
+                e.currentTarget.style.color = "#ffffff"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)"
+                e.currentTarget.style.color = "#cbd5e1"
+              }}
+            >
+              <IconTarget size={13} color="currentColor" />
+              <span>ALIGN VIEW</span>
             </button>
           </div>
         </div>
