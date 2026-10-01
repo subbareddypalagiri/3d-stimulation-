@@ -608,10 +608,12 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
     clampPitch: false
   })
 
+  const centerVecRef = useRef(new THREE.Vector3())
+
   useFrame(({ clock, camera }) => {
     const t = clock.elapsedTime
-    const center = new THREE.Vector3(...activeCenter)
-    const dist = camera.position.distanceTo(center)
+    centerVecRef.current.set(...activeCenter)
+    const dist = camera.position.distanceTo(centerVecRef.current)
 
     const isScale = dist > 220000 && dist < 1200000000
     if (isScale !== isCosmicScale) {

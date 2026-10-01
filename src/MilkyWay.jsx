@@ -108,15 +108,15 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
     clampPitch: false
   })
 
+  const posVec = useMemo(() => new THREE.Vector3(...position), [position])
+
   useFrame(({ clock, camera }) => {
     const time = clock.getElapsedTime()
-    const dist = camera.position.distanceTo(new THREE.Vector3(...position))
+    const dist = camera.position.distanceTo(posVec)
     
     // --- EXTERIOR MILKY WAY SPIRAL GALAXY DISC ONLY ---
     // Smoothly reveals only as you leave the 25 stars stellar cluster (dist 60K to 100K)
     if (exteriorRef.current && exteriorMaterialRef.current) {
-      exteriorMaterialRef.current.uniforms.uTime.value = time
-      
       let exteriorOpacity = 0
       if (dist > 60000 && dist <= 110000) {
         exteriorOpacity = (dist - 60000) / 50000
@@ -126,8 +126,12 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
         exteriorOpacity = 1.0 - ((dist - 420000) / 280000)
       }
       
-      exteriorMaterialRef.current.uniforms.uOpacity.value = Math.max(0, exteriorOpacity)
-      exteriorRef.current.visible = exteriorOpacity > 0
+      const isVisible = exteriorOpacity > 0
+      exteriorRef.current.visible = isVisible
+      if (isVisible) {
+        exteriorMaterialRef.current.uniforms.uTime.value = time
+        exteriorMaterialRef.current.uniforms.uOpacity.value = exteriorOpacity
+      }
     }
   })
 

@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber"
-import { Stars, CameraControls, Environment } from "@react-three/drei"
+import { Stars, CameraControls, Environment, AdaptiveDpr, AdaptiveEvents, Bvh } from "@react-three/drei"
 import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import { Suspense, useRef, useState, useEffect } from "react"
 import * as THREE from "three"
@@ -246,9 +246,19 @@ function App() {
     <div style={{ width: "100vw", height: "100vh", background: "#000", overflow: "hidden" }}>
       <Canvas 
         camera={{ position: [0, 50, 150], fov: 45, far: 80000000000, near: 1 }} 
-        gl={{ logarithmicDepthBuffer: true, antialias: true }}
-        shadows
+        dpr={[1, 2]}
+        gl={{
+          powerPreference: "high-performance",
+          antialias: true,
+          logarithmicDepthBuffer: true,
+          alpha: false,
+          stencil: false,
+          depth: true
+        }}
+        performance={{ min: 0.8 }}
       >
+        <AdaptiveDpr pixelated={false} />
+        <AdaptiveEvents />
         <Environment preset="city" />
         <ambientLight intensity={0.08} />
 
@@ -351,7 +361,7 @@ function App() {
           scrollSpeed={mouseSensitivity.scroll} 
         />
 
-        <EffectComposer disableNormalPass>
+        <EffectComposer disableNormalPass multisampling={0}>
           <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.5} intensity={1.2} mipmapBlur />
         </EffectComposer>
       </Canvas>

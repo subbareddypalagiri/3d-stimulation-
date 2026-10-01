@@ -7,6 +7,7 @@ export default function InterstellarNavigator({ cameraControlRef, flyTo }) {
   const keysPressed = useRef({})
   const flyToRef = useRef(flyTo)
   flyToRef.current = flyTo
+  const dirRef = useRef(new THREE.Vector3())
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -61,7 +62,7 @@ export default function InterstellarNavigator({ cameraControlRef, flyTo }) {
     // Ensure look-ahead target advances forward during keyboard flight
     const target = controls._target
     if (target) {
-      const dir = new THREE.Vector3()
+      const dir = dirRef.current
       camera.getWorldDirection(dir)
       const distToTarget = camera.position.distanceTo(target)
       const camDist = camera.position.length()

@@ -97,6 +97,8 @@ export default function CosmicFlightNavigator({ cameraControlRef, scrollSpeed = 
     }
   }, [gl, camera, cameraControlRef, scrollSpeed])
 
+  const dirRef = useRef(new THREE.Vector3())
+
   // Continuous frame update loop: applies momentum & maintains auto look-ahead
   useFrame(({ camera: activeCam }, delta) => {
     const controls = cameraControlRef.current
@@ -120,7 +122,7 @@ export default function CosmicFlightNavigator({ cameraControlRef, scrollSpeed = 
     // Ensures target is ALWAYS ahead in the camera's view direction so you never hit a wall
     const target = controls._target
     if (target) {
-      const dir = new THREE.Vector3()
+      const dir = dirRef.current
       activeCam.getWorldDirection(dir)
       const distToTarget = activeCam.position.distanceTo(target)
       const camDist = activeCam.position.length()

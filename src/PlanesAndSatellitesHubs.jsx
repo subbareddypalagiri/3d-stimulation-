@@ -211,6 +211,8 @@ function SingleSatelliteHub({ hub, originalScene, flyTo }) {
     return clone
   }, [originalScene, hub.colors])
 
+  const hubPos = useMemo(() => new THREE.Vector3(...hub.pos), [hub.pos])
+
   useFrame(({ clock, camera }) => {
     const t = clock.elapsedTime
     if (modelRef.current) {
@@ -218,7 +220,7 @@ function SingleSatelliteHub({ hub, originalScene, flyTo }) {
     }
 
     if (groupRef.current) {
-      const dist = camera.position.distanceTo(new THREE.Vector3(...hub.pos))
+      const dist = camera.position.distanceTo(hubPos)
       const isVisible = dist >= hub.minDist && dist <= hub.maxDist
       groupRef.current.visible = isVisible
     }

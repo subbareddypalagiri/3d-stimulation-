@@ -56,6 +56,11 @@ export function useKineticTrackball({
       isDragging.current = false
       document.body.style.cursor = "auto"
 
+      window.removeEventListener("pointermove", handlePointerMove)
+      window.removeEventListener("pointerup", handlePointerUp)
+      window.removeEventListener("touchmove", handlePointerMove)
+      window.removeEventListener("touchend", handlePointerUp)
+
       const clientX = e.clientX ?? (e.changedTouches && e.changedTouches[0]?.clientX) ?? prevPointer.current.x
       const clientY = e.clientY ?? (e.changedTouches && e.changedTouches[0]?.clientY) ?? prevPointer.current.y
 
@@ -68,10 +73,13 @@ export function useKineticTrackball({
       }
     }
 
-    window.addEventListener("pointermove", handlePointerMove)
-    window.addEventListener("pointerup", handlePointerUp)
-    window.addEventListener("touchmove", handlePointerMove, { passive: true })
-    window.addEventListener("touchend", handlePointerUp)
+    // Attach listeners function for drag activation
+    startPointer.current.attachListeners = () => {
+      window.addEventListener("pointermove", handlePointerMove)
+      window.addEventListener("pointerup", handlePointerUp)
+      window.addEventListener("touchmove", handlePointerMove, { passive: true })
+      window.addEventListener("touchend", handlePointerUp)
+    }
 
     return () => {
       window.removeEventListener("pointermove", handlePointerMove)
@@ -105,8 +113,11 @@ export function useKineticTrackball({
       const clientX = e.clientX ?? (e.nativeEvent && e.nativeEvent.clientX) ?? 0
       const clientY = e.clientY ?? (e.nativeEvent && e.nativeEvent.clientY) ?? 0
       prevPointer.current = { x: clientX, y: clientY }
-      startPointer.current = { x: clientX, y: clientY, time: Date.now() }
+      startPointer.current = { ...startPointer.current, x: clientX, y: clientY, time: Date.now() }
       document.body.style.cursor = "grabbing"
+      if (startPointer.current.attachListeners) {
+        startPointer.current.attachListeners()
+      }
     },
     onPointerOver: (e) => {
       if (enabled && !isDragging.current) {

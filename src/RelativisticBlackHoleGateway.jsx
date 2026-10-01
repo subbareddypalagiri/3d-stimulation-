@@ -214,15 +214,15 @@ export default function RelativisticBlackHoleGateway({
   }), [position, radius])
 
   useFrame(({ clock, camera }) => {
-    const t = clock.elapsedTime
-    if (matRef.current) {
-      matRef.current.uniforms.uTime.value = t
+    const distToM87 = camera.position.distanceTo(uniforms.uCenter.value)
+    const isNearby = distToM87 <= 140000
+
+    if (groupRef.current) {
+      groupRef.current.visible = isNearby
     }
 
-    const distToM87 = camera.position.distanceTo(new THREE.Vector3(...position))
-    if (groupRef.current) {
-      // Only visible when user is in the vicinity of M87 (<= 140,000 AU), never blocks Skill Web or other regions!
-      groupRef.current.visible = distToM87 <= 140000
+    if (isNearby && matRef.current) {
+      matRef.current.uniforms.uTime.value = clock.elapsedTime
     }
   })
 

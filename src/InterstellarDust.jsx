@@ -85,44 +85,40 @@ export default function InterstellarDust({ count = 2200 }) {
 
   useFrame(({ clock, camera }) => {
     if (!pointsRef.current) return
+    const cPos = camera.position
+    const camDist = cPos.length()
+    const isVisible = camDist < 80000
+
+    pointsRef.current.visible = isVisible
+    if (!isVisible) return
+
     const t = clock.elapsedTime
     uniforms.uTime.value = t
 
     // Wrap particles around current camera position so dust is infinite
-    const cPos = camera.position
     const pAttr = pointsRef.current.geometry.attributes.position
     const arr = pAttr.array
-
-    // Calculate camera displacement for warp motion feel
-    const deltaMove = new THREE.Vector3().subVectors(cPos, lastCamPos.current)
     lastCamPos.current.copy(cPos)
 
+    const half = BOX_SIZE / 2
+
     for (let i = 0; i < count; i++) {
-      let x = arr[i * 3 + 0]
-      let y = arr[i * 3 + 1]
-      let z = arr[i * 3 + 2]
+      const idx = i * 3
+      const dx = arr[idx] - cPos.x
+      const dy = arr[idx + 1] - cPos.y
+      const dz = arr[idx + 2] - cPos.z
 
-      const dx = x - cPos.x
-      const dy = y - cPos.y
-      const dz = z - cPos.z
+      if (dx > half) arr[idx] -= BOX_SIZE
+      else if (dx < -half) arr[idx] += BOX_SIZE
 
-      const half = BOX_SIZE / 2
+      if (dy > half) arr[idx + 1] -= BOX_SIZE
+      else if (dy < -half) arr[idx + 1] += BOX_SIZE
 
-      if (dx > half) arr[i * 3 + 0] -= BOX_SIZE
-      else if (dx < -half) arr[i * 3 + 0] += BOX_SIZE
-
-      if (dy > half) arr[i * 3 + 1] -= BOX_SIZE
-      else if (dy < -half) arr[i * 3 + 1] += BOX_SIZE
-
-      if (dz > half) arr[i * 3 + 2] -= BOX_SIZE
-      else if (dz < -half) arr[i * 3 + 2] += BOX_SIZE
+      if (dz > half) arr[idx + 2] -= BOX_SIZE
+      else if (dz < -half) arr[idx + 2] += BOX_SIZE
     }
 
     pAttr.needsUpdate = true
-
-    // Interstellar dust visible when camera is in stellar neighborhood & local galaxy (dist < 80,000)
-    const camDist = cPos.length()
-    pointsRef.current.visible = camDist < 80000
   })
 
   return (
