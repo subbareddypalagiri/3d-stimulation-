@@ -1,7 +1,6 @@
 import React, { useRef, useMemo, useState } from "react"
 import { useLoader, useFrame } from "@react-three/fiber"
 import * as THREE from "three"
-import { useKineticTrackball } from "./useKineticTrackball"
 
 import { TEN_COSMIC_SPHERES } from "./cosmicSpheresData"
 
@@ -66,20 +65,13 @@ function SingleCosmicSphere({ sphere, texture, onSelect, isVisible }) {
   }), [texture, sphere])
 
   const driftDir = sphere.id % 2 === 0 ? 1 : -1
-  const { bindGrab } = useKineticTrackball({
-    targetRef: rotGroupRef,
-    enabled: isVisible,
-    idleDriftY: 0.0006 * driftDir,
-    idleDriftX: 0,
-    sensitivityX: 0.005,
-    sensitivityY: 0.004,
-    damping: 0.93,
-    clampPitch: false
-  })
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock }, delta) => {
     if (matRef.current) {
       matRef.current.uniforms.uTime.value = clock.elapsedTime + sphere.id * 1.5
+    }
+    if (rotGroupRef.current) {
+      rotGroupRef.current.rotation.y += delta * 0.012 * driftDir
     }
   })
 
@@ -103,14 +95,6 @@ function SingleCosmicSphere({ sphere, texture, onSelect, isVisible }) {
           />
         </mesh>
       </group>
-
-      {/* Interactive 3D Grab Hit Sphere for 360° Rotation */}
-      {isVisible && (
-        <mesh {...bindGrab}>
-          <sphereGeometry args={[radius * 1.02, 16, 16]} />
-          <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
-        </mesh>
-      )}
     </group>
   )
 }

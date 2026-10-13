@@ -1,7 +1,6 @@
 import React, { useRef, useMemo, useState } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
-import { useKineticTrackball } from "./useKineticTrackball"
 
 // ============================================================
 // 1. GALAXY SHADER (1000 Spiral Galaxies Cluster)
@@ -595,29 +594,17 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
     omniverseRef.current.instanceMatrix.needsUpdate = true
   }, [oPos, oScales, dummy])
 
-  const [isCosmicScale, setIsCosmicScale] = useState(false)
   const trackballGroupRef = useRef()
-  const { bindGrab } = useKineticTrackball({
-    targetRef: trackballGroupRef,
-    enabled: isCosmicScale,
-    idleDriftY: 0.0001,
-    idleDriftX: 0,
-    sensitivityX: 0.003,
-    sensitivityY: 0.002,
-    damping: 0.94,
-    clampPitch: false
-  })
-
   const centerVecRef = useRef(new THREE.Vector3())
 
-  useFrame(({ clock, camera }) => {
+  useFrame(({ clock, camera }, delta) => {
     const t = clock.elapsedTime
     centerVecRef.current.set(...activeCenter)
     const dist = camera.position.distanceTo(centerVecRef.current)
 
-    const isScale = dist > 220000 && dist < 1200000000
-    if (isScale !== isCosmicScale) {
-      setIsCosmicScale(isScale)
+    // Smooth cosmic rotation
+    if (trackballGroupRef.current) {
+      trackballGroupRef.current.rotation.y += delta * 0.001
     }
 
     // 1. 1000 Galaxies Cluster (220K -> 2.2M)
@@ -672,14 +659,6 @@ export default function CosmicWeb({ activeCenter = [0,0,0] }) {
 
   return (
     <group position={activeCenter}>
-      {/* 360° Free Kinetic Trackball Grab Sphere for the Cosmic Web */}
-      {isCosmicScale && (
-        <mesh {...bindGrab}>
-          <sphereGeometry args={[95000000, 24, 24]} />
-          <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
-        </mesh>
-      )}
-
       <group ref={trackballGroupRef}>
         {/* LEVEL 6: 20 BOLD OMNIVERSE MEGA-DOMAINS (NormalBlending = NO BLOWOUT!) */}
         <instancedMesh ref={omniverseRef} args={[null, null, OMNIVERSE_COUNT]} frustumCulled={false} raycast={() => null}>

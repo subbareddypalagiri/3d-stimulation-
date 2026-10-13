@@ -262,6 +262,7 @@ const FireMaterial = shaderMaterial(
 extend({ SunMaterial, FireMaterial })
 
 export default function Sun({ 
+  id = 0,
   position = [0, 0, 0], 
   colorDark = '#220000',
   colorRed = '#cc1100',
@@ -271,13 +272,30 @@ export default function Sun({
 }) {
   const sunMatRef = useRef()
   const fireMatRef = useRef()
+  const fireMeshRef = useRef()
   const groupRef = useRef()
+  const worldPosRef = useRef(new THREE.Vector3())
   
   const sunTexture = useLoader(THREE.TextureLoader, '/textures/sun.jpg')
   sunTexture.wrapS = sunTexture.wrapT = THREE.RepeatWrapping;
 
-  // Sync props to uniforms
+  // Sync props to uniforms with distance-based LOD
   useFrame((state, delta) => {
+    if (!groupRef.current) return
+
+    // Sol (id === 0) has full flares always; distant stars wake up flares only when close (< 1600 AU)
+    const isHomeSol = id === 0
+    let shouldRenderFlares = isHomeSol
+    if (!isHomeSol) {
+      groupRef.current.getWorldPosition(worldPosRef.current)
+      const distToCam = state.camera.position.distanceTo(worldPosRef.current)
+      shouldRenderFlares = distToCam < 1600
+    }
+
+    if (fireMeshRef.current) {
+      fireMeshRef.current.visible = shouldRenderFlares
+    }
+
     if (sunMatRef.current) {
       sunMatRef.current.uTime += delta * 0.15 
       sunMatRef.current.uColorDark.set(colorDark)
@@ -285,14 +303,14 @@ export default function Sun({
       sunMatRef.current.uColorOrange.set(colorOrange)
       sunMatRef.current.uColorWhite.set(colorWhite)
     }
-    if (fireMatRef.current) {
+
+    if (shouldRenderFlares && fireMatRef.current) {
       fireMatRef.current.uTime += delta * 0.2 
       fireMatRef.current.uColorRed.set(colorRed)
       fireMatRef.current.uColorOrange.set(colorOrange)
     }
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.02 
-    }
+
+    groupRef.current.rotation.y += delta * 0.02 
   })
 
   return (
@@ -302,7 +320,7 @@ export default function Sun({
         <sunMaterial ref={sunMatRef} uTexture={sunTexture} />
       </mesh>
       
-      <mesh>
+      <mesh ref={fireMeshRef}>
         <sphereGeometry args={[3.05, 48, 48]} />
         <fireMaterial ref={fireMatRef} uTexture={sunTexture} transparent depthWrite={false} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} />
       </mesh>

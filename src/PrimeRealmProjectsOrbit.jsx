@@ -1,7 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
-import { useKineticTrackball } from "./useKineticTrackball"
 
 /* ---------------------------------------------------------------------
    5x7 PIXEL FONT — for pixel labels and 3D voxel text
@@ -423,27 +422,16 @@ export default function PrimeRealmProjectsOrbit({
         mesh.rotation.y += dt * p.spinSpeed
       }
     })
+
+    if (trackballGroupRef.current) {
+      trackballGroupRef.current.rotation.y += dt * 0.008
+    }
   })
 
   const trackballGroupRef = useRef()
-  const { bindGrab } = useKineticTrackball({
-    targetRef: trackballGroupRef,
-    idleDriftY: 0.0006,
-    idleDriftX: 0,
-    sensitivityX: 0.005,
-    sensitivityY: 0.004,
-    damping: 0.92,
-    clampPitch: false
-  })
 
   return (
     <group ref={rootGroupRef} position={position} scale={[scale, scale, scale]}>
-      {/* 360° Free Kinetic Trackball Grab Sphere for the Prime Projects Realm */}
-      <mesh {...bindGrab}>
-        <sphereGeometry args={[140, 24, 24]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </mesh>
-
       <group ref={trackballGroupRef}>
         {/* 3D Voxel Lettering Monument: PROJECTS WITH PASSION */}
         <group ref={titleRef}>

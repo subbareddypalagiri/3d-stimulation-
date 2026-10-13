@@ -9,9 +9,9 @@ const SOL_CENTER = new THREE.Vector3(0, 0, 0)
 
 /**
  * Intelligent adaptive cosmic speed calculator:
- * Determines the ideal travel velocity based on whether the camera is near a planetary surface,
- * inside the Prime Cosmic Realm (13 Projects Orbit), orbiting a star system, or transiting
- * the deep intergalactic void and multiverse horizons.
+ * Uses continuous exponential distance scaling across all 9 cosmological levels.
+ * Guarantees effortless traversal from planetary surfaces (AU < 50) all the way to
+ * the deep Multiverse (35 Billion AU) without speed ceilings or invisible walls.
  */
 export function getCosmicFlightSpeed(camera, target) {
   const camPos = camera.position
@@ -21,38 +21,33 @@ export function getCosmicFlightSpeed(camera, target) {
   const distToSkill = camPos.distanceTo(SKILL_CENTER)
   const distToM87 = camPos.distanceTo(M87_CENTER)
 
-  // 1. Inside Prime Cosmic Realm (13 Projects Orbit)
-  // Realm scale factor is 650,000 AU; total span is ~55,000,000 AU
+  // 1. Close-up Planetary / Celestial Surface Inspection
+  if (targetDist < 70 && distToSol < 10000) {
+    return Math.max(4.0, targetDist * 0.42)
+  }
+
+  // 2. Prime Cosmic Realm (13 Projects Orbit)
   if (distToPrime < 120 * 650000) {
-    return Math.max(650000 * 0.08, targetDist * 0.045)
+    const localDist = Math.min(distToPrime, targetDist)
+    return Math.max(650000 * 0.12, localDist * 0.38)
   }
 
-  // 2. Near Solar System / Earth / Inner Planets
-  if (distToSol < 3500) {
-    return Math.max(1.5, Math.min(targetDist * 0.05, 120))
-  }
-
-  // 3. Near Skill Web
+  // 3. Subbareddy Skill Web
   if (distToSkill < 60000) {
-    return Math.max(80, Math.min(targetDist * 0.06, 2500))
+    const localDist = Math.min(distToSkill, targetDist)
+    return Math.max(45, localDist * 0.36)
   }
 
-  // 4. Near M87 Relativistic Black Hole
+  // 4. M87 Relativistic Black Hole Gateway
   if (distToM87 < 80000) {
-    return Math.max(120, Math.min(targetDist * 0.06, 4000))
+    const localDist = Math.min(distToM87, targetDist)
+    return Math.max(60, localDist * 0.36)
   }
 
-  // 5. Interstellar, Intergalactic & Multiverse Deep Void
-  if (distToSol < 120000) {
-    return Math.max(300, Math.min(distToSol * 0.04, 6000))
-  } else if (distToSol < 1000000) {
-    return Math.max(4000, Math.min(distToSol * 0.05, 45000))
-  } else if (distToSol < 50000000) {
-    return Math.max(35000, Math.min(distToSol * 0.06, 1800000))
-  } else {
-    // Deep cosmic web & multiverse bubbles (up to 32 Billion AU)
-    return Math.max(1500000, Math.min(distToSol * 0.08, 120000000))
-  }
+  // 5. Universal Exponential Flight (Sol -> Milky Way -> Virgo -> Cosmic Web -> Multiverse)
+  // Each wheel gesture travels ~20-25% of current distance for natural, swift navigation
+  const currentScale = Math.max(distToSol, 110)
+  return Math.max(32, currentScale * 0.52)
 }
 
 /**
@@ -78,16 +73,17 @@ export default function CosmicFlightNavigator({ cameraControlRef, scrollSpeed = 
       e.preventDefault()
       e.stopPropagation()
 
-      // negative deltaY = forward into view; positive = backward
-      const forwardDir = e.deltaY < 0 ? 1 : -1
+      // Normalize wheel delta across mice & trackpads
+      const rawDelta = e.deltaY
+      const normalizedMagnitude = Math.abs(rawDelta) > 40 ? Math.sign(rawDelta) : rawDelta / 40
+      const forwardDir = -normalizedMagnitude
       const isShift = e.shiftKey
       const baseSpeed = getCosmicFlightSpeed(camera, controls._target)
-      const impulse = forwardDir * baseSpeed * scrollSpeed * (isShift ? 3.5 : 1.0)
+      const impulse = forwardDir * baseSpeed * scrollSpeed * (isShift ? 3.0 : 1.0)
 
       // Accumulate smooth flight momentum
       flightVelocity.current += impulse
-      // Clamp peak impulse to maintain control during aggressive scrolling
-      const maxImpulse = baseSpeed * 12.0 * scrollSpeed
+      const maxImpulse = baseSpeed * 10.0 * scrollSpeed
       flightVelocity.current = THREE.MathUtils.clamp(flightVelocity.current, -maxImpulse, maxImpulse)
     }
 

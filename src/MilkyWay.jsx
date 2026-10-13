@@ -86,8 +86,6 @@ const proceduralFragmentShader = `
   }
 `
 
-import { useKineticTrackball } from './useKineticTrackball'
-
 export default function MilkyWay({ position = [0, 0, 0] }) {
   const exteriorRef = useRef()
   const exteriorMaterialRef = useRef()
@@ -98,22 +96,17 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
     uOpacity: { value: 0.0 }
   }), [])
 
-  const { bindGrab } = useKineticTrackball({
-    targetRef: trackballGroupRef,
-    idleDriftY: 0.0003,
-    idleDriftX: 0,
-    sensitivityX: 0.004,
-    sensitivityY: 0.003,
-    damping: 0.94,
-    clampPitch: false
-  })
-
   const posVec = useMemo(() => new THREE.Vector3(...position), [position])
 
-  useFrame(({ clock, camera }) => {
+  useFrame(({ clock, camera }, delta) => {
     const time = clock.getElapsedTime()
     const dist = camera.position.distanceTo(posVec)
     
+    // Smooth cinematic galactic drift
+    if (trackballGroupRef.current) {
+      trackballGroupRef.current.rotation.y += delta * 0.005
+    }
+
     // --- EXTERIOR MILKY WAY SPIRAL GALAXY DISC ONLY ---
     // Smoothly reveals only as you leave the 25 stars stellar cluster (dist 60K to 100K)
     if (exteriorRef.current && exteriorMaterialRef.current) {
@@ -137,7 +130,7 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
 
   return (
     <group position={position}>
-      {/* THE EXTERIOR GRAND SPIRAL GALAXY DISC WITH 360° KINETIC TRACKBALL */}
+      {/* THE EXTERIOR GRAND SPIRAL GALAXY DISC */}
       <group ref={trackballGroupRef}>
         <mesh ref={exteriorRef} rotation={[-Math.PI / 6, 0, 0]} raycast={() => null}>
           <planeGeometry args={[450000, 225000]} />
@@ -154,12 +147,6 @@ export default function MilkyWay({ position = [0, 0, 0] }) {
           />
         </mesh>
       </group>
-
-      {/* Interactive 3D Grab Plane */}
-      <mesh {...bindGrab} rotation={[-Math.PI / 6, 0, 0]}>
-        <planeGeometry args={[450000, 225000]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} side={THREE.DoubleSide} />
-      </mesh>
     </group>
   )
 }

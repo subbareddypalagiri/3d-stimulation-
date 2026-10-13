@@ -138,6 +138,7 @@ export default function SolarSystem({
       <group>
         <group ref={sunGroupRef}>
           <Sun 
+            id={id}
             colorDark={sunColors.colorDark || sunColors.dark}
             colorRed={sunColors.colorRed || sunColors.red}
             colorOrange={sunColors.colorOrange || sunColors.org}
