@@ -93,45 +93,22 @@ export default function CosmicFlightNavigator({ cameraControlRef, scrollSpeed = 
     }
   }, [gl, camera, cameraControlRef, scrollSpeed])
 
-  const dirRef = useRef(new THREE.Vector3())
-
-  // Continuous frame update loop: applies momentum & maintains auto look-ahead
+  // Continuous frame update loop: applies momentum dolly
   useFrame(({ camera: activeCam }, delta) => {
     const controls = cameraControlRef.current
     if (!controls) return
 
     const dt = Math.min(delta, 0.1)
 
-    // 1. Smooth physical glide
+    // Smooth physical exponential dolly
     if (Math.abs(flightVelocity.current) > 0.0001) {
-      const step = flightVelocity.current * dt * 9.0
-      controls.forward(step, false)
+      const step = flightVelocity.current * dt * 8.0
+      controls.dolly(step, false)
 
       // Exponential damping for luxurious, buttery glide
       flightVelocity.current *= Math.pow(0.72, dt * 60)
       if (Math.abs(flightVelocity.current) < 0.001) {
         flightVelocity.current = 0
-      }
-    }
-
-    // 2. Unrestricted 360° Look-Ahead Target Maintenance
-    // Ensures target is ALWAYS ahead in the camera's view direction so you never hit a wall
-    const target = controls._target
-    if (target) {
-      const dir = dirRef.current
-      activeCam.getWorldDirection(dir)
-      const distToTarget = activeCam.position.distanceTo(target)
-      const camDist = activeCam.position.length()
-      const minDist = Math.max(1.8, camDist * 0.0005)
-
-      if (distToTarget < minDist) {
-        const pushDist = Math.max(minDist * 12.0, 25.0)
-        controls.setTarget(
-          activeCam.position.x + dir.x * pushDist,
-          activeCam.position.y + dir.y * pushDist,
-          activeCam.position.z + dir.z * pushDist,
-          false
-        )
       }
     }
   })

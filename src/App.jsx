@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber"
-import { Stars, CameraControls, Environment, AdaptiveDpr, AdaptiveEvents, Bvh } from "@react-three/drei"
+import { Stars, CameraControls, AdaptiveDpr, AdaptiveEvents, Bvh } from "@react-three/drei"
 import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import { Suspense, useRef, useState, useEffect } from "react"
 import * as THREE from "three"
@@ -148,6 +148,7 @@ function App() {
     }
   })
 
+
   const updateSensitivity = (newSens) => {
     setMouseSensitivity(newSens)
     try {
@@ -270,6 +271,7 @@ function App() {
           powerPreference: "high-performance",
           antialias: true,
           logarithmicDepthBuffer: true,
+          preserveDrawingBuffer: true,
           alpha: false,
           stencil: false,
           depth: true
@@ -278,8 +280,7 @@ function App() {
       >
         <AdaptiveDpr pixelated={false} />
         <AdaptiveEvents />
-        <Environment preset="city" />
-        <ambientLight intensity={0.08} />
+        <ambientLight intensity={0.12} />
 
         {/* Live cosmological telemetry tracker */}
         <CosmicLevelTracker 
@@ -370,14 +371,14 @@ function App() {
           ref={cameraControlRef} 
           makeDefault 
           maxDistance={65000000000} 
-          minDistance={0.5}
+          minDistance={3.5}
           smoothTime={0.25}
           azimuthRotateSpeed={mouseSensitivity.rotate}
           polarRotateSpeed={mouseSensitivity.rotate}
           truckSpeed={mouseSensitivity.rotate}
           dollySpeed={0}
           dollyToCursor={false}
-          infinityDolly={true}
+          infinityDolly={false}
         />
 
         {/* Real-time Interstellar Flight Engine (Traverse gaps between solar systems) */}
