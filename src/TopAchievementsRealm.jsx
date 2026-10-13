@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo } from "react"
+import { useRef, useEffect } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
 
@@ -237,9 +237,10 @@ export default function TopAchievementsRealm({
   const groupRef = useRef()
   const contentRef = useRef()
   const animatedStateRef = useRef({
-    spinners: [],
+    rings: [],
+    achievementSpinners: [],
+    detachedSpinners: [],
     planetPieces: [],
-    achievementLabels: [],
     coreMesh: null,
     haloSprite: null,
     tempCamVec: new THREE.Vector3(),
@@ -257,9 +258,10 @@ export default function TopAchievementsRealm({
     }
 
     const state = animatedStateRef.current
-    state.spinners = []
+    state.rings = []
+    state.achievementSpinners = []
+    state.detachedSpinners = []
     state.planetPieces = []
-    state.achievementLabels = []
 
     const disposables = []
 
@@ -291,68 +293,104 @@ export default function TopAchievementsRealm({
       return geo
     }
 
-    // 2. Build 4 Asteroid Belt rings
-    function buildBelt(innerR, outerR, count, sizeBoost) {
-      for (let i = 0; i < count; i++) {
-        const rr = innerR + (outerR - innerR) * Math.pow(Math.random(), 1.3)
+    // -------------------------------------------------------------
+    // SMART TRICK 2: "Single Box Trick" (InstancedMesh Belt Rings)
+    // 940 individual meshes converted into 4 batched InstancedMeshes
+    // Drops draw calls from 940 to 4!
+    // -------------------------------------------------------------
+    const ringConfigs = [
+      { innerR: 60, outerR: 100, count: 160, sizeBoost: 0.7, speed: 0.015 },  // Ring 0: Inner belt
+      { innerR: 150, outerR: 300, count: 380, sizeBoost: 1.0, speed: 0.010 }, // Ring 1: Main vast belt
+      { innerR: 345, outerR: 410, count: 220, sizeBoost: 1.15, speed: 0.007 },// Ring 2: Third ring
+      { innerR: 455, outerR: 540, count: 180, sizeBoost: 1.3, speed: 0.005 }  // Ring 3: Outer chunky belt
+    ]
+
+    const dummy = new THREE.Object3D()
+
+    ringConfigs.forEach((cfg, ringIdx) => {
+      const ringGeo = makeAsteroidGeometry(1.0, 0.45)
+      const ringMat = rockMats[ringIdx % rockMats.length]
+      const instancedMesh = new THREE.InstancedMesh(ringGeo, ringMat, cfg.count)
+      instancedMesh.instanceMatrix.setUsage(THREE.StaticDrawUsage)
+      disposables.push(ringGeo)
+
+      for (let i = 0; i < cfg.count; i++) {
+        const rr = cfg.innerR + (cfg.outerR - cfg.innerR) * Math.pow(Math.random(), 1.3)
         const angle = Math.random() * Math.PI * 2
-        const bandFrac = (rr - innerR) / (outerR - innerR)
+        const bandFrac = (rr - cfg.innerR) / (cfg.outerR - cfg.innerR)
         const yScatter = (Math.random() - 0.5) * 22 * (1 - bandFrac * 0.5)
 
         const sizeRoll = Math.random()
         const r = (sizeRoll > 0.97 ? (10 + Math.random() * 9)
                  : sizeRoll > 0.85 ? (5 + Math.random() * 5)
-                 : (0.8 + Math.pow(Math.random(), 2) * 3.5)) * sizeBoost
+                 : (0.8 + Math.pow(Math.random(), 2) * 3.5)) * cfg.sizeBoost
 
-        const detail = r > 6 ? 2 : (r > 2.5 ? 1 : 0)
-        const geo = new THREE.IcosahedronGeometry(r, detail)
-        disposables.push(geo)
-
-        if (detail > 0) {
-          const pos = geo.attributes.position
-          const seed = Math.random() * 100
-          for (let v = 0; v < pos.count; v++) {
-            const x = pos.getX(v), y = pos.getY(v), z = pos.getZ(v)
-            const len = Math.sqrt(x * x + y * y + z * z) || 1
-            const nx = x / len, ny = y / len, nz = z / len
-            const n = noise3(nx * 2.2 + seed, ny * 2.2 + seed, nz * 2.2 + seed)
-            const n2 = noise3(nx * 5 + seed + 9, ny * 5 + seed + 9, nz * 5 + seed + 9)
-            const disp = 1 + (n - 0.5) * 0.55 + (n2 - 0.5) * 0.22
-            pos.setXYZ(v, x * disp, y * disp, z * disp)
-          }
-          geo.computeVertexNormals()
-        }
-
-        const mat = rockMats[Math.floor(Math.random() * rockMats.length)]
-        const mesh = new THREE.Mesh(geo, mat)
-        mesh.position.set(Math.cos(angle) * rr, yScatter, Math.sin(angle) * rr)
-        mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
-        container.add(mesh)
-
-        state.spinners.push({
-          mesh,
-          spin: new THREE.Vector3((Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5),
-          orbitRadius: rr,
-          orbitAngle: angle,
-          orbitHeight: yScatter,
-          orbitSpeed: (0.006 + Math.random() * 0.01) * (Math.random() < 0.06 ? -1 : 1),
-          r
-        })
+        dummy.position.set(Math.cos(angle) * rr, yScatter, Math.sin(angle) * rr)
+        dummy.rotation.set(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, Math.random() * Math.PI * 2)
+        dummy.scale.set(r, r, r)
+        dummy.updateMatrix()
+        instancedMesh.setMatrixAt(i, dummy.matrix)
       }
-    }
+      instancedMesh.instanceMatrix.needsUpdate = true
 
-    // 4 Distinct Belt Divisions
-    buildBelt(60, 100, 160, 0.7)    // Inner ring close to planet
-    buildBelt(150, 300, 380, 1.0)   // Main vast belt
-    buildBelt(345, 410, 220, 1.15)  // Third ring
-    buildBelt(455, 540, 180, 1.3)   // Outer ring, chunky rocks
+      const ringGroup = new THREE.Group()
+      ringGroup.add(instancedMesh)
+      container.add(ringGroup)
 
+      state.rings.push({
+        group: ringGroup,
+        speed: cfg.speed
+      })
+    })
+
+    // -------------------------------------------------------------
+    // 6 Dedicated Orbiting Achievement Boulders (Interactive & Clickable)
+    // -------------------------------------------------------------
+    ACHIEVEMENTS_DATA.forEach((data, idx) => {
+      const achRadius = 7 + (idx % 3) * 2.5
+      const achGeo = makeAsteroidGeometry(achRadius, 0.42)
+      disposables.push(achGeo)
+      const achMat = rockMats[idx % rockMats.length]
+      const achMesh = new THREE.Mesh(achGeo, achMat)
+      achMesh.userData = { achievement: data }
+
+      const orbitR = 140 + idx * 60 // Spaced across the belt radii
+      const orbitSpeed = (0.012 / (1 + idx * 0.14)) * (idx % 2 === 0 ? 1 : -1)
+      const initialAngle = (idx / ACHIEVEMENTS_DATA.length) * Math.PI * 2
+      const yScatter = (idx % 2 === 0 ? 9 : -9)
+
+      achMesh.position.set(Math.cos(initialAngle) * orbitR, yScatter, Math.sin(initialAngle) * orbitR)
+      container.add(achMesh)
+
+      // Crisp Billboard Text Sprite for this achievement
+      const { sprite, texture, material } = makeTextSprite(data.title, data.color)
+      disposables.push(texture, material)
+      sprite.position.copy(achMesh.position)
+      sprite.position.y += achRadius + 18
+      sprite.userData = { achievement: data }
+      container.add(sprite)
+
+      state.achievementSpinners.push({
+        mesh: achMesh,
+        sprite,
+        orbitR,
+        orbitSpeed,
+        angle: initialAngle,
+        yPos: yScatter,
+        spin: new THREE.Vector3((Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4),
+        yOffset: achRadius + 18,
+        data
+      })
+    })
+
+    // -------------------------------------------------------------
     // 3. Central Molten Broken Planet
+    // -------------------------------------------------------------
     const planetR = 42
     const planetTex = makePlanetTexture()
     disposables.push(planetTex)
 
-    // Molten Glowing Core
+    // Glowing Molten Core
     const coreGeo = new THREE.IcosahedronGeometry(planetR * 0.8, 2)
     disposables.push(coreGeo)
     {
@@ -380,7 +418,7 @@ export default function TopAchievementsRealm({
     state.coreMesh = coreMesh
 
     // Core Point Light
-    const coreLight = new THREE.PointLight(0xff7a2e, 2.8, 400, 1.8)
+    const coreLight = new THREE.PointLight(0xff7a2e, 2.5, 380, 1.8)
     container.add(coreLight)
 
     // Halo Glow Sprite
@@ -409,12 +447,12 @@ export default function TopAchievementsRealm({
     const phiSegs = 5, thetaSegs = 4
     for (let pi = 0; pi < phiSegs; pi++) {
       for (let ti = 0; ti < thetaSegs; ti++) {
-        if (Math.random() < 0.15) continue // missing chunks create molten deep fissures
+        if (Math.random() < 0.15) continue
         const phiStart = (pi / phiSegs) * Math.PI * 2
         const phiLen = (Math.PI * 2 / phiSegs) * (0.72 + Math.random() * 0.14)
         const thetaStart = (ti / thetaSegs) * Math.PI
         const thetaLen = (Math.PI / thetaSegs) * (0.72 + Math.random() * 0.14)
-        const wgeo = new THREE.SphereGeometry(planetR, 9, 7, phiStart, phiLen, thetaStart, thetaLen)
+        const wgeo = new THREE.SphereGeometry(planetR, 8, 6, phiStart, phiLen, thetaStart, thetaLen)
         disposables.push(wgeo)
 
         const wp = wgeo.attributes.position, wseed = Math.random() * 90
@@ -460,7 +498,7 @@ export default function TopAchievementsRealm({
     disposables.push(fragMat)
 
     for (let i = 0; i < 6; i++) {
-      const fr = 5 + Math.random() * 7
+      const fr = 5 + Math.random() * 6
       const fgeo = new THREE.IcosahedronGeometry(fr, 1)
       disposables.push(fgeo)
       const fpos = fgeo.attributes.position, fseed = Math.random() * 50
@@ -478,41 +516,13 @@ export default function TopAchievementsRealm({
       frag.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
       container.add(frag)
 
-      state.spinners.push({
+      state.detachedSpinners.push({
         mesh: frag,
-        spin: new THREE.Vector3((Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3),
-        orbitRadius: -1
+        spin: new THREE.Vector3((Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3)
       })
     }
 
-    // 5. 6 Achievement Sprites attached to the biggest orbital asteroids in the belt
-    const achievementPicks = state.spinners
-      .filter(s => s.orbitRadius >= 0)
-      .sort((a, b) => b.r - a.r)
-      .slice(0, ACHIEVEMENTS_DATA.length)
-
-    achievementPicks.forEach((spinner, idx) => {
-      const data = ACHIEVEMENTS_DATA[idx]
-      const { sprite, texture, material } = makeTextSprite(data.title, data.color)
-      disposables.push(texture, material)
-
-      sprite.position.copy(spinner.mesh.position)
-      sprite.position.y += spinner.r + 18
-      container.add(sprite)
-
-      // Make spinner mesh interactive
-      spinner.mesh.userData = { achievement: data }
-      sprite.userData = { achievement: data }
-
-      state.achievementLabels.push({
-        spinner,
-        sprite,
-        data,
-        yOffset: spinner.r + 18
-      })
-    })
-
-    // 6. Floating 3D Rock Letters: "TOP ACHIEVEMENTS"
+    // 5. Floating 3D Rock Letters: "TOP ACHIEVEMENTS"
     {
       const word = "TOP ACHIEVEMENTS"
       const cw = 1700, ch = 230
@@ -531,8 +541,8 @@ export default function TopAchievementsRealm({
 
       const samples = []
       const scaleX = 560 / cw, scaleY = scaleX
-      for (let y = 0; y < ch; y += 6) {
-        for (let x = 0; x < cw; x += 6) {
+      for (let y = 0; y < ch; y += 7) {
+        for (let x = 0; x < cw; x += 7) {
           if (img[(y * cw + x) * 4] > 128) {
             samples.push([(x - cw / 2) * scaleX, (ch / 2 - y) * scaleY + 260])
           }
@@ -550,30 +560,30 @@ export default function TopAchievementsRealm({
       disposables.push(wordRockMat)
 
       const wordMesh = new THREE.InstancedMesh(rockGeo, wordRockMat, samples.length)
-      const dummy = new THREE.Object3D()
+      const wordDummy = new THREE.Object3D()
       for (let i = 0; i < samples.length; i++) {
-        dummy.position.set(samples[i][0], samples[i][1] + (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 10)
-        dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
+        wordDummy.position.set(samples[i][0], samples[i][1] + (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 10)
+        wordDummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
         const s = 1.1 + Math.random() * 1.5
-        dummy.scale.set(s, s, s)
-        dummy.updateMatrix()
-        wordMesh.setMatrixAt(i, dummy.matrix)
+        wordDummy.scale.set(s, s, s)
+        wordDummy.updateMatrix()
+        wordMesh.setMatrixAt(i, wordDummy.matrix)
       }
       wordMesh.instanceMatrix.needsUpdate = true
       container.add(wordMesh)
 
       // Light illuminating the 3D rock letters
-      const wordLight = new THREE.PointLight(0xfff1d6, 1.4, 600, 2)
+      const wordLight = new THREE.PointLight(0xfff1d6, 1.4, 500, 2)
       wordLight.position.set(0, 240, 200)
       container.add(wordLight)
     }
 
     // Direct Directional Sunlight for crisp shadows & rock highlights
-    const realmSun = new THREE.DirectionalLight(0xfff1d6, 1.8)
+    const realmSun = new THREE.DirectionalLight(0xfff1d6, 1.6)
     realmSun.position.set(220, 140, 180)
     container.add(realmSun)
 
-    const realmRim = new THREE.DirectionalLight(0x5577ff, 0.45)
+    const realmRim = new THREE.DirectionalLight(0x5577ff, 0.4)
     realmRim.position.set(-200, -80, -160)
     container.add(realmRim)
 
@@ -590,8 +600,11 @@ export default function TopAchievementsRealm({
     }
   }, [])
 
-  // Zero-Allocation 2026 useFrame loop:
-  // Culls when far away (> 450,000 AU), zero object allocations inside loop
+  // -------------------------------------------------------------
+  // SMART TRICK 1: "Smart Sleep Mode" (Dooram unnapudu Zero Computation)
+  // Distance to Sol is 187,683 AU. When dist > 65,000 AU, 100% SLEEPING!
+  // Wakes up instantly when warping or flying within 65,000 AU!
+  // -------------------------------------------------------------
   useFrame(({ camera, clock }, delta) => {
     if (!groupRef.current) return
 
@@ -599,18 +612,29 @@ export default function TopAchievementsRealm({
     state.tempCamVec.copy(camera.position)
     const distToRealm = state.tempCamVec.distanceTo(state.centerVec)
 
-    // Distance Culling: Skip animations if outside visual range
-    if (distToRealm > 450000) {
-      if (groupRef.current.visible) groupRef.current.visible = false
-      return
+    // 1. SMART SLEEP CHECK:
+    // If camera is far away (> 65,000 AU), put entire realm into SLEEP mode!
+    if (distToRealm > 65000) {
+      if (groupRef.current.visible) {
+        groupRef.current.visible = false
+      }
+      return // Zero CPU calculations, zero GPU draw calls!
     }
 
-    if (!groupRef.current.visible) groupRef.current.visible = true
+    // 2. WAKE UP:
+    if (!groupRef.current.visible) {
+      groupRef.current.visible = true
+    }
 
     const dt = Math.min(delta, 0.05)
     const time = clock.elapsedTime
 
-    // 1. Broken planet pieces radial breathing displacement
+    // 3. Rotate 4 InstancedMesh belt rings on GPU (Lightning-fast: 4 operations only!)
+    state.rings.forEach(ring => {
+      ring.group.rotation.y += ring.speed * dt
+    })
+
+    // 4. Broken planet pieces radial breathing displacement
     const pieces = state.planetPieces
     for (let i = 0; i < pieces.length; i++) {
       const pc = pieces[i]
@@ -620,31 +644,28 @@ export default function TopAchievementsRealm({
       pc.mesh.position.z = pc.dir.z * d
     }
 
-    // 2. Asteroids rotation & orbital movement
-    const spinners = state.spinners
-    for (let i = 0; i < spinners.length; i++) {
-      const s = spinners[i]
+    // 5. Orbit the 6 dedicated achievement boulders & their labels
+    state.achievementSpinners.forEach(s => {
+      s.angle += s.orbitSpeed * dt
+      s.mesh.position.x = Math.cos(s.angle) * s.orbitR
+      s.mesh.position.z = Math.sin(s.angle) * s.orbitR
+      s.mesh.position.y = s.yPos
+
       s.mesh.rotation.x += s.spin.x * dt
       s.mesh.rotation.y += s.spin.y * dt
       s.mesh.rotation.z += s.spin.z * dt
 
-      if (s.orbitRadius >= 0) {
-        s.orbitAngle += s.orbitSpeed * dt
-        s.mesh.position.x = Math.cos(s.orbitAngle) * s.orbitRadius
-        s.mesh.position.z = Math.sin(s.orbitAngle) * s.orbitRadius
-        s.mesh.position.y = s.orbitHeight
-      }
-    }
+      s.sprite.position.x = s.mesh.position.x
+      s.sprite.position.y = s.mesh.position.y + s.yOffset
+      s.sprite.position.z = s.mesh.position.z
+    })
 
-    // 3. Achievement labels position synchronisation
-    const labels = state.achievementLabels
-    for (let i = 0; i < labels.length; i++) {
-      const al = labels[i]
-      const pos = al.spinner.mesh.position
-      al.sprite.position.x = pos.x
-      al.sprite.position.y = pos.y + al.yOffset
-      al.sprite.position.z = pos.z
-    }
+    // 6. Detached boulders tumble
+    state.detachedSpinners.forEach(s => {
+      s.mesh.rotation.x += s.spin.x * dt
+      s.mesh.rotation.y += s.spin.y * dt
+      s.mesh.rotation.z += s.spin.z * dt
+    })
   })
 
   // Raycasting click handler for achievement inspection

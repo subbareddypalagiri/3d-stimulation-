@@ -386,7 +386,22 @@ export default function PrimeRealmProjectsOrbit({
     return out.set(p.basePos.x, p.baseY + Math.sin(t * 0.6 + p.floatSeed) * 0.7, p.basePos.z)
   }
 
-  useFrame(({ clock }, delta) => {
+  const posVec = useMemo(() => new THREE.Vector3(...position), [position])
+  const rootGroupRef = useRef()
+
+  useFrame(({ clock, camera }, delta) => {
+    // Smart Sleep Mode: Put 13 planets and 13 lights to sleep when far away (> 150M AU)
+    const distToRealm = camera.position.distanceTo(posVec)
+    const isNearby = distToRealm < 150000000
+
+    if (rootGroupRef.current) {
+      if (!isNearby) {
+        if (rootGroupRef.current.visible) rootGroupRef.current.visible = false
+        return // Zero calculations, zero planet lerps, zero draw calls when at Sol/Milky Way!
+      }
+      if (!rootGroupRef.current.visible) rootGroupRef.current.visible = true
+    }
+
     const t = clock.elapsedTime
     const dt = Math.min(delta, 0.05)
 
@@ -422,7 +437,7 @@ export default function PrimeRealmProjectsOrbit({
   })
 
   return (
-    <group position={position} scale={[scale, scale, scale]}>
+    <group ref={rootGroupRef} position={position} scale={[scale, scale, scale]}>
       {/* 360° Free Kinetic Trackball Grab Sphere for the Prime Projects Realm */}
       <mesh {...bindGrab}>
         <sphereGeometry args={[140, 24, 24]} />

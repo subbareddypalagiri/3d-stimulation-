@@ -265,7 +265,7 @@ function App() {
     <div style={{ width: "100vw", height: "100vh", background: "#000", overflow: "hidden" }}>
       <Canvas 
         camera={{ position: [0, 50, 150], fov: 45, far: 80000000000, near: 1 }} 
-        dpr={[1, 2]}
+        dpr={[1, 1.6]}
         gl={{
           powerPreference: "high-performance",
           antialias: true,

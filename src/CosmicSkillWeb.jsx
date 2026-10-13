@@ -509,8 +509,23 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
     }
   }, [])
 
+  const skillPosVec = useMemo(() => new THREE.Vector3(...position), [position])
+  const tempColRef = useRef(new THREE.Color())
+
   // Animation frame loop: direct interactive 3D rotation, floating billboard title bob, living fire rise
   useFrame(({ clock, camera }, delta) => {
+    // Smart Sleep Mode: Put CosmicSkillWeb to sleep when far away (> 65,000 AU, e.g. at Sol)
+    const dist = camera.position.distanceTo(skillPosVec)
+    const isNearby = dist <= 65000
+
+    if (groupRef.current) {
+      if (!isNearby) {
+        if (groupRef.current.visible) groupRef.current.visible = false
+        return // Zero calculations, zero particle updates when not in Skill Web realm!
+      }
+      if (!groupRef.current.visible) groupRef.current.visible = true
+    }
+
     const t = clock.elapsedTime
     const dt = Math.min(delta, 0.1)
 
@@ -536,6 +551,7 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
     const fd = webData.fireData
     if (fd && fireRef.current) {
       fireRef.current.position.y = bobY
+      const cachedColor = tempColRef.current
       for (let fi = 0; fi < fd.count; fi++) {
         const progress = (t * fd.speed[fi] + fd.phase[fi]) % 1
         const i3 = fi * 3
@@ -544,21 +560,17 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
         fd.pos[i3] = fd.baseX[fi] + xOff
         fd.pos[i3 + 1] = fd.baseY[fi] + progress * fd.rise[fi]
         fd.pos[i3 + 2] = fd.baseZ[fi] + zOff
-        const c = fd.colHot.clone().lerp(fd.colFire, Math.min(1, progress * 1.8))
-        if (progress > 0.45) c.lerp(fd.colDark, (progress - 0.45) / 0.55)
-        fd.col[i3] = c.r
-        fd.col[i3 + 1] = c.g
-        fd.col[i3 + 2] = c.b
+
+        // Zero-GC in-place color blending (no .clone() allocations!)
+        cachedColor.copy(fd.colHot).lerp(fd.colFire, Math.min(1, progress * 1.8))
+        if (progress > 0.45) cachedColor.lerp(fd.colDark, (progress - 0.45) / 0.55)
+        fd.col[i3] = cachedColor.r
+        fd.col[i3 + 1] = cachedColor.g
+        fd.col[i3 + 2] = cachedColor.b
       }
       fd.geo.attributes.position.needsUpdate = true
       fd.geo.attributes.color.needsUpdate = true
       fd.mat.opacity = 0.82 + Math.sin(t * 7) * 0.08
-    }
-
-    // Dynamic visibility check: visible from past Milky Way edge (dist > 35,000) up to supercluster view
-    if (groupRef.current) {
-      const dist = camera.position.distanceTo(new THREE.Vector3(...position))
-      groupRef.current.visible = dist <= 1200000
     }
   })
 
