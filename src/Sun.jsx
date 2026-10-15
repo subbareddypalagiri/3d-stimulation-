@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useFrame, extend, useLoader } from '@react-three/fiber'
 import { shaderMaterial } from '@react-three/drei'
 import * as THREE from 'three'
@@ -279,6 +279,8 @@ export default function Sun({
   const sunTexture = useLoader(THREE.TextureLoader, '/textures/sun.jpg')
   sunTexture.wrapS = sunTexture.wrapT = THREE.RepeatWrapping;
 
+  const [isClose, setIsClose] = useState(id === 0)
+
   // Sync props to uniforms with distance-based LOD
   useFrame((state, delta) => {
     if (!groupRef.current) return
@@ -290,13 +292,16 @@ export default function Sun({
       groupRef.current.getWorldPosition(worldPosRef.current)
       const distToCam = state.camera.position.distanceTo(worldPosRef.current)
       shouldRenderFlares = distToCam < 1600
+      if (shouldRenderFlares !== isClose) {
+        setIsClose(shouldRenderFlares)
+      }
     }
 
     if (fireMeshRef.current) {
       fireMeshRef.current.visible = shouldRenderFlares
     }
 
-    if (sunMatRef.current) {
+    if (shouldRenderFlares && sunMatRef.current) {
       sunMatRef.current.uTime += delta * 0.15 
       sunMatRef.current.uColorDark.set(colorDark)
       sunMatRef.current.uColorRed.set(colorRed)
@@ -315,15 +320,24 @@ export default function Sun({
 
   return (
     <group ref={groupRef} position={position} {...props}>
-      <mesh>
-        <sphereGeometry args={[3, 48, 48]} />
-        <sunMaterial ref={sunMatRef} uTexture={sunTexture} />
-      </mesh>
+      {isClose ? (
+        <mesh>
+          <sphereGeometry args={[3, 48, 48]} />
+          <sunMaterial ref={sunMatRef} uTexture={sunTexture} />
+        </mesh>
+      ) : (
+        <mesh>
+          <sphereGeometry args={[3, 16, 16]} />
+          <meshBasicMaterial color={colorWhite} />
+        </mesh>
+      )}
       
-      <mesh ref={fireMeshRef}>
-        <sphereGeometry args={[3.05, 48, 48]} />
-        <fireMaterial ref={fireMatRef} uTexture={sunTexture} transparent depthWrite={false} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} />
-      </mesh>
+      {isClose && (
+        <mesh ref={fireMeshRef}>
+          <sphereGeometry args={[3.05, 48, 48]} />
+          <fireMaterial ref={fireMatRef} uTexture={sunTexture} transparent depthWrite={false} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} />
+        </mesh>
+      )}
     </group>
   )
 }

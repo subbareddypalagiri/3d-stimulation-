@@ -1,6 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Stars, CameraControls, AdaptiveDpr, AdaptiveEvents, Bvh } from "@react-three/drei"
-import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import { Suspense, useRef, useState, useEffect } from "react"
 import * as THREE from "three"
 import "./App.css"
@@ -60,6 +59,8 @@ function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
   const lastUpdate = useRef(0)
   const lastProgress = useRef(1)
 
+  const lastDist = useRef(150)
+
   useFrame(({ camera, clock }) => {
     const now = clock.elapsedTime
     centerVec.current.set(...activeCenter)
@@ -113,11 +114,14 @@ function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
       progress = 9
     }
 
-    // Only update React state when level changes, or at most 5 times per second (prevents GC frame drops!)
-    if (progress !== lastProgress.current || now - lastUpdate.current > 0.2) {
+    // Only update React state when level changes, or throttled to 1 time per second
+    const distRounded = Math.round(dist)
+    const distChanged = Math.abs(distRounded - lastDist.current) > 2
+    if (progress !== lastProgress.current || (now - lastUpdate.current > 0.8 && distChanged)) {
       lastUpdate.current = now
       lastProgress.current = progress
-      onLevelUpdate({ level, desc, color, progress, dist: Math.round(dist) })
+      lastDist.current = distRounded
+      onLevelUpdate({ level, desc, color, progress, dist: distRounded })
     }
   })
 
@@ -266,12 +270,12 @@ function App() {
     <div style={{ width: "100vw", height: "100vh", background: "#000", overflow: "hidden" }}>
       <Canvas 
         camera={{ position: [0, 50, 150], fov: 45, far: 80000000000, near: 1 }} 
-        dpr={[1, 1.6]}
+        dpr={[1, 1.25]}
         gl={{
           powerPreference: "high-performance",
           antialias: true,
           logarithmicDepthBuffer: true,
-          preserveDrawingBuffer: true,
+          preserveDrawingBuffer: false,
           alpha: false,
           stencil: false,
           depth: true
@@ -390,9 +394,6 @@ function App() {
           scrollSpeed={mouseSensitivity.scroll} 
         />
 
-        <EffectComposer disableNormalPass multisampling={0}>
-          <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.5} intensity={1.2} mipmapBlur />
-        </EffectComposer>
       </Canvas>
 
       {/* Interactive Ethereal Cosmic Soundscape (Web Audio Synthesizer) */}

@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from "react"
+import React, { useRef, useMemo, useState } from "react"
 import { useFrame } from "@react-three/fiber"
 import { useGLTF, Html } from "@react-three/drei"
 import * as THREE from "three"
@@ -169,9 +169,12 @@ export const SATELLITE_HUBS = [
 function SingleSatelliteHub({ hub, originalScene, flyTo }) {
   const groupRef = useRef()
   const modelRef = useRef()
+  const hubPos = useMemo(() => new THREE.Vector3(...hub.pos), [hub.pos])
+  const [isVisible, setIsVisible] = useState(hub.id === 1)
 
-  // Clone scene and apply customized color theme per hub
+  // Lazy Clone scene: Only create cloned meshes and materials when this hub is in proximity
   const clonedScene = useMemo(() => {
+    if (!isVisible && hub.id !== 1) return null
     const clone = originalScene.clone(true)
     clone.traverse((child) => {
       if (child.isMesh) {
@@ -209,22 +212,21 @@ function SingleSatelliteHub({ hub, originalScene, flyTo }) {
       }
     })
     return clone
-  }, [originalScene, hub.colors])
-
-  const hubPos = useMemo(() => new THREE.Vector3(...hub.pos), [hub.pos])
+  }, [originalScene, hub.colors, isVisible, hub.id])
 
   useFrame(({ clock, camera }) => {
-    const t = clock.elapsedTime
-    if (modelRef.current) {
-      modelRef.current.rotation.y = t * hub.rotSpeed
+    const dist = camera.position.distanceTo(hubPos)
+    const inRange = dist >= hub.minDist && dist <= hub.maxDist
+    if (inRange !== isVisible) {
+      setIsVisible(inRange)
     }
 
-    if (groupRef.current) {
-      const dist = camera.position.distanceTo(hubPos)
-      const isVisible = dist >= hub.minDist && dist <= hub.maxDist
-      groupRef.current.visible = isVisible
+    if (isVisible && modelRef.current) {
+      modelRef.current.rotation.y = clock.elapsedTime * hub.rotSpeed
     }
   })
+
+  if (!isVisible) return null
 
   return (
     <group ref={groupRef} position={hub.pos} scale={[hub.scale, hub.scale, hub.scale]} raycast={() => null}>
