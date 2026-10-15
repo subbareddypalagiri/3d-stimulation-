@@ -28,8 +28,60 @@ export const SOL_PLANETS = [
   { name: 'Pluto', symbol: '♇', pos: [175, 0, 0], radius: 0.18, color: '#cbd5e1' }
 ]
 
+function makeStarLabelSprite(name, color = "#ffeedd") {
+  const fontSize = 38
+  const canvas = document.createElement("canvas")
+  const ctx = canvas.getContext("2d")
+  ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
+  const textWidth = Math.ceil(ctx.measureText("✦ " + name).width)
+  canvas.width = textWidth + 56
+  canvas.height = fontSize + 44
+
+  const ctx2 = canvas.getContext("2d")
+  ctx2.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
+  ctx2.textBaseline = "middle"
+
+  // Rounded pill background with subtle glow border
+  const r = 20
+  const x = 4, y = 4, w = canvas.width - 8, h = canvas.height - 8
+  ctx2.fillStyle = "rgba(6, 10, 20, 0.84)"
+  ctx2.strokeStyle = color
+  ctx2.lineWidth = 3
+  ctx2.beginPath()
+  ctx2.moveTo(x + r, y)
+  ctx2.arcTo(x + w, y, x + w, y + h, r)
+  ctx2.arcTo(x + w, y + h, x, y + h, r)
+  ctx2.arcTo(x, y + h, x, y, r)
+  ctx2.arcTo(x, y, x + w, y, r)
+  ctx2.closePath()
+  ctx2.fill()
+  ctx2.stroke()
+
+  // Glowing symbol and text
+  ctx2.shadowColor = color
+  ctx2.shadowBlur = 12
+  ctx2.fillStyle = color
+  ctx2.fillText("✦ " + name, 26, canvas.height / 2)
+  ctx2.shadowBlur = 0
+  ctx2.fillStyle = "#ffffff"
+  ctx2.fillText("✦ " + name, 26, canvas.height / 2)
+
+  const tex = new THREE.CanvasTexture(canvas)
+  const mat = new THREE.SpriteMaterial({
+    map: tex,
+    transparent: true,
+    depthWrite: false,
+    depthTest: false
+  })
+  const sprite = new THREE.Sprite(mat)
+  const spriteH = 14
+  sprite.scale.set(spriteH * (canvas.width / canvas.height), spriteH, 1)
+  return sprite
+}
+
 export default function SolarSystem({ 
   id = 0,
+  name = 'Star System',
   position = [0, 0, 0], 
   sunColors, 
   speedMultiplier = 1,
@@ -40,6 +92,7 @@ export default function SolarSystem({
 }) {
   const [showPlanets, setShowPlanets] = useState(id === 0)
   const systemPos = useMemo(() => new THREE.Vector3(...position), [position])
+  const labelGroupRef = useRef()
   
   // Sleek, compact procedural planets
   const planetsData = useMemo(() => {
@@ -96,13 +149,29 @@ export default function SolarSystem({
     return randomPlanets
   }, [id, planetCount])
 
+  // Billboard name badge sprite generated once
+  const labelSprite = useMemo(() => {
+    if (id === 0) return null
+    const starGlowColor = sunColors.colorOrange || sunColors.org || sunColors.colorRed || sunColors.red || "#ffaa33"
+    return makeStarLabelSprite(name, starGlowColor)
+  }, [id, name, sunColors])
+
   // LOD: Only render planetary systems when camera is within proximity of this star system
+  // Dynamic visibility for star label: visible in space (< 65,000 AU), hides when up close (< 45 AU)
   useFrame(({ camera }) => {
-    if (id === 0) return // Home Sol system always has planets
     const dist = camera.position.distanceTo(systemPos)
-    const shouldShow = dist < 450 * Math.max(scale, 1)
-    if (shouldShow !== showPlanets) {
-      setShowPlanets(shouldShow)
+    if (id !== 0) {
+      const shouldShow = dist < 450 * Math.max(scale, 1)
+      if (shouldShow !== showPlanets) {
+        setShowPlanets(shouldShow)
+      }
+    }
+
+    if (labelGroupRef.current) {
+      const isLabelVisible = dist >= 45 * Math.max(scale, 0.8) && dist < 65000
+      if (labelGroupRef.current.visible !== isLabelVisible) {
+        labelGroupRef.current.visible = isLabelVisible
+      }
     }
   })
 
@@ -114,13 +183,25 @@ export default function SolarSystem({
     sensitivityX: 0.005,
     sensitivityY: 0.004,
     damping: 0.92,
-    clampPitch: false,
-    onClick: () => {
-      if (onSelectSystem) {
-        onSelectSystem(position, scale)
-      }
-    }
+    clampPitch: false
   })
+
+  // Direct Click-to-Fly handler for mouse clicks on star or label
+  const handleSelect = (e) => {
+    e.stopPropagation()
+    if (onSelectSystem) {
+      onSelectSystem(position, scale)
+    }
+  }
+
+  const handlePointerOver = (e) => {
+    e.stopPropagation()
+    document.body.style.cursor = 'pointer'
+  }
+
+  const handlePointerOut = () => {
+    document.body.style.cursor = 'auto'
+  }
 
   return (
     <group position={position} scale={[scale, scale, scale]}>
@@ -145,11 +226,36 @@ export default function SolarSystem({
             colorWhite={sunColors.colorWhite || sunColors.wht}
           />
         </group>
+        
+        {/* Inner trackball grab mesh for close-up inspection */}
         <mesh {...bindSunGrab}>
           <sphereGeometry args={[11, 16, 16]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
+
+        {/* Generous Click-to-Fly hit volume (easily clicked from afar) */}
+        <mesh
+          onClick={handleSelect}
+          onPointerOver={handlePointerOver}
+          onPointerOut={handlePointerOut}
+        >
+          <sphereGeometry args={[id === 0 ? 16 : 38, 16, 16]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
       </group>
+
+      {/* Floating 3D Star Name Badge (Interactive & Click-to-Fly) */}
+      {labelSprite && (
+        <group
+          ref={labelGroupRef}
+          position={[0, 18, 0]}
+          onClick={handleSelect}
+          onPointerOver={handlePointerOver}
+          onPointerOut={handlePointerOut}
+        >
+          <primitive object={labelSprite} />
+        </group>
+      )}
 
       {/* Planets rendered when camera is near this solar system */}
       {showPlanets && planetsData.map((planet, idx) => (

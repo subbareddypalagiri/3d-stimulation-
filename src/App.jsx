@@ -1,9 +1,9 @@
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Stars, CameraControls, AdaptiveDpr, AdaptiveEvents, Bvh } from "@react-three/drei"
-import { Suspense, useRef, useState, useEffect } from "react"
+import { Suspense, useRef, useState, useEffect, useMemo } from "react"
 import * as THREE from "three"
 import "./App.css"
-import UniverseManager from "./UniverseManager"
+import UniverseManager, { generateAllSystems } from "./UniverseManager"
 import MilkyWay from "./MilkyWay"
 import CosmicWeb from "./CosmicWeb"
 import CosmicAudio from "./CosmicAudio"
@@ -143,6 +143,8 @@ function App() {
   const [showMonument, setShowMonument] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSpeedModalOpen, setIsSpeedModalOpen] = useState(false)
+  const [isSystemsModalOpen, setIsSystemsModalOpen] = useState(false)
+  const allStarSystems = useMemo(() => generateAllSystems(), [])
   const [mouseSensitivity, setMouseSensitivity] = useState(() => {
     try {
       const saved = localStorage.getItem("cosmic_mouse_sensitivity")
@@ -473,6 +475,43 @@ function App() {
         boxShadow: "0 14px 35px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 18px rgba(245, 180, 50, 0.12)",
         fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
       }}>
+        {/* 0. 25 Stellar Systems Quick Selector */}
+        <button
+          onClick={() => setIsSystemsModalOpen(true)}
+          style={{
+            background: isSystemsModalOpen ? "rgba(251, 146, 60, 0.28)" : "rgba(255, 255, 255, 0.05)",
+            border: `1px solid ${isSystemsModalOpen ? "#fb923c" : "rgba(255, 255, 255, 0.12)"}`,
+            color: isSystemsModalOpen ? "#fb923c" : "#e2e8f0",
+            padding: "6px 10px",
+            borderRadius: 20,
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            transition: "all 0.2s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(251, 146, 60, 0.18)"
+            e.currentTarget.style.borderColor = "rgba(251, 146, 60, 0.5)"
+            e.currentTarget.style.color = "#fb923c"
+            e.currentTarget.style.transform = "translateY(-1px)"
+          }}
+          onMouseLeave={(e) => {
+            if (!isSystemsModalOpen) {
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)"
+              e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
+              e.currentTarget.style.color = "#e2e8f0"
+            }
+            e.currentTarget.style.transform = "translateY(0)"
+          }}
+          title="Browse & Fly to 25 Star Systems"
+        >
+          <IconGlobe size={15} color="#fb923c" />
+          <span>SYSTEMS</span>
+        </button>
+
         {/* 1. Celestial Realm (Active Highlighted Gold Pill) */}
         <button
           onClick={() => {
@@ -746,6 +785,166 @@ function App() {
           <span>WARP ▾</span>
         </button>
       </div>
+
+      {/* 25 Stellar Systems Modal */}
+      {isSystemsModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.78)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: 20
+          }}
+          onClick={() => setIsSystemsModalOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "rgba(10, 15, 26, 0.96)",
+              border: "1.5px solid rgba(251, 146, 60, 0.4)",
+              borderRadius: 20,
+              boxShadow: "0 25px 60px rgba(0,0,0,0.9), 0 0 40px rgba(251, 146, 60, 0.25)",
+              maxWidth: 780,
+              width: "100%",
+              maxHeight: "85vh",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              fontFamily: OBSIDIAN_TOKENS.fontMono
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "16px 20px",
+                borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+                background: "rgba(255, 255, 255, 0.02)"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    background: "rgba(251, 146, 60, 0.15)",
+                    border: "1px solid rgba(251, 146, 60, 0.4)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}
+                >
+                  <IconGlobe size={18} color="#fb923c" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: "#ffffff", letterSpacing: "0.06em" }}>
+                    STELLAR NEIGHBORHOOD • 25 SOLAR SYSTEMS
+                  </div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>
+                    Click any star system to fly directly to it and inspect orbiting procedural planets
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsSystemsModalOpen(false)}
+                style={{
+                  background: "rgba(255, 255, 255, 0.06)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#94a3b8",
+                  padding: "6px",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                <IconClose size={16} />
+              </button>
+            </div>
+
+            {/* Grid of 25 Systems */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(215px, 1fr))",
+                gap: 10,
+                padding: 18,
+                overflowY: "auto",
+                maxHeight: "calc(85vh - 75px)"
+              }}
+            >
+              {allStarSystems.map((sys) => {
+                const distFromOrigin = Math.round(Math.hypot(...sys.position))
+                const isHome = sys.id === 0
+                return (
+                  <button
+                    key={sys.id}
+                    onClick={() => {
+                      flyTo(sys.position, Math.max(sys.scale * 35, 45))
+                      setGalaxyCenter(sys.position)
+                      setIsSystemsModalOpen(false)
+                    }}
+                    style={{
+                      background: isHome ? "rgba(245, 180, 50, 0.12)" : "rgba(255, 255, 255, 0.03)",
+                      border: `1px solid ${isHome ? "#f5b032" : "rgba(255, 255, 255, 0.08)"}`,
+                      borderRadius: 12,
+                      padding: "12px 14px",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = isHome ? "rgba(245, 180, 50, 0.22)" : "rgba(251, 146, 60, 0.12)"
+                      e.currentTarget.style.borderColor = "#fb923c"
+                      e.currentTarget.style.transform = "translateY(-2px)"
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = isHome ? "rgba(245, 180, 50, 0.12)" : "rgba(255, 255, 255, 0.03)"
+                      e.currentTarget.style.borderColor = isHome ? "#f5b032" : "rgba(255, 255, 255, 0.08)"
+                      e.currentTarget.style.transform = "translateY(0)"
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "#ffffff" }}>
+                        {isHome ? "☀️ Sol (Home System)" : `✦ ${sys.name}`}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 9,
+                          padding: "2px 6px",
+                          borderRadius: 8,
+                          background: isHome ? "rgba(245, 180, 50, 0.2)" : "rgba(255, 255, 255, 0.08)",
+                          color: isHome ? "#f5b032" : "#94a3b8",
+                          fontWeight: 700
+                        }}
+                      >
+                        {sys.planetCount} Planets
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 10, color: "rgba(255, 255, 255, 0.5)", display: "flex", justifyContent: "space-between" }}>
+                      <span>Scale: {sys.scale}x</span>
+                      <span>{isHome ? "0 AU (Center)" : `${distFromOrigin.toLocaleString()} AU`}</span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Quick Mouse Sensitivity Adjustment Popover - Obsidian Stealth Theme */}
       {isSpeedModalOpen && (

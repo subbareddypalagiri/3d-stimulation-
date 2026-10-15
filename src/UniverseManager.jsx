@@ -14,7 +14,7 @@ const starTypes = [
 
 // 24 Real Named Neighboring Star Systems around Sol (Total 25 Systems!)
 // Clean, elegant, proportional scales (0.5 to 1.5) and well-spaced coordinates
-const NEIGHBOR_STAR_SYSTEMS = [
+export const NEIGHBOR_STAR_SYSTEMS = [
   // 1-24: Original Neighbor Systems (Balanced Scales)
   { name: 'Alpha Centauri A', pos: [580, 80, -320], starType: 0, scale: 0.95, planets: 4 },
   { name: 'Proxima Centauri', pos: [720, -110, -420], starType: 2, scale: 0.55, planets: 2 },
@@ -42,7 +42,7 @@ const NEIGHBOR_STAR_SYSTEMS = [
   { name: 'Betelgeuse', pos: [6600, -650, 4700], starType: 2, scale: 1.5, planets: 6 }
 ]
 
-const generateAllSystems = () => {
+export const generateAllSystems = () => {
   // 1. Home Solar System (ID 0) at origin
   const list = [
     {
@@ -56,7 +56,7 @@ const generateAllSystems = () => {
     }
   ]
 
-  // 2. Add all 44 Neighboring & Exotic Stellar Systems
+  // 2. Add all 24 Neighboring Stellar Systems
   NEIGHBOR_STAR_SYSTEMS.forEach((star, index) => {
     list.push({
       id: index + 1,
@@ -83,7 +83,7 @@ export default function UniverseManager({ flyTo, onActiveSystemChange }) {
     }
   }, [activeSystemId, systems, onActiveSystemChange])
 
-  // Smoothly manage visibility: All 45 solar systems visible throughout Level 1 (dist < 65,000)
+  // Smoothly manage visibility: All 25 solar systems visible throughout Level 1 (dist < 65,000)
   useFrame(({ camera }) => {
     if (groupRef.current) {
       const dist = camera.position.length()
@@ -99,7 +99,7 @@ export default function UniverseManager({ flyTo, onActiveSystemChange }) {
           {...system} 
           onSelectSystem={(pos, scale) => {
             setActiveSystemId(system.id)
-            if (flyTo) flyTo(pos, scale * 4)
+            if (flyTo) flyTo(pos, Math.max(scale * 35, 45))
           }} 
           onSelectPlanet={(planetWorldPos, planetRadius) => {
             if (flyTo) flyTo(planetWorldPos, Math.max(planetRadius, 1.2), 0.7)

@@ -71,6 +71,7 @@ function noise3(x, y, z) {
 }
 
 export default function CosmicSkillWeb({ position = [110000, 32000, -180000], scale = 45, flyTo }) {
+  const rootRef = useRef()
   const groupRef = useRef()
   const fireRef = useRef()
   const titleGroupRef = useRef()
@@ -514,16 +515,20 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
 
   // Animation frame loop: direct interactive 3D rotation, floating billboard title bob, living fire rise
   useFrame(({ clock, camera }, delta) => {
-    // Smart Sleep Mode: Put CosmicSkillWeb to sleep when far away (> 65,000 AU, e.g. at Sol)
-    const dist = camera.position.distanceTo(skillPosVec)
-    const isNearby = dist <= 65000
+    const camDistFromOrigin = camera.position.length()
+    const distToSkill = camera.position.distanceTo(skillPosVec)
 
-    if (groupRef.current) {
-      if (!isNearby) {
-        if (groupRef.current.visible) groupRef.current.visible = false
-        return // Zero calculations, zero particle updates when not in Skill Web realm!
+    // Strictly hidden inside Solar System & within Milky Way (< 350,000 AU).
+    // Only visible after crossing the Milky Way (>= 350,000 AU),
+    // OR if user explicitly flew to the Skill Web (distToSkill < 65,000 AU and camDistFromOrigin >= 50,000 AU).
+    const isVisible = (camDistFromOrigin >= 350000 || (distToSkill < 65000 && camDistFromOrigin >= 50000))
+
+    if (rootRef.current) {
+      if (!isVisible) {
+        if (rootRef.current.visible) rootRef.current.visible = false
+        return // 100% hidden, zero GPU draw calls, zero fire particle calculation!
       }
-      if (!groupRef.current.visible) groupRef.current.visible = true
+      if (!rootRef.current.visible) rootRef.current.visible = true
     }
 
     const t = clock.elapsedTime
@@ -549,7 +554,7 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
     }
 
     const fd = webData.fireData
-    if (fd && fireRef.current) {
+    if (fd && fireRef.current && distToSkill < 120000) {
       fireRef.current.position.y = bobY
       const cachedColor = tempColRef.current
       for (let fi = 0; fi < fd.count; fi++) {
@@ -575,7 +580,7 @@ export default function CosmicSkillWeb({ position = [110000, 32000, -180000], sc
   })
 
   return (
-    <group position={position} scale={[scale, scale, scale]}>
+    <group ref={rootRef} position={position} scale={[scale, scale, scale]}>
       {/* 1. Root interactive mouse-rotatable Cosmic Skill Web */}
       <group ref={groupRef}>
         {/* Interactive 3D Rotation Grab Sphere: Drag anywhere on Skill Web to freely rotate */}
