@@ -12,8 +12,8 @@ export const FIVE_BLACK_HOLES = [
     sector: "Kuiper Belt / Oort Cloud",
     position: [16000, 2200, -11000],
     scale: 2400,
-    color: "#ff9500", // Deep Burning Amber Gold
-    accent: "#ffcc44",
+    color: "#ff9922", // Deep Burning Amber Gold
+    accent: "#ffdd66",
     mass: "100 Million Solar Masses",
     desc: "Interstellar Gateway • Gravitational Lensing & Time Dilation"
   },
@@ -37,7 +37,7 @@ export const FIVE_BLACK_HOLES = [
     position: [98000, -5800, -88000],
     scale: 3600,
     color: "#06b6d4", // Electric Cyan & Ice Blue
-    accent: "#67e8f9",
+    accent: "#a5f3fc",
     mass: "21 Solar Masses",
     desc: "High-Mass Microquasar • Relativistic Polar Plasma Jet"
   },
@@ -67,249 +67,191 @@ export const FIVE_BLACK_HOLES = [
   }
 ]
 
-// Hardware-accelerated seamless toroidal noise generator for turbulent plasma
-function makeTurbulentNoiseTexture() {
-  const size = 256
-  const canvas = document.createElement("canvas")
-  canvas.width = size
-  canvas.height = size
-  const ctx = canvas.getContext("2d")
-  const imgData = ctx.createImageData(size, size)
-  const data = imgData.data
-
-  const perm = new Uint8Array(512)
-  for (let i = 0; i < 256; i++) perm[i] = i
-  for (let i = 255; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    const t = perm[i]; perm[i] = perm[j]; perm[j] = t
-  }
-  for (let i = 0; i < 256; i++) perm[256 + i] = perm[i]
-
-  function grad(hash, x, y) {
-    const h = hash & 3
-    const u = h < 2 ? x : y
-    const v = h < 2 ? y : x
-    return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v)
-  }
-
-  function noise(x, y) {
-    const X = Math.floor(x) & 255
-    const Y = Math.floor(y) & 255
-    const xf = x - Math.floor(x)
-    const yf = y - Math.floor(y)
-    const u = xf * xf * (3 - 2 * xf)
-    const v = yf * yf * (3 - 2 * yf)
-    const g00 = grad(perm[X + perm[Y]], xf, yf)
-    const g10 = grad(perm[X + 1 + perm[Y]], xf - 1, yf)
-    const g01 = grad(perm[X + perm[Y + 1]], xf, yf - 1)
-    const g11 = grad(perm[X + 1 + perm[Y + 1]], xf - 1, yf - 1)
-    const x1 = g00 + u * (g10 - g00)
-    const x2 = g01 + u * (g11 - g01)
-    return x1 + v * (x2 - x1)
-  }
-
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const s = (x / size) * Math.PI * 2
-      const t = (y / size) * Math.PI * 2
-      const nx = Math.cos(s) * 1.8, ny = Math.sin(s) * 1.8
-      const nz = Math.cos(t) * 1.8, nw = Math.sin(t) * 1.8
-
-      let val = 0.5 + 0.35 * noise(nx + 12, ny + 12) + 0.15 * noise(nx * 2.5 + nz, ny * 2.5 + nw)
-      val = Math.max(0, Math.min(1, val))
-      const idx = (y * size + x) * 4
-      data[idx] = Math.floor(val * 255)
-      data[idx + 1] = Math.floor(Math.pow(val, 1.3) * 255)
-      data[idx + 2] = Math.floor(Math.pow(val, 1.8) * 255)
-      data[idx + 3] = 255
-    }
-  }
-  ctx.putImageData(imgData, 0, 0)
-  const tex = new THREE.CanvasTexture(canvas)
-  tex.wrapS = THREE.RepeatWrapping
-  tex.wrapT = THREE.RepeatWrapping
-  return tex
-}
-
-const vertShader = `
+// 1. High-Definition Relativistic Accretion Disk Shader
+const diskVertexShader = `
+  varying vec2 vUv;
   varying vec3 vWorldPos;
   void main() {
+    vUv = uv;
     vec4 wp = modelMatrix * vec4(position, 1.0);
     vWorldPos = wp.xyz;
     gl_Position = projectionMatrix * viewMatrix * wp;
   }
 `
 
-const fragShader = `
+const diskFragmentShader = `
   uniform float uTime;
-  uniform vec3 uCenter;
-  uniform float uScale;
   uniform vec3 uBaseColor;
   uniform vec3 uAccentColor;
-  uniform sampler2D uNoiseTex;
-
+  varying vec2 vUv;
   varying vec3 vWorldPos;
 
-  const float PI = 3.14159265359;
-  const float HORIZON = 0.22;
-  const float ISCO = 0.26;
-  const float DISK_OUTER = 0.88;
-  const float BOUND_RADIUS = 0.98;
-
-  bool intersectSphere(vec3 ro, vec3 rd, float R, out float tNear, out float tFar) {
-    float b = dot(ro, rd);
-    float c = dot(ro, ro) - R * R;
-    float d = b * b - c;
-    if (d < 0.0) return false;
-    float sd = sqrt(d);
-    tNear = -b - sd;
-    tFar = -b + sd;
-    return true;
+  // High-performance procedural noise
+  float hash(vec2 p) {
+    p = fract(p * vec2(234.34, 435.345));
+    p += dot(p, p + 34.23);
+    return fract(p.x * p.y);
   }
 
-  // Tilted coordinate frame (15.5 degrees) for the classic Interstellar warping look
-  vec3 rotateDisk(vec3 p) {
-    float angle = 0.27; // ~15.5 degrees
-    float cosA = cos(angle);
-    float sinA = sin(angle);
-    return vec3(p.x, p.y * cosA - p.z * sinA, p.y * sinA + p.z * cosA);
+  float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+  }
+
+  float fbm(vec2 p) {
+    float v = 0.0;
+    float a = 0.55;
+    mat2 rot = mat2(cos(0.52), sin(0.52), -sin(0.52), cos(0.52));
+    for (int i = 0; i < 4; i++) {
+      v += a * noise(p);
+      p = rot * p * 2.15;
+      a *= 0.48;
+    }
+    return v;
   }
 
   void main() {
-    vec3 roWorld = cameraPosition;
-    vec3 rdWorld = normalize(vWorldPos - cameraPosition);
+    vec2 p = (vUv - 0.5) * 2.0;
+    float r = length(p);
 
-    // Normalize coordinates to unit sphere around black hole
-    vec3 ro = (roWorld - uCenter) / uScale;
-    vec3 rd = rdWorld;
+    // Bounded between ISCO (0.28) and Outer Disk (0.98)
+    if (r < 0.26 || r > 0.99) discard;
 
-    float tNear, tFar;
-    if (!intersectSphere(ro, rd, BOUND_RADIUS, tNear, tFar)) {
-      discard;
-    }
+    float angle = atan(p.y, p.x);
 
-    if (tNear > 0.0) {
-      ro += rd * tNear;
-    }
+    // Relativistic Keplerian differential speed (inner disk rotates much faster than outer disk)
+    float keplerSpeed = 2.4 / pow(max(r, 0.2), 0.85);
+    float rotAngle = angle + uTime * keplerSpeed * 0.4;
 
-    vec3 pos = ro;
-    vec3 vel = rd;
-    vec3 accumulated = vec3(0.0);
-    float transmittance = 1.0;
-    bool enteredHorizon = false;
+    // Multi-scale swirling plasma spirals
+    vec2 polar = vec2(rotAngle * 6.0, r * 28.0);
+    float plasma1 = fbm(polar);
+    float plasma2 = noise(vec2(rotAngle * 12.0 - uTime * 1.2, r * 48.0));
+    float plasma = pow(plasma1 * 0.72 + plasma2 * 0.28, 1.4);
 
-    // 48 High-Performance Raymarching Steps with Schwarzschild Light Geodesics
-    for (int step = 0; step < 48; step++) {
-      float r = length(pos);
-      if (r < HORIZON * 1.01) {
-        enteredHorizon = true;
-        break;
-      }
-      if (r > BOUND_RADIUS && step > 6 && dot(pos, vel) > 0.0) {
-        break;
-      }
+    // Relativistic Doppler Beaming (approaching side is boosted, receding side is dimmer)
+    float doppler = 0.5 + 0.5 * sin(angle);
+    float dopplerBoost = pow(doppler, 1.9) * 2.5;
 
-      float stepSize = clamp((r - HORIZON) * 0.12, 0.016, 0.08);
+    // Brilliant inner Einstein photon ring spike
+    float photonRing = exp(-pow((r - 0.28) * 32.0, 2.0)) * 4.2;
 
-      // Schwarzschild Gravity Light Bending (~ 1/r^2 steering)
-      vec3 rNorm = pos / max(r, 0.001);
-      float steerMag = (0.34 / max(r * r, 0.018)) * stepSize;
-      vel = normalize(vel - rNorm * steerMag);
-      pos += vel * stepSize;
+    // Smooth edge blending
+    float innerFade = smoothstep(0.26, 0.33, r);
+    float outerFade = 1.0 - smoothstep(0.72, 0.99, r);
+    float envelope = innerFade * outerFade;
 
-      // Accretion Disk in tilted frame
-      vec3 dp = rotateDisk(pos);
-      float rDisk = length(dp.xz);
-      float h = abs(dp.y);
+    // Thermal color ramp: Core White-Hot -> Base Color -> Dark Crimson
+    vec3 colHot = vec3(1.0, 0.98, 0.94);
+    vec3 colMid = uBaseColor;
+    vec3 colDark = mix(vec3(0.08, 0.01, 0.01), uAccentColor * 0.25, 0.5);
 
-      float diskThick = mix(0.012, 0.048, smoothstep(ISCO, DISK_OUTER, rDisk));
-      if (rDisk > ISCO && rDisk < DISK_OUTER && h < diskThick * 3.2) {
-        float phi = atan(dp.z, dp.x);
+    vec3 col = mix(colDark, colMid, doppler);
+    col = mix(col, colHot, photonRing * 0.9 + plasma * 0.55);
 
-        // Hardware-accelerated procedural noise lookup
-        vec2 diskUv = vec2(rDisk * 1.4 - uTime * 0.08, phi / (2.0 * PI) + rDisk * 0.35);
-        vec4 noiseVal = texture2D(uNoiseTex, diskUv * 2.2);
+    float intensity = (plasma * 2.2 + photonRing * 3.5) * envelope * (0.45 + dopplerBoost);
+    intensity = clamp(intensity, 0.0, 5.0);
 
-        float vertical = exp(-pow(h / max(diskThick, 0.001), 2.0) * 3.8);
-        float radialFade = smoothstep(ISCO, ISCO + 0.06, rDisk) * (1.0 - smoothstep(DISK_OUTER - 0.16, DISK_OUTER, rDisk));
-        float density = vertical * radialFade * (0.32 + 0.68 * noiseVal.r);
-
-        // Relativistic Doppler Beaming
-        vec3 vOrbit = normalize(vec3(-dp.z, 0.0, dp.x));
-        vec3 dVel = rotateDisk(vel);
-        float toward = dot(vOrbit, -dVel);
-        float doppler = pow(clamp(1.0 + toward * 0.68, 0.3, 2.4), 1.6);
-        float redshift = sqrt(max(0.01, 1.0 - HORIZON / r));
-
-        // Color ramp customized by uBaseColor and uAccentColor
-        float heat = pow((DISK_OUTER - rDisk) / (DISK_OUTER - ISCO), 1.3);
-        vec3 colHot = vec3(1.0, 0.98, 0.92);
-        vec3 colMid = uBaseColor;
-        vec3 colDark = mix(vec3(0.05, 0.01, 0.01), uAccentColor * 0.25, 0.5);
-
-        vec3 thermal = mix(colDark, colMid, smoothstep(0.05, 0.65, heat));
-        thermal = mix(thermal, colHot, pow(heat, 2.6));
-
-        vec3 emission = thermal * density * doppler * redshift * 7.8;
-        float optDepth = density * 3.2 * stepSize;
-        float absorbed = 1.0 - exp(-optDepth);
-        accumulated += emission * transmittance * absorbed / max(density, 0.001);
-        transmittance *= exp(-optDepth);
-      }
-    }
-
-    // Brilliant Gravitational Photon Ring at Shadow Boundary
-    float rEnd = length(pos);
-    if (!enteredHorizon && rEnd >= HORIZON && rEnd <= HORIZON * 1.4) {
-      float photonRing = exp(-pow((rEnd - HORIZON * 1.15) * 42.0, 2.0)) * 5.2;
-      accumulated += vec3(1.0, 0.97, 0.92) * photonRing * transmittance;
-    }
-
-    float alpha = clamp(1.0 - transmittance, 0.0, 1.0);
-    if (enteredHorizon) {
-      alpha = 1.0;
-      accumulated = vec3(0.0); // Pure pitch-black event horizon
-    }
-
-    if (alpha < 0.005 && !enteredHorizon) discard;
-
-    // ACES Filmic Tone Mapping
-    vec3 x = accumulated * 1.35;
+    // ACES Filmic Tone Mapping for vibrant bloom
+    vec3 x = col * intensity * 1.8;
     vec3 finalColor = (x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14);
-    finalColor = clamp(finalColor, 0.0, 1.0);
 
+    float alpha = clamp(envelope * (plasma * 1.2 + photonRing * 1.8) * 1.5, 0.0, 1.0);
     gl_FragColor = vec4(finalColor, alpha);
   }
 `
 
-// Individual Singularity Black Hole Mesh + 3D Hologram Pin
-function SingleSingularityBlackHole({ data, noiseTex, onFlyTo, isCurrentTarget }) {
+// 2. Iconic Gravitational Lensing Arc Shader (Upper & Lower bent starlight arcs)
+const lensArcVertexShader = `
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  varying vec3 vViewDir;
+  void main() {
+    vUv = uv;
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vNormal = normalize(mat3(modelMatrix) * normal);
+    vViewDir = normalize(cameraPosition - wp.xyz);
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }
+`
+
+const lensArcFragmentShader = `
+  uniform float uTime;
+  uniform vec3 uBaseColor;
+  uniform vec3 uAccentColor;
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  varying vec3 vViewDir;
+
+  void main() {
+    vec2 p = (vUv - 0.5) * 2.0;
+    float r = length(p);
+
+    if (r < 0.28 || r > 0.98) discard;
+
+    // View-dependent relativistic Fresnel brightening
+    float fresnel = 1.0 - abs(dot(vNormal, vViewDir));
+    fresnel = pow(fresnel, 1.8);
+
+    // Light arc warped over the top and bottom of the event horizon
+    float angle = atan(p.y, p.x);
+    float arcShape = pow(abs(cos(angle)), 1.2);
+
+    float ring = exp(-pow((r - 0.38) * 18.0, 2.0)) * 3.8;
+    float outerGlow = exp(-pow((r - 0.55) * 6.0, 2.0)) * 1.4;
+
+    float intensity = (ring + outerGlow) * arcShape * (0.6 + fresnel * 1.8);
+
+    vec3 colHot = vec3(1.0, 0.96, 0.88);
+    vec3 col = mix(uBaseColor, colHot, ring * 0.75);
+
+    vec3 x = col * intensity * 1.5;
+    vec3 finalColor = (x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14);
+
+    float alpha = clamp(intensity * 0.85, 0.0, 1.0);
+    gl_FragColor = vec4(finalColor, alpha);
+  }
+`
+
+// Individual Singularity Black Hole Mesh System
+function SingleSingularityBlackHole({ data, onFlyTo, isCurrentTarget }) {
   const groupRef = useRef()
-  const matRef = useRef()
+  const diskRef = useRef()
+  const arcTopRef = useRef()
+  const arcSideRef = useRef()
   const [hovered, setHovered] = useState(false)
+  const [camDistance, setCamDistance] = useState(999999)
 
   const uniforms = useMemo(() => ({
     uTime: { value: 0 },
-    uCenter: { value: new THREE.Vector3(...data.position) },
-    uScale: { value: data.scale },
     uBaseColor: { value: new THREE.Color(data.color) },
-    uAccentColor: { value: new THREE.Color(data.accent) },
-    uNoiseTex: { value: noiseTex }
-  }), [data, noiseTex])
+    uAccentColor: { value: new THREE.Color(data.accent) }
+  }), [data])
 
-  // Distance-based LOD Culling: runs full raymarch only when within visual range
   useFrame(({ clock, camera }) => {
     if (!groupRef.current) return
-    const camDist = camera.position.distanceTo(uniforms.uCenter.value)
-    // Visible within generous range (80x scale)
-    const isNearby = camDist <= data.scale * 80
+    const dist = camera.position.distanceTo(groupRef.current.position)
+    setCamDistance(dist)
 
+    const isNearby = dist <= data.scale * 60
     if (groupRef.current.visible !== isNearby) {
       groupRef.current.visible = isNearby
     }
 
-    if (isNearby && matRef.current) {
-      matRef.current.uniforms.uTime.value = clock.elapsedTime
+    if (isNearby) {
+      const t = clock.elapsedTime
+      uniforms.uTime.value = t
+
+      // Slow dynamic spin of accretion disk
+      if (diskRef.current) {
+        diskRef.current.rotation.z = t * 0.12
+      }
     }
   })
 
@@ -318,11 +260,12 @@ function SingleSingularityBlackHole({ data, noiseTex, onFlyTo, isCurrentTarget }
     onFlyTo(data)
   }
 
+  const s = data.scale
+
   return (
     <group ref={groupRef} position={data.position}>
-      {/* 1. Photorealistic Raymarched Mesh on Local Unit Sphere */}
+      {/* Invisible Interactive Click Box for smooth raycast picking */}
       <mesh
-        scale={[data.scale, data.scale, data.scale]}
         onClick={handleClick}
         onPointerOver={(e) => {
           e.stopPropagation()
@@ -334,104 +277,156 @@ function SingleSingularityBlackHole({ data, noiseTex, onFlyTo, isCurrentTarget }
           document.body.style.cursor = "auto"
         }}
       >
-        <sphereGeometry args={[1, 40, 40]} />
-        <shaderMaterial
-          ref={matRef}
-          vertexShader={vertShader}
-          fragmentShader={fragShader}
-          uniforms={uniforms}
-          transparent={true}
+        <sphereGeometry args={[s * 1.6, 16, 16]} />
+        <meshBasicMaterial visible={false} />
+      </mesh>
+
+      {/* 1. Pure Pitch-Black Event Horizon (The Absolute Shadow of Gravity) */}
+      <mesh raycast={() => null}>
+        <sphereGeometry args={[s * 0.36, 48, 48]} />
+        <meshBasicMaterial color="#000000" />
+      </mesh>
+
+      {/* 2. Brilliant Razor-Thin Einstein Photon Ring */}
+      <mesh raycast={() => null} rotation={[-Math.PI * 0.08, 0, 0]}>
+        <ringGeometry args={[s * 0.37, s * 0.44, 96]} />
+        <meshBasicMaterial
+          color={data.accent}
           side={THREE.DoubleSide}
-          depthWrite={false}
-          blending={THREE.NormalBlending}
+          transparent
+          opacity={0.95}
+          blending={THREE.AdditiveBlending}
         />
       </mesh>
 
-      {/* 2. Interactive 3D Holographic Marker */}
-      <Html
-        position={[0, data.scale * 1.15, 0]}
-        center
-        distanceFactor={data.scale * 18}
-        style={{ pointerEvents: "auto" }}
+      {/* 3. Primary Relativistic Accretion Disk (Tilted at 14 degrees) */}
+      <mesh
+        ref={diskRef}
+        rotation={[-Math.PI / 2.2, 0, 0]}
+        raycast={() => null}
       >
-        <div
-          onClick={handleClick}
-          style={{
-            background: isCurrentTarget ? "rgba(15, 23, 42, 0.96)" : "rgba(8, 12, 22, 0.88)",
-            border: `1.5px solid ${isCurrentTarget ? "#38bdf8" : data.color}`,
-            boxShadow: `0 0 24px ${isCurrentTarget ? "rgba(56, 189, 248, 0.7)" : data.color + "66"}, inset 0 0 10px rgba(0,0,0,0.4)`,
-            padding: "8px 14px",
-            borderRadius: 10,
-            backdropFilter: "blur(14px)",
-            color: "#ffffff",
-            fontFamily: "system-ui, -apple-system, sans-serif",
-            fontSize: 11,
-            whiteSpace: "nowrap",
-            cursor: "pointer",
-            textAlign: "center",
-            transform: hovered ? "scale(1.08)" : "scale(1)",
-            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-            userSelect: "none"
-          }}
-          title={`Click to fly and orbit ${data.name} in 360° 3D`}
+        <ringGeometry args={[s * 0.38, s * 1.55, 128]} />
+        <shaderMaterial
+          vertexShader={diskVertexShader}
+          fragmentShader={diskFragmentShader}
+          uniforms={uniforms}
+          transparent
+          side={THREE.DoubleSide}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* 4. Iconic Einstein Gravitational Bent Light Arc (Vertical Upper/Lower Warped Ring) */}
+      <mesh
+        ref={arcTopRef}
+        rotation={[0, Math.PI / 2.1, 0]}
+        raycast={() => null}
+      >
+        <ringGeometry args={[s * 0.39, s * 1.35, 96]} />
+        <shaderMaterial
+          vertexShader={lensArcVertexShader}
+          fragmentShader={lensArcFragmentShader}
+          uniforms={uniforms}
+          transparent
+          side={THREE.DoubleSide}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* 5. Second Cross-Arc for 360-degree Gravitational Lensing Spherical Depth */}
+      <mesh
+        ref={arcSideRef}
+        rotation={[Math.PI / 4, Math.PI / 4, 0]}
+        raycast={() => null}
+      >
+        <ringGeometry args={[s * 0.40, s * 1.2, 80]} />
+        <shaderMaterial
+          vertexShader={lensArcVertexShader}
+          fragmentShader={lensArcFragmentShader}
+          uniforms={uniforms}
+          transparent
+          side={THREE.DoubleSide}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* 6. Outer Spacetime Distortion Glow */}
+      <mesh raycast={() => null}>
+        <sphereGeometry args={[s * 1.6, 24, 24]} />
+        <meshBasicMaterial
+          color={data.color}
+          transparent
+          opacity={0.06}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* 
+        7. ULTRA-SUBTLE Cosmic Beacon Pin:
+        - NEVER renders when the user is orbiting this black hole (prevents card from dominating!)
+        - Only visible when viewed from distant space (camDistance > scale * 3.5)
+        - Compact, non-intrusive 9px badge that doesn't block the screen
+      */}
+      {!isCurrentTarget && camDistance > s * 3.5 && camDistance < s * 45 && (
+        <Html
+          position={[0, s * 1.1, 0]}
+          center
+          distanceFactor={55000}
+          style={{ pointerEvents: "auto" }}
         >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-            <span style={{
-              width: 7,
-              height: 7,
-              borderRadius: "50%",
-              background: data.color,
-              boxShadow: `0 0 8px ${data.color}`
-            }} />
-            <b style={{ color: data.accent, letterSpacing: 0.6, fontSize: 11.5 }}>
-              🌀 {data.name}
-            </b>
-            {isCurrentTarget && (
+          <div
+            onClick={handleClick}
+            style={{
+              background: "rgba(8, 12, 22, 0.85)",
+              border: `1px solid ${data.color}99`,
+              boxShadow: `0 0 16px ${data.color}44`,
+              padding: "4px 10px",
+              borderRadius: 20,
+              backdropFilter: "blur(10px)",
+              color: "#ffffff",
+              fontFamily: "system-ui, -apple-system, sans-serif",
+              fontSize: 10,
+              whiteSpace: "nowrap",
+              cursor: "pointer",
+              textAlign: "center",
+              transform: hovered ? "scale(1.08)" : "scale(1)",
+              transition: "transform 0.15s ease",
+              userSelect: "none"
+            }}
+            title={`Click to orbit ${data.name} in 360° 3D`}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <span style={{
-                background: "#0284c7",
-                color: "#ffffff",
-                padding: "1px 5px",
-                borderRadius: 4,
-                fontSize: 8.5,
-                fontWeight: 800
-              }}>
-                ORBITING
-              </span>
-            )}
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: data.color,
+                boxShadow: `0 0 6px ${data.color}`
+              }} />
+              <b style={{ color: data.accent, letterSpacing: 0.5, fontSize: 10 }}>
+                {data.name}
+              </b>
+              <span style={{ color: "#94a3b8", fontSize: 8.5 }}>• ORBIT 360°</span>
+            </div>
           </div>
-          <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 2 }}>
-            {data.level} • {data.sector}
-          </div>
-          <div style={{
-            marginTop: 4,
-            display: "inline-block",
-            background: "rgba(255, 255, 255, 0.08)",
-            border: `1px solid ${data.color}88`,
-            color: "#ffffff",
-            padding: "2px 8px",
-            borderRadius: 6,
-            fontSize: 8.5,
-            fontWeight: 700
-          }}>
-            ✦ 360° 3D ORBIT ✦
-          </div>
-        </div>
-      </Html>
+        </Html>
+      )}
     </group>
   )
 }
 
 // Master Component: Renders all 5 Black Holes
 export default function FiveSingularityBlackHoles({ onFlyTo, currentTargetId }) {
-  const noiseTex = useMemo(() => makeTurbulentNoiseTexture(), [])
-
   return (
     <group>
       {FIVE_BLACK_HOLES.map((bh) => (
         <SingleSingularityBlackHole
           key={bh.id}
           data={bh}
-          noiseTex={noiseTex}
           onFlyTo={onFlyTo}
           isCurrentTarget={currentTargetId === bh.id}
         />

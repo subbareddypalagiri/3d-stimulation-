@@ -198,12 +198,12 @@ function App() {
     setActiveBlackHole(bh)
     setGalaxyCenter(bh.position)
     if (cameraControlRef.current) {
-      const dist = bh.scale * 2.5
-      const elev = bh.scale * 0.65
+      const dist = bh.scale * 2.1
+      const elev = bh.scale * 0.38
       cameraControlRef.current.setLookAt(
-        bh.position[0] + dist * 0.85,
+        bh.position[0] + dist * 0.72,
         bh.position[1] + elev,
-        bh.position[2] + dist * 0.85,
+        bh.position[2] + dist * 0.72,
         bh.position[0],
         bh.position[1],
         bh.position[2],
