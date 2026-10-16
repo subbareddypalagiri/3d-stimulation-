@@ -20,7 +20,6 @@ import NameMonument from "./NameMonument"
 import EmuInTheSky from "./EmuInTheSky"
 import AlienNebulaRealm from "./AlienNebulaRealm"
 import RelativisticBlackHoleGateway from "./RelativisticBlackHoleGateway"
-import RelativisticBlackHole from "./RelativisticBlackHole"
 import PlanesAndSatellitesHubs, { SATELLITE_HUBS } from "./PlanesAndSatellitesHubs"
 import CosmicSkillWeb from "./CosmicSkillWeb"
 import { SOL_PLANETS } from "./SolarSystem"
@@ -134,12 +133,6 @@ function App() {
   const [isPortalOpen, setIsPortalOpen] = useState(false)
   const [isCelestialPortalOpen, setIsCelestialPortalOpen] = useState(false)
   const [celestialInitialPart, setCelestialInitialPart] = useState("hands")
-  const [isBlackHoleModalOpen, setIsBlackHoleModalOpen] = useState(false)
-  const [isPIPClosed, setIsPIPClosed] = useState(false)
-  const [blackHoleTarget, setBlackHoleTarget] = useState({
-    title: "M87: Post-Milky Way Relativistic Black Hole",
-    subtitle: "Virgo Supercluster • 550,000 AU Beyond Milky Way • Raymarched Null Geodesics"
-  })
   const [showMonument, setShowMonument] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSpeedModalOpen, setIsSpeedModalOpen] = useState(false)
@@ -153,7 +146,6 @@ function App() {
       return { scroll: 0.6, rotate: 0.6 }
     }
   })
-
 
   const updateSensitivity = (newSens) => {
     setMouseSensitivity(newSens)
@@ -178,7 +170,7 @@ function App() {
   // Natural scroll into Celestial Realm at Level 9 Horizon of Infinity
   useEffect(() => {
     const handleGlobalWheel = (e) => {
-      if (telemetry.progress === 9 && !isCelestialPortalOpen && !isPortalOpen && !isBlackHoleModalOpen) {
+      if (telemetry.progress === 9 && !isCelestialPortalOpen && !isPortalOpen) {
         if (e.deltaY > 60) {
           setCelestialInitialPart("hands")
           setIsCelestialPortalOpen(true)
@@ -187,7 +179,18 @@ function App() {
     }
     window.addEventListener("wheel", handleGlobalWheel, { passive: true })
     return () => window.removeEventListener("wheel", handleGlobalWheel)
-  }, [telemetry.progress, isCelestialPortalOpen, isPortalOpen, isBlackHoleModalOpen])
+  }, [telemetry.progress, isCelestialPortalOpen, isPortalOpen])
+
+  const flyToM87 = () => {
+    setGalaxyCenter([150000, 60000, -520000])
+    if (cameraControlRef.current) {
+      cameraControlRef.current.setLookAt(
+        150000 + 28000, 60000 + 11000, -520000 + 36000,
+        150000, 60000, -520000,
+        true
+      )
+    }
+  }
 
   const flyToPrimeRealm = () => {
     if (cameraControlRef.current) {
@@ -323,18 +326,11 @@ function App() {
           {/* Level 8: 8K Self-Illuminating Alien Space Nebula Realm */}
           <AlienNebulaRealm position={[-8200000000, -1100000000, 3900000000]} scale={130000} />
 
-          {/* Level 3: Relativistic Raymarched Black Hole Gateway (Past Milky Way) */}
+          {/* Level 3: Relativistic Raymarched Singularity Black Hole (Direct in 3D Space) */}
           <RelativisticBlackHoleGateway
             position={[150000, 60000, -520000]}
             radius={18000}
-            onOpenSimulation={() => {
-              setBlackHoleTarget({
-                title: "M87: Post-Milky Way Relativistic Black Hole",
-                subtitle: "Virgo Supercluster • 550,000 AU Beyond Milky Way • Raymarched Null Geodesics"
-              })
-              setIsBlackHoleModalOpen(true)
-            }}
-            flyTo={flyTo}
+            flyTo={flyToM87}
           />
 
           {/* 10 Planetary Satellite & Plane Networks Across Diverse Cosmic Sectors */}
@@ -548,15 +544,9 @@ function App() {
           <span>CELESTIAL</span>
         </button>
 
-        {/* 2. M87 Black Hole */}
+        {/* 2. M87 Black Hole (Direct in-space flyTo) */}
         <button
-          onClick={() => {
-            flyTo([150000, 60000, -520000], 65000)
-            setBlackHoleTarget({
-              title: "M87: Post-Milky Way Relativistic Singularity",
-              subtitle: "Virgo Sector • 550,000 AU Beyond Milky Way • Raymarched Null Geodesics"
-            })
-          }}
+          onClick={flyToM87}
           style={{
             background: "rgba(255, 255, 255, 0.05)",
             border: "1px solid rgba(255, 255, 255, 0.12)",
@@ -2017,170 +2007,6 @@ function App() {
             ENTER ▾
           </span>
         </button>
-      )}
-
-      {/* Live Floating Observation Window When Past the Milky Way (Level 3+) */}
-      {telemetry.progress >= 3 && !isBlackHoleModalOpen && !isPortalOpen && !isCelestialPortalOpen && !isPIPClosed && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 24,
-            right: 24,
-            width: 380,
-            height: 280,
-            background: "rgba(5, 10, 25, 0.92)",
-            border: "1.5px solid #ff7700",
-            borderRadius: 16,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.8), 0 0 30px rgba(255, 110, 20, 0.5)",
-            backdropFilter: "blur(20px)",
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-            zIndex: 90,
-            transition: "all 0.3s ease"
-          }}
-        >
-          {/* Header Bar */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "8px 12px",
-            background: "rgba(20, 10, 5, 0.85)",
-            borderBottom: "1px solid rgba(255, 120, 20, 0.3)"
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: "#ff7700",
-                boxShadow: "0 0 8px #ff7700"
-              }} />
-              <b style={{ color: "#ffaa44", fontSize: 11, letterSpacing: "0.5px" }}>
-                LIVE: POST-MILKY WAY BLACK HOLE
-              </b>
-            </div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button
-                onClick={() => {
-                  flyTo([150000, 60000, -520000], 120000)
-                }}
-                style={{
-                  background: "rgba(0, 229, 255, 0.2)",
-                  border: "1px solid rgba(0, 229, 255, 0.6)",
-                  color: "#00e5ff",
-                  padding: "2px 8px",
-                  borderRadius: 6,
-                  fontSize: 10,
-                  cursor: "pointer",
-                  fontWeight: 700
-                }}
-                title="Warp camera directly in front of this black hole in 3D"
-              >
-                🛸 Warp
-              </button>
-              <button
-                onClick={() => setIsBlackHoleModalOpen(true)}
-                style={{
-                  background: "rgba(255, 140, 40, 0.25)",
-                  border: "1px solid rgba(255, 140, 40, 0.6)",
-                  color: "#ffcc66",
-                  padding: "2px 8px",
-                  borderRadius: 6,
-                  fontSize: 10,
-                  cursor: "pointer",
-                  fontWeight: 700
-                }}
-                title="Open full-screen WebGPU simulation"
-              >
-                ⛶ Expand
-              </button>
-              <button
-                onClick={() => setIsPIPClosed(true)}
-                style={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  color: "#aaa",
-                  padding: "2px 6px",
-                  borderRadius: 6,
-                  fontSize: 10,
-                  cursor: "pointer"
-                }}
-                title="Minimize window"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-
-          {/* Live WebGPU Canvas */}
-          <div style={{ flex: 1, position: "relative" }}>
-            <RelativisticBlackHole
-              title="M87: Post-Milky Way Singularity"
-              subtitle="Drag to orbit • Relativistic Doppler beaming"
-              isFullscreen={false}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Floating Reopen Badge if minimized */}
-      {telemetry.progress >= 3 && !isBlackHoleModalOpen && isPIPClosed && (
-        <button
-          onClick={() => setIsPIPClosed(false)}
-          style={{
-            position: "absolute",
-            bottom: 24,
-            right: 24,
-            background: "rgba(10, 15, 30, 0.9)",
-            border: "1.5px solid #ff7700",
-            color: "#ffaa44",
-            padding: "10px 16px",
-            borderRadius: 24,
-            backdropFilter: "blur(16px)",
-            boxShadow: "0 0 20px rgba(255, 110, 20, 0.4)",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontSize: 12,
-            fontWeight: 800,
-            zIndex: 90
-          }}
-        >
-          <span>🌀</span>
-          <span>Open Black Hole Monitor</span>
-        </button>
-      )}
-
-      {/* Full-Screen / Modal Interactive WebGPU Relativistic Black Hole Viewer */}
-      {isBlackHoleModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            zIndex: 9999,
-            background: "rgba(0, 0, 0, 0.88)",
-            backdropFilter: "blur(24px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px"
-          }}
-        >
-          <div style={{ width: "94vw", height: "90vh", maxWidth: "1400px", maxHeight: "900px" }}>
-            <RelativisticBlackHole
-              title={blackHoleTarget.title}
-              subtitle={blackHoleTarget.subtitle}
-              isFullscreen={false}
-              onClose={() => setIsBlackHoleModalOpen(false)}
-            />
-          </div>
-        </div>
       )}
 
       {/* Prime Cosmic Realm (Level 7) - 6 Layout Modes Switcher */}
