@@ -205,15 +205,13 @@ export default function SolarSystem({
 
   return (
     <group position={position} scale={[scale, scale, scale]}>
-      {/* Dynamic pointLight ONLY for Home Sol system (preserves pure 60fps & prevents lighting blowout) */}
-      {id === 0 && (
-        <pointLight 
-          intensity={2000} 
-          color={sunColors.colorWhite || sunColors.wht} 
-          distance={800} 
-          decay={1.8} 
-        />
-      )}
+      {/* Central Star Radiant Illumination */}
+      <pointLight 
+        intensity={id === 0 ? 3200 : 2600} 
+        color={sunColors.colorWhite || sunColors.wht || "#ffffff"} 
+        distance={1400} 
+        decay={1.2} 
+      />
       
       {/* Interactive Sun with 360° kinetic trackball and hit target */}
       <group>

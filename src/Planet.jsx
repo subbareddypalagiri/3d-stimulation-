@@ -73,12 +73,17 @@ function makeBandedRingTexture(baseColorHex = '#fbbf24') {
   return tex
 }
 
-// Atmospheric Limb Glow Shader (Rayleigh scattering edge haze)
+// Atmospheric Limb Glow Shader (Rayleigh daylight scattering & Mie terminator sunset glow)
 const atmoVertexShader = `
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vWorldNormal;
+  varying vec3 vWorldPos;
   void main() {
     vNormal = normalize(normalMatrix * normal);
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vWorldPos = wp.xyz;
+    vWorldNormal = normalize(mat3(modelMatrix) * normal);
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     vViewDir = normalize(-mvPosition.xyz);
     gl_Position = projectionMatrix * mvPosition;
@@ -87,25 +92,50 @@ const atmoVertexShader = `
 
 const atmoFragmentShader = `
   uniform vec3 uColor;
+  uniform vec3 uSunsetColor;
   uniform float uPower;
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vWorldNormal;
+  varying vec3 vWorldPos;
+
   void main() {
-    float intensity = pow(max(0.0, 0.76 - dot(vNormal, vViewDir)), uPower);
+    float rim = pow(max(0.0, 0.78 - dot(vNormal, vViewDir)), uPower);
+    
+    // Direction vector pointing to the central Star
+    vec3 sunDir = normalize(-vWorldPos);
+    float sunFacing = dot(vWorldNormal, sunDir);
+
+    // Rayleigh daylight vs Mie sunset scatter along terminator line
+    float sunsetMix = smoothstep(-0.25, 0.25, sunFacing) * (1.0 - smoothstep(0.2, 0.7, sunFacing));
+    vec3 atmoCol = mix(uColor, uSunsetColor, sunsetMix * 0.75);
+
+    // Illuminated daylight side vs dark space night side
+    float dayFactor = smoothstep(-0.35, 0.45, sunFacing);
+    float intensity = rim * (0.18 + 0.82 * dayFactor);
     intensity = clamp(intensity, 0.0, 1.0);
-    gl_FragColor = vec4(uColor, intensity * 0.95);
+
+    gl_FragColor = vec4(atmoCol, intensity * 0.98);
   }
 `
 
 function AtmosphereHalo({ radius, color, power = 2.2 }) {
+  const sunsetColor = useMemo(() => {
+    const col = new THREE.Color(color)
+    const hsl = { h: 0, s: 0, l: 0 }
+    col.getHSL(hsl)
+    return new THREE.Color().setHSL((hsl.h + 0.07) % 1.0, 0.95, 0.58)
+  }, [color])
+
   const uniforms = useMemo(() => ({
     uColor: { value: new THREE.Color(color) },
+    uSunsetColor: { value: sunsetColor },
     uPower: { value: power }
-  }), [color, power])
+  }), [color, sunsetColor, power])
 
   return (
     <mesh raycast={() => null}>
-      <sphereGeometry args={[radius * 1.045, 48, 48]} />
+      <sphereGeometry args={[radius * 1.045, 64, 64]} />
       <shaderMaterial
         vertexShader={atmoVertexShader}
         fragmentShader={atmoFragmentShader}
@@ -220,11 +250,11 @@ export default function Planet({
               color={!colorMap ? color : '#ffffff'}
               normalMap={normalMap}
               normalScale={new THREE.Vector2(0.85, 0.85)}
-              roughnessMap={specularMap}
-              clearcoat={specularMap ? 0.8 : 0.0}
+              clearcoat={specularMap ? 1.0 : 0.0}
+              clearcoatMap={specularMap}
               clearcoatRoughness={0.12}
-              metalness={specularMap ? 0.08 : 0.0}
-              roughness={specularMap ? 0.65 : (colorMap ? 0.55 : 0.75)}
+              metalness={0.02}
+              roughness={specularMap ? 0.75 : (colorMap ? 0.6 : 0.75)}
             />
           </mesh>
 

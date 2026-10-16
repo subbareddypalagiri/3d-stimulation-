@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Stars, CameraControls, AdaptiveDpr, AdaptiveEvents, Bvh } from "@react-three/drei"
-import { EffectComposer, Bloom } from "@react-three/postprocessing"
+import { EffectComposer, Bloom, Vignette, ChromaticAberration, Noise } from "@react-three/postprocessing"
 import { Suspense, useRef, useState, useEffect, useMemo } from "react"
 import * as THREE from "three"
 import "./App.css"
@@ -313,7 +313,9 @@ function App() {
           preserveDrawingBuffer: false,
           alpha: false,
           stencil: false,
-          depth: true
+          depth: true,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.25
         }}
         performance={{ min: 0.8 }}
       >
@@ -405,9 +407,10 @@ function App() {
           makeDefault 
           maxDistance={65000000000} 
           minDistance={3.5}
-          smoothTime={0.25}
-          azimuthRotateSpeed={mouseSensitivity.rotate}
-          polarRotateSpeed={mouseSensitivity.rotate}
+          smoothTime={0.42}
+          draggingSmoothTime={0.16}
+          azimuthRotateSpeed={mouseSensitivity.rotate * 0.9}
+          polarRotateSpeed={mouseSensitivity.rotate * 0.9}
           truckSpeed={mouseSensitivity.rotate}
           dollySpeed={0}
           dollyToCursor={false}
@@ -423,14 +426,17 @@ function App() {
           scrollSpeed={mouseSensitivity.scroll} 
         />
 
-        {/* Cinematic AAA Post-Processing (Incandescent Starlight, Bloom & Specular Halos) */}
+        {/* Hollywood IMAX Film Pipeline (Incandescent Bloom, Anamorphic Vignette, Film Grain & Chromatic Dispersion) */}
         <EffectComposer multisampling={0}>
           <Bloom 
             mipmapBlur
-            luminanceThreshold={0.82}
-            intensity={activeBlackHole ? 1.45 : 1.1}
-            radius={0.65}
+            luminanceThreshold={0.80}
+            intensity={activeBlackHole ? 1.45 : 1.15}
+            radius={0.68}
           />
+          <Vignette offset={0.32} darkness={0.65} />
+          <ChromaticAberration offset={[0.0008, 0.0008]} />
+          <Noise opacity={0.022} />
         </EffectComposer>
 
       </Canvas>

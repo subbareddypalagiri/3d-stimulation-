@@ -173,14 +173,16 @@ const diskFragmentShader = `
   }
 `
 
-// 2. Iconic Gravitational Lensing Arc Shader (Upper & Lower bent starlight arcs)
+// 2. Secret #1: Spacetime Gravitational Lensing of Background Starlight
 const lensArcVertexShader = `
   varying vec2 vUv;
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vWorldPos;
   void main() {
     vUv = uv;
     vec4 wp = modelMatrix * vec4(position, 1.0);
+    vWorldPos = wp.xyz;
     vNormal = normalize(mat3(modelMatrix) * normal);
     vViewDir = normalize(cameraPosition - wp.xyz);
     gl_Position = projectionMatrix * viewMatrix * wp;
@@ -192,9 +194,13 @@ const lensArcFragmentShader = `
   uniform vec3 uBaseColor;
   uniform vec3 uAccentColor;
   uniform sampler2D uNoiseDeep;
+  uniform sampler2D uStarMap;
   varying vec2 vUv;
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vWorldPos;
+
+  const float PI = 3.14159265359;
 
   void main() {
     vec2 p = (vUv - 0.5) * 2.0;
@@ -211,27 +217,40 @@ const lensArcFragmentShader = `
     float arcShape = pow(abs(cos(angle)), 1.2);
 
     // Sample deep noise texture for wispy starlight distortion
-    vec2 arcUv = vec2(r * 2.2 + uTime * 0.03, angle / 6.2831853);
+    vec2 arcUv = vec2(r * 2.2 + uTime * 0.03, angle / (2.0 * PI));
     float arcNoise = texture2D(uNoiseDeep, arcUv).r;
 
     float ring = exp(-pow((r - 0.38) * 18.0, 2.0)) * (3.8 + arcNoise * 1.2);
     float outerGlow = exp(-pow((r - 0.55) * 6.0, 2.0)) * 1.4;
 
+    // Einstein Spacetime Gravitational Lensing: deflect background starfield
+    vec3 localRadial = normalize(vec3(p.x, p.y, -sqrt(max(0.001, 1.0 - r * r))));
+    vec3 deflectedRay = normalize(vViewDir - localRadial * (0.48 / max(r * r, 0.08)));
+    
+    vec2 envUv = vec2(
+      atan(deflectedRay.z, deflectedRay.x) / (2.0 * PI) + 0.5,
+      asin(clamp(deflectedRay.y, -0.999, 0.999)) / PI + 0.5
+    );
+    vec3 warpedStarfield = texture2D(uStarMap, envUv).rgb * 2.4;
+
     float intensity = (ring + outerGlow) * arcShape * (0.6 + fresnel * 1.8);
 
     vec3 colHot = vec3(1.0, 0.96, 0.88);
     vec3 col = mix(uBaseColor, colHot, ring * 0.75);
+    
+    // Blend gravitational starlight warping into the arc
+    col = mix(col, warpedStarfield, 0.38 + fresnel * 0.42);
 
-    vec3 x = col * intensity * 1.5;
+    vec3 x = col * intensity * 1.6;
     vec3 finalColor = (x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14);
 
-    float alpha = clamp(intensity * 0.85, 0.0, 1.0);
+    float alpha = clamp(intensity * 0.88, 0.0, 1.0);
     gl_FragColor = vec4(finalColor, alpha);
   }
 `
 
 // Individual Singularity Black Hole Mesh System
-function SingleSingularityBlackHole({ data, onFlyTo, isCurrentTarget, noiseTexture }) {
+function SingleSingularityBlackHole({ data, onFlyTo, isCurrentTarget, noiseTexture, starMapTexture }) {
   const groupRef = useRef()
   const diskRef = useRef()
   const arcTopRef = useRef()
@@ -243,8 +262,9 @@ function SingleSingularityBlackHole({ data, onFlyTo, isCurrentTarget, noiseTextu
     uTime: { value: 0 },
     uBaseColor: { value: new THREE.Color(data.color) },
     uAccentColor: { value: new THREE.Color(data.accent) },
-    uNoiseDeep: { value: noiseTexture }
-  }), [data, noiseTexture])
+    uNoiseDeep: { value: noiseTexture },
+    uStarMap: { value: starMapTexture }
+  }), [data, noiseTexture, starMapTexture])
 
   useFrame(({ clock, camera }) => {
     if (!groupRef.current) return
@@ -434,13 +454,18 @@ function SingleSingularityBlackHole({ data, onFlyTo, isCurrentTarget, noiseTextu
 // Master Component: Renders all 5 Black Holes
 export default function FiveSingularityBlackHoles({ onFlyTo, currentTargetId }) {
   const noiseTexture = useLoader(TextureLoader, '/textures/noise_deep.png')
+  const starMapTexture = useLoader(TextureLoader, '/textures/galaxy.jpg')
 
   useMemo(() => {
     if (noiseTexture) {
       noiseTexture.wrapS = THREE.RepeatWrapping
       noiseTexture.wrapT = THREE.RepeatWrapping
     }
-  }, [noiseTexture])
+    if (starMapTexture) {
+      starMapTexture.wrapS = THREE.RepeatWrapping
+      starMapTexture.wrapT = THREE.ClampToEdgeWrapping
+    }
+  }, [noiseTexture, starMapTexture])
 
   return (
     <group>
@@ -451,6 +476,7 @@ export default function FiveSingularityBlackHoles({ onFlyTo, currentTargetId }) 
           onFlyTo={onFlyTo}
           isCurrentTarget={currentTargetId === bh.id}
           noiseTexture={noiseTexture}
+          starMapTexture={starMapTexture}
         />
       ))}
     </group>
