@@ -99,15 +99,15 @@ export default function SolarSystem({
     // HOME SYSTEM (ID = 0): THE REAL 9 PLANETS
     if (id === 0) {
       return [
-        { name: 'Mercury', position: [15, 0, 0], radius: 0.38, orbitSpeed: 0.04, rotationSpeed: 0.01, textures: { color: '/textures/mercury.jpg' }, hasClouds: false, ring: null },
-        { name: 'Venus', position: [22, 0, 0], radius: 0.95, orbitSpeed: 0.015, rotationSpeed: -0.002, textures: { color: '/textures/venus.jpg' }, hasClouds: false, ring: null },
-        { name: 'Earth', position: [30, 0, 0], radius: 1, orbitSpeed: 0.01, rotationSpeed: 0.02, textures: { color: '/textures/earth_color.jpg', normal: '/textures/earth_normal.png', specular: '/textures/earth_water.png', clouds: '/textures/earth_clouds.png' }, hasClouds: true, ring: null },
-        { name: 'Mars', position: [40, 0, 0], radius: 0.53, orbitSpeed: 0.008, rotationSpeed: 0.018, textures: { color: '/textures/mars.jpg' }, hasClouds: false, ring: null },
-        { name: 'Jupiter', position: [65, 0, 0], radius: 2.8, orbitSpeed: 0.002, rotationSpeed: 0.04, textures: { color: '/textures/jupiter.jpg' }, hasClouds: false, ring: null },
-        { name: 'Saturn', position: [95, 0, 0], radius: 2.4, orbitSpeed: 0.0009, rotationSpeed: 0.038, textures: { color: '/textures/saturn.jpg' }, hasClouds: false, ring: { innerRadius: 3.0, outerRadius: 5.5, color: '#eebb99' } },
-        { name: 'Uranus', position: [125, 0, 0], radius: 1.2, orbitSpeed: 0.0004, rotationSpeed: -0.03, textures: { color: '/textures/uranus.jpg' }, hasClouds: false, ring: { innerRadius: 1.6, outerRadius: 2.1, color: '#99ccff' } },
-        { name: 'Neptune', position: [155, 0, 0], radius: 1.1, orbitSpeed: 0.0001, rotationSpeed: 0.032, textures: { color: '/textures/neptune.jpg' }, hasClouds: false, ring: null },
-        { name: 'Pluto', position: [175, 0, 0], radius: 0.18, orbitSpeed: 0.00005, rotationSpeed: 0.005, textures: { color: '/textures/mercury.jpg' }, hasClouds: false, ring: null }
+        { name: 'Mercury', position: [15, 0, 0], radius: 0.38, orbitSpeed: 0.04, rotationSpeed: 0.01, textures: { color: '/textures/mercury.jpg' }, hasClouds: false, ring: null, atmosphere: null },
+        { name: 'Venus', position: [22, 0, 0], radius: 0.95, orbitSpeed: 0.015, rotationSpeed: -0.002, textures: { color: '/textures/venus.jpg' }, hasClouds: false, ring: null, atmosphere: '#e3bb76', atmoPower: 1.8 },
+        { name: 'Earth', position: [30, 0, 0], radius: 1, orbitSpeed: 0.01, rotationSpeed: 0.02, textures: { color: '/textures/earth_color.jpg', normal: '/textures/earth_normal.png', specular: '/textures/earth_water.png', clouds: '/textures/earth_clouds.png' }, hasClouds: true, ring: null, atmosphere: '#38bdf8', atmoPower: 2.0 },
+        { name: 'Mars', position: [40, 0, 0], radius: 0.53, orbitSpeed: 0.008, rotationSpeed: 0.018, textures: { color: '/textures/mars.jpg' }, hasClouds: false, ring: null, atmosphere: '#ef4444', atmoPower: 3.2 },
+        { name: 'Jupiter', position: [65, 0, 0], radius: 2.8, orbitSpeed: 0.002, rotationSpeed: 0.04, textures: { color: '/textures/jupiter.jpg' }, hasClouds: false, ring: null, atmosphere: '#f59e0b', atmoPower: 2.4 },
+        { name: 'Saturn', position: [95, 0, 0], radius: 2.4, orbitSpeed: 0.0009, rotationSpeed: 0.038, textures: { color: '/textures/saturn.jpg' }, hasClouds: false, ring: { innerRadius: 2.8, outerRadius: 5.8, color: '#fbbf24' }, atmosphere: '#fbbf24', atmoPower: 2.4 },
+        { name: 'Uranus', position: [125, 0, 0], radius: 1.2, orbitSpeed: 0.0004, rotationSpeed: -0.03, textures: { color: '/textures/uranus.jpg' }, hasClouds: false, ring: { innerRadius: 1.5, outerRadius: 2.2, color: '#67e8f9' }, atmosphere: '#67e8f9', atmoPower: 2.0 },
+        { name: 'Neptune', position: [155, 0, 0], radius: 1.1, orbitSpeed: 0.0001, rotationSpeed: 0.032, textures: { color: '/textures/neptune.jpg' }, hasClouds: false, ring: null, atmosphere: '#3b82f6', atmoPower: 2.0 },
+        { name: 'Pluto', position: [175, 0, 0], radius: 0.18, orbitSpeed: 0.00005, rotationSpeed: 0.005, textures: { color: '/textures/mercury.jpg' }, hasClouds: false, ring: null, atmosphere: null }
       ]
     }
 

@@ -1,5 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Stars, CameraControls, AdaptiveDpr, AdaptiveEvents, Bvh } from "@react-three/drei"
+import { EffectComposer, Bloom } from "@react-three/postprocessing"
 import { Suspense, useRef, useState, useEffect, useMemo } from "react"
 import * as THREE from "three"
 import "./App.css"
@@ -421,6 +422,16 @@ function App() {
           cameraControlRef={cameraControlRef} 
           scrollSpeed={mouseSensitivity.scroll} 
         />
+
+        {/* Cinematic AAA Post-Processing (Incandescent Starlight, Bloom & Specular Halos) */}
+        <EffectComposer multisampling={0}>
+          <Bloom 
+            mipmapBlur
+            luminanceThreshold={0.82}
+            intensity={activeBlackHole ? 1.45 : 1.1}
+            radius={0.65}
+          />
+        </EffectComposer>
 
       </Canvas>
 

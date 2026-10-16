@@ -1,7 +1,8 @@
 import React, { useRef, useMemo, useState } from "react"
-import { useFrame } from "@react-three/fiber"
+import { useFrame, useLoader } from "@react-three/fiber"
 import { Html } from "@react-three/drei"
 import * as THREE from "three"
+import { TextureLoader } from "three"
 
 // 5 Curated Cosmic Singularity Black Holes across diverse scales
 export const FIVE_BLACK_HOLES = [
@@ -67,7 +68,7 @@ export const FIVE_BLACK_HOLES = [
   }
 ]
 
-// 1. High-Definition Relativistic Accretion Disk Shader
+// 1. High-Definition Relativistic Accretion Disk Shader using Singularity noise_deep.png
 const diskVertexShader = `
   varying vec2 vUv;
   varying vec3 vWorldPos;
@@ -83,10 +84,10 @@ const diskFragmentShader = `
   uniform float uTime;
   uniform vec3 uBaseColor;
   uniform vec3 uAccentColor;
+  uniform sampler2D uNoiseDeep;
   varying vec2 vUv;
   varying vec3 vWorldPos;
 
-  // High-performance procedural noise
   float hash(vec2 p) {
     p = fract(p * vec2(234.34, 435.345));
     p += dot(p, p + 34.23);
@@ -120,22 +121,27 @@ const diskFragmentShader = `
     vec2 p = (vUv - 0.5) * 2.0;
     float r = length(p);
 
-    // Bounded between ISCO (0.28) and Outer Disk (0.98)
     if (r < 0.26 || r > 0.99) discard;
 
     float angle = atan(p.y, p.x);
 
-    // Relativistic Keplerian differential speed (inner disk rotates much faster than outer disk)
+    // Relativistic Keplerian differential speed
     float keplerSpeed = 2.4 / pow(max(r, 0.2), 0.85);
     float rotAngle = angle + uTime * keplerSpeed * 0.4;
 
-    // Multi-scale swirling plasma spirals
-    vec2 polar = vec2(rotAngle * 6.0, r * 28.0);
+    // Procedural baseline turbulence
+    vec2 polar = vec2(rotAngle * 4.0, r * 22.0);
     float plasma1 = fbm(polar);
-    float plasma2 = noise(vec2(rotAngle * 12.0 - uTime * 1.2, r * 48.0));
-    float plasma = pow(plasma1 * 0.72 + plasma2 * 0.28, 1.4);
 
-    // Relativistic Doppler Beaming (approaching side is boosted, receding side is dimmer)
+    // High-frequency 3D curl noise lookup from noise_deep.png
+    vec2 deepUv = vec2(r * 1.8 - uTime * 0.05, rotAngle / 6.2831853 + r * 0.32);
+    vec4 deepSample = texture2D(uNoiseDeep, deepUv);
+    float deepNoise = deepSample.r * 0.65 + deepSample.g * 0.35;
+
+    // Rich, turbulent fibrous plasma from MisterPrada/singularity
+    float plasma = pow(plasma1 * 0.35 + deepNoise * 0.65, 1.35);
+
+    // Relativistic Doppler Beaming
     float doppler = 0.5 + 0.5 * sin(angle);
     float dopplerBoost = pow(doppler, 1.9) * 2.5;
 
@@ -185,6 +191,7 @@ const lensArcFragmentShader = `
   uniform float uTime;
   uniform vec3 uBaseColor;
   uniform vec3 uAccentColor;
+  uniform sampler2D uNoiseDeep;
   varying vec2 vUv;
   varying vec3 vNormal;
   varying vec3 vViewDir;
@@ -203,7 +210,11 @@ const lensArcFragmentShader = `
     float angle = atan(p.y, p.x);
     float arcShape = pow(abs(cos(angle)), 1.2);
 
-    float ring = exp(-pow((r - 0.38) * 18.0, 2.0)) * 3.8;
+    // Sample deep noise texture for wispy starlight distortion
+    vec2 arcUv = vec2(r * 2.2 + uTime * 0.03, angle / 6.2831853);
+    float arcNoise = texture2D(uNoiseDeep, arcUv).r;
+
+    float ring = exp(-pow((r - 0.38) * 18.0, 2.0)) * (3.8 + arcNoise * 1.2);
     float outerGlow = exp(-pow((r - 0.55) * 6.0, 2.0)) * 1.4;
 
     float intensity = (ring + outerGlow) * arcShape * (0.6 + fresnel * 1.8);
@@ -220,7 +231,7 @@ const lensArcFragmentShader = `
 `
 
 // Individual Singularity Black Hole Mesh System
-function SingleSingularityBlackHole({ data, onFlyTo, isCurrentTarget }) {
+function SingleSingularityBlackHole({ data, onFlyTo, isCurrentTarget, noiseTexture }) {
   const groupRef = useRef()
   const diskRef = useRef()
   const arcTopRef = useRef()
@@ -231,8 +242,9 @@ function SingleSingularityBlackHole({ data, onFlyTo, isCurrentTarget }) {
   const uniforms = useMemo(() => ({
     uTime: { value: 0 },
     uBaseColor: { value: new THREE.Color(data.color) },
-    uAccentColor: { value: new THREE.Color(data.accent) }
-  }), [data])
+    uAccentColor: { value: new THREE.Color(data.accent) },
+    uNoiseDeep: { value: noiseTexture }
+  }), [data, noiseTexture])
 
   useFrame(({ clock, camera }) => {
     if (!groupRef.current) return
@@ -421,6 +433,15 @@ function SingleSingularityBlackHole({ data, onFlyTo, isCurrentTarget }) {
 
 // Master Component: Renders all 5 Black Holes
 export default function FiveSingularityBlackHoles({ onFlyTo, currentTargetId }) {
+  const noiseTexture = useLoader(TextureLoader, '/textures/noise_deep.png')
+
+  useMemo(() => {
+    if (noiseTexture) {
+      noiseTexture.wrapS = THREE.RepeatWrapping
+      noiseTexture.wrapT = THREE.RepeatWrapping
+    }
+  }, [noiseTexture])
+
   return (
     <group>
       {FIVE_BLACK_HOLES.map((bh) => (
@@ -429,6 +450,7 @@ export default function FiveSingularityBlackHoles({ onFlyTo, currentTargetId }) 
           data={bh}
           onFlyTo={onFlyTo}
           isCurrentTarget={currentTargetId === bh.id}
+          noiseTexture={noiseTexture}
         />
       ))}
     </group>
