@@ -19,7 +19,7 @@ import CelestialRealmPortal from "./CelestialRealmPortal"
 import NameMonument from "./NameMonument"
 import EmuInTheSky from "./EmuInTheSky"
 import AlienNebulaRealm from "./AlienNebulaRealm"
-import RelativisticBlackHoleGateway from "./RelativisticBlackHoleGateway"
+import FiveSingularityBlackHoles, { FIVE_BLACK_HOLES } from "./FiveSingularityBlackHoles"
 import PlanesAndSatellitesHubs, { SATELLITE_HUBS } from "./PlanesAndSatellitesHubs"
 import CosmicSkillWeb from "./CosmicSkillWeb"
 import { SOL_PLANETS } from "./SolarSystem"
@@ -127,6 +127,16 @@ function CosmicLevelTracker({ onLevelUpdate, activeCenter = [0, 0, 0] }) {
   return null
 }
 
+// Driver to handle optional continuous 360-degree orbit around the active black hole
+function BlackHoleOrbitDriver({ activeBlackHole, isAutoOrbiting, cameraControlRef }) {
+  useFrame((_, delta) => {
+    if (activeBlackHole && isAutoOrbiting && cameraControlRef?.current) {
+      cameraControlRef.current.azimuthAngle += delta * 0.22
+    }
+  })
+  return null
+}
+
 function App() {
   const cameraControlRef = useRef()
   const [galaxyCenter, setGalaxyCenter] = useState([0, 0, 0])
@@ -159,6 +169,9 @@ function App() {
   const [primeLayoutMode, setPrimeLayoutMode] = useState("rows")
   const [activePrimePlanet, setActivePrimePlanet] = useState(null)
   const [activeAchievement, setActiveAchievement] = useState(null)
+  const [activeBlackHole, setActiveBlackHole] = useState(null)
+  const [isBlackHolesMenuOpen, setIsBlackHolesMenuOpen] = useState(false)
+  const [isAutoOrbitingBH, setIsAutoOrbitingBH] = useState(false)
   const [telemetry, setTelemetry] = useState({
     level: "LEVEL 1: STELLAR NEIGHBORHOOD",
     desc: "Sol & 24 Neighboring Star Systems",
@@ -181,14 +194,30 @@ function App() {
     return () => window.removeEventListener("wheel", handleGlobalWheel)
   }, [telemetry.progress, isCelestialPortalOpen, isPortalOpen])
 
-  const flyToM87 = () => {
-    setGalaxyCenter([150000, 60000, -520000])
+  const flyToBlackHole = (bh) => {
+    setActiveBlackHole(bh)
+    setGalaxyCenter(bh.position)
     if (cameraControlRef.current) {
+      const dist = bh.scale * 2.5
+      const elev = bh.scale * 0.65
       cameraControlRef.current.setLookAt(
-        150000 + 28000, 60000 + 11000, -520000 + 36000,
-        150000, 60000, -520000,
+        bh.position[0] + dist * 0.85,
+        bh.position[1] + elev,
+        bh.position[2] + dist * 0.85,
+        bh.position[0],
+        bh.position[1],
+        bh.position[2],
         true
       )
+    }
+  }
+
+  const exitBlackHoleOrbit = () => {
+    setActiveBlackHole(null)
+    setIsAutoOrbitingBH(false)
+    setGalaxyCenter([0, 0, 0])
+    if (cameraControlRef.current) {
+      cameraControlRef.current.setLookAt(0, 50, 150, 0, 0, 0, true)
     }
   }
 
@@ -305,9 +334,6 @@ function App() {
           <MilkyWay position={galaxyCenter} />
           <CosmicWeb activeCenter={galaxyCenter} />
           
-          {/* 10 Relativistic 3D Black Holes Distributed Across All 6 Cosmic Scales */}
-          <TenBlackHoles flyTo={flyTo} />
-
           {/* Luminous Interstellar Dust Streaming in the Deep Void Gaps */}
           <InterstellarDust count={2200} />
 
@@ -326,11 +352,15 @@ function App() {
           {/* Level 8: 8K Self-Illuminating Alien Space Nebula Realm */}
           <AlienNebulaRealm position={[-8200000000, -1100000000, 3900000000]} scale={130000} />
 
-          {/* Level 3: Relativistic Raymarched Singularity Black Hole (Direct in 3D Space) */}
-          <RelativisticBlackHoleGateway
-            position={[150000, 60000, -520000]}
-            radius={18000}
-            flyTo={flyToM87}
+          {/* 5 Photorealistic Raymarched Singularity Black Holes across 5 Cosmic Scales */}
+          <FiveSingularityBlackHoles
+            onFlyTo={flyToBlackHole}
+            currentTargetId={activeBlackHole?.id}
+          />
+          <BlackHoleOrbitDriver
+            activeBlackHole={activeBlackHole}
+            isAutoOrbiting={isAutoOrbitingBH}
+            cameraControlRef={cameraControlRef}
           />
 
           {/* 10 Planetary Satellite & Plane Networks Across Diverse Cosmic Sectors */}
@@ -544,39 +574,39 @@ function App() {
           <span>CELESTIAL</span>
         </button>
 
-        {/* 2. M87 Black Hole (Direct in-space flyTo) */}
+        {/* 2. 5 Singularity Black Holes (Direct in-space 360 Orbit) */}
         <button
-          onClick={flyToM87}
+          onClick={() => setIsBlackHolesMenuOpen(!isBlackHolesMenuOpen)}
           style={{
-            background: "rgba(255, 255, 255, 0.05)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
-            color: "#e2e8f0",
-            padding: "6px 10px",
+            background: activeBlackHole ? "rgba(251, 146, 60, 0.22)" : "rgba(255, 255, 255, 0.05)",
+            border: `1px solid ${activeBlackHole ? "#fb923c" : "rgba(255, 255, 255, 0.12)"}`,
+            color: activeBlackHole ? "#fb923c" : "#e2e8f0",
+            padding: "6px 12px",
             borderRadius: 20,
             fontSize: 11,
             fontWeight: 700,
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            gap: 5,
+            gap: 6,
             transition: "all 0.2s ease"
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(251, 146, 60, 0.15)"
-            e.currentTarget.style.borderColor = "rgba(251, 146, 60, 0.5)"
+            e.currentTarget.style.background = "rgba(251, 146, 60, 0.18)"
+            e.currentTarget.style.borderColor = "rgba(251, 146, 60, 0.6)"
             e.currentTarget.style.color = "#fb923c"
             e.currentTarget.style.transform = "translateY(-1px)"
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)"
-            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)"
-            e.currentTarget.style.color = "#e2e8f0"
+            e.currentTarget.style.background = activeBlackHole ? "rgba(251, 146, 60, 0.22)" : "rgba(255, 255, 255, 0.05)"
+            e.currentTarget.style.borderColor = activeBlackHole ? "#fb923c" : "rgba(255, 255, 255, 0.12)"
+            e.currentTarget.style.color = activeBlackHole ? "#fb923c" : "#e2e8f0"
             e.currentTarget.style.transform = "translateY(0)"
           }}
-          title="Fly to M87 Relativistic Black Hole"
+          title="Explore 5 Photorealistic Singularity Black Holes & Orbit in 360°"
         >
-          <IconBlackHole size={15} />
-          <span>M87</span>
+          <IconBlackHole size={15} color="#fb923c" />
+          <span>5 BLACK HOLES {activeBlackHole ? `(${activeBlackHole.name})` : "▾"}</span>
         </button>
 
         {/* 3. Name Monument */}
@@ -2549,6 +2579,245 @@ function App() {
               <span>ALIGN VIEW</span>
             </button>
           </div>
+        </div>
+      )}
+
+      {/* 5 Singularity Black Holes Quick Selector Modal */}
+      {isBlackHolesMenuOpen && (
+        <div style={{
+          position: "fixed",
+          top: 70,
+          left: "50%",
+          transform: "translateX(-50%)",
+          background: "rgba(8, 12, 24, 0.96)",
+          border: "1.5px solid rgba(251, 146, 60, 0.45)",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.95), 0 0 35px rgba(251, 146, 60, 0.25)",
+          borderRadius: 16,
+          padding: "16px 20px",
+          zIndex: 120,
+          backdropFilter: "blur(24px)",
+          fontFamily: OBSIDIAN_TOKENS.fontMono,
+          width: 460,
+          maxWidth: "92vw"
+        }}>
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 12,
+            paddingBottom: 8,
+            borderBottom: "1px solid rgba(255,255,255,0.1)"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 16 }}>🌀</span>
+              <b style={{ color: "#ffffff", fontSize: 12, letterSpacing: "0.06em" }}>
+                SINGULARITY ENGINES // 5 COSMIC BLACK HOLES
+              </b>
+            </div>
+            <button
+              onClick={() => setIsBlackHolesMenuOpen(false)}
+              style={{
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                color: "#cbd5e1",
+                borderRadius: 6,
+                padding: "2px 8px",
+                fontSize: 12,
+                cursor: "pointer"
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 12, lineHeight: 1.4 }}>
+            Direct in-space photorealistic raymarched black holes. Select any cosmic scale to fly directly in front of it and orbit in full 360° 3D.
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: "65vh", overflowY: "auto" }}>
+            {FIVE_BLACK_HOLES.map((bh) => {
+              const isCurrent = activeBlackHole?.id === bh.id
+              return (
+                <div
+                  key={bh.id}
+                  onClick={() => {
+                    flyToBlackHole(bh)
+                    setIsBlackHolesMenuOpen(false)
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    background: isCurrent ? `${bh.color}25` : "rgba(255, 255, 255, 0.03)",
+                    border: `1.5px solid ${isCurrent ? bh.color : "rgba(255, 255, 255, 0.08)"}`,
+                    padding: "10px 14px",
+                    borderRadius: 10,
+                    cursor: "pointer",
+                    transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = bh.color
+                    e.currentTarget.style.background = `${bh.color}18`
+                    e.currentTarget.style.transform = "translateX(4px)"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = isCurrent ? bh.color : "rgba(255, 255, 255, 0.08)"
+                    e.currentTarget.style.background = isCurrent ? `${bh.color}25` : "rgba(255, 255, 255, 0.03)"
+                    e.currentTarget.style.transform = "translateX(0)"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: bh.color,
+                      boxShadow: `0 0 10px ${bh.color}`
+                    }} />
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: "#ffffff", display: "flex", alignItems: "center", gap: 6 }}>
+                        <span>{bh.name}</span>
+                        {isCurrent && (
+                          <span style={{ fontSize: 8.5, background: "#0284c7", color: "#fff", padding: "1px 5px", borderRadius: 4 }}>
+                            ORBITING
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 9.5, color: "#94a3b8", marginTop: 2 }}>
+                        {bh.level} • {bh.sector}
+                      </div>
+                      <div style={{ fontSize: 8.5, color: bh.accent, marginTop: 1 }}>
+                        {bh.mass}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ textAlign: "right" }}>
+                    <span style={{
+                      fontSize: 9,
+                      fontWeight: 800,
+                      color: bh.accent,
+                      background: "rgba(255,255,255,0.06)",
+                      padding: "4px 9px",
+                      borderRadius: 6,
+                      border: `1px solid ${bh.color}55`
+                    }}>
+                      ORBIT 360° ❯
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 360° 3D Orbit Flight HUD (Active when inspecting a Black Hole) */}
+      {activeBlackHole && (
+        <div style={{
+          position: "fixed",
+          bottom: 24,
+          left: "50%",
+          transform: "translateX(-50%)",
+          background: "rgba(8, 12, 24, 0.95)",
+          border: `1.5px solid ${activeBlackHole.color}`,
+          boxShadow: `0 16px 40px rgba(0, 0, 0, 0.9), 0 0 30px ${activeBlackHole.color}55`,
+          borderRadius: 20,
+          padding: "10px 18px",
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+          zIndex: 110,
+          backdropFilter: "blur(20px)",
+          fontFamily: OBSIDIAN_TOKENS.fontMono
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: activeBlackHole.color,
+              boxShadow: `0 0 12px ${activeBlackHole.color}`
+            }} />
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#ffffff", letterSpacing: "0.06em" }}>
+                🌀 {activeBlackHole.name.toUpperCase()}
+              </div>
+              <div style={{ fontSize: 9.5, color: activeBlackHole.accent, marginTop: 1 }}>
+                {activeBlackHole.level} • {activeBlackHole.mass}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ height: 26, width: 1, background: "rgba(255, 255, 255, 0.15)" }} />
+
+          {/* 360 Orbit Mouse Guidance */}
+          <div style={{ fontSize: 9.5, color: "#94a3b8", display: "flex", alignItems: "center", gap: 5 }}>
+            <span>🖱️ Drag to Orbit 360°</span>
+          </div>
+
+          {/* Auto 360 Orbit Toggle Button */}
+          <button
+            onClick={() => setIsAutoOrbitingBH(!isAutoOrbitingBH)}
+            style={{
+              background: isAutoOrbitingBH ? "rgba(245, 180, 50, 0.25)" : "rgba(255, 255, 255, 0.08)",
+              border: `1px solid ${isAutoOrbitingBH ? "#f5b032" : "rgba(255, 255, 255, 0.2)"}`,
+              color: isAutoOrbitingBH ? "#f5b032" : "#ffffff",
+              padding: "5px 12px",
+              borderRadius: 12,
+              fontSize: 9.5,
+              fontWeight: 800,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              transition: "all 0.2s ease"
+            }}
+          >
+            <span>{isAutoOrbitingBH ? "⏸ PAUSE AUTO ORBIT" : "▶ AUTO 360° ORBIT"}</span>
+          </button>
+
+          {/* Next Black Hole Button */}
+          <button
+            onClick={() => {
+              const curIdx = FIVE_BLACK_HOLES.findIndex(b => b.id === activeBlackHole.id)
+              const nextIdx = (curIdx + 1) % FIVE_BLACK_HOLES.length
+              flyToBlackHole(FIVE_BLACK_HOLES[nextIdx])
+            }}
+            style={{
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "#cbd5e1",
+              padding: "5px 10px",
+              borderRadius: 12,
+              fontSize: 9.5,
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.2s ease"
+            }}
+            title="Fly to next Black Hole"
+          >
+            NEXT BH ❯
+          </button>
+
+          {/* Exit / Return Button */}
+          <button
+            onClick={exitBlackHoleOrbit}
+            style={{
+              background: "rgba(239, 68, 68, 0.18)",
+              border: "1px solid rgba(239, 68, 68, 0.4)",
+              color: "#fca5a5",
+              padding: "5px 10px",
+              borderRadius: 12,
+              fontSize: 9.5,
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.2s ease"
+            }}
+            title="Exit 360° Orbit & Return to Solar System"
+          >
+            ✕ RETURN TO SOL
+          </button>
         </div>
       )}
     </div>
